@@ -13677,11 +13677,12 @@ rider_ai = (1, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_riding_ai,
 
     (neg|agent_slot_eq, ":agent_no", slot_agent_is_skirmish, 1),
     (agent_get_horse, ":horse_no", ":agent_no"),
+	(gt, ":horse_no", -1),
     (assign, ":melee_weapon", -1),
     (assign, ":agent_shield", -1),
     (try_begin),
 	  (agent_slot_eq, ":agent_no", slot_agent_is_running_away, 0),
-	  (gt, ":horse_no", -1),
+	  #(gt, ":horse_no", -1),
       (agent_get_team, ":team_no", ":agent_no"),
 
       (assign, ":thrown_ammo", 0),
@@ -14001,12 +14002,14 @@ rider_ai = (1, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_riding_ai,
 ])
 
 shoot_ai = (
-	0, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_riding_ai, 1)],
+	0, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1)],
 	[
      (store_mission_timer_c_msec,":time_n"),
      (try_for_agents,":agent_no"),
        (agent_is_alive,":agent_no"),
 	   (agent_slot_eq,":agent_no",slot_agent_archer_state,2),
+       (neg|agent_slot_eq, ":agent_no", slot_agent_special_ability_affect_type, taunt),
+       (neg|agent_slot_eq, ":agent_no", slot_agent_special_ability_affect_type, mummy_curse),	   
        (agent_get_wielded_item,":weapon",":agent_no",0),
        (gt,":weapon",0),
        (item_get_type,":item_type",":weapon"),
@@ -14120,7 +14123,7 @@ shoot_ai = (
   ])
 
 archer_ai = (
-	1, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_riding_ai, 1)],
+	1, 0, 0, [(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1)],
 	[
      #(key_is_down,key_t),
      (try_for_agents,":agent_no"),
@@ -14130,7 +14133,8 @@ archer_ai = (
        (agent_is_human,":agent_no"),
        (agent_is_non_player,":agent_no"),
        (agent_slot_eq, ":agent_no", slot_agent_is_running_away, 0),
-       
+       (neg|agent_slot_eq, ":agent_no", slot_agent_special_ability_affect_type, taunt),
+       (neg|agent_slot_eq, ":agent_no", slot_agent_special_ability_affect_type, mummy_curse),       
        (agent_get_ammo,":ammo",":agent_no",0),
        (agent_get_horse,":horse_no",":agent_no"),
        (lt,":horse_no",0),
@@ -14287,9 +14291,9 @@ custom_commander_commom_triggers = [
     
     #(1, 0, ti_once, [(neq, "$g_battle_result", 0)],[(call_script, "script_freelancer_keep_field_loot"),]),	#(eq, "$freelancer_state", 1),
 	(ti_tab_pressed, 0, 0, [(neq, "$g_battle_result", 0),(neg|is_vanilla_warband),], [(call_script, "script_freelancer_keep_field_loot"),]),
-    (2, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@gettarget", 0),]),
-    (ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@melee", 0),]),
-    (ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@pathing", 0),]),    
+    #(2, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@gettarget", 0),]),
+    #(ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@melee", 0),]),
+    #(ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@pathing", 0),]),    
     custom_commander_camera,
     custom_commander_agent_refill_ammo,
     custom_commander_cheat_refill_ammo,
@@ -14376,9 +14380,9 @@ arena_battle_triggers = [
   
     
 quick_battle_triggers = [
-    (2, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@gettarget", 0),]),
-    (ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@melee", 0),]),
-    (ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@pathing", 0),]),
+    #(2, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@gettarget", 0),]),
+    #(ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@melee", 0),]),
+    #(ti_after_mission_start, 0, 0, [(neg|is_vanilla_warband),(party_slot_eq, "p_main_party", slot_party_pref_combat_ai, 1),], [(lua_call, "@pathing", 0),]),
     custom_commander_camera,
     custom_commander_agent_refill_ammo,
     #custom_commander_toggle_charging,

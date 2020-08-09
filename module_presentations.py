@@ -14907,6 +14907,7 @@ presentations = [
             (item_get_type, ":type", ":item_no"),
             (this_or_next|is_between, ":type", itp_type_arrows, itp_type_goods),
             (is_between, ":type", itp_type_pistol, itp_type_animal),
+			(neq, ":type", itp_type_shield),
             (val_add, "$temp_2", 1),
           (try_end),
         (else_try),
@@ -14927,6 +14928,7 @@ presentations = [
           (eq, "$temp", 4), # other armors
           (try_for_range, ":item_no", 1, ":num_items"),
             (item_get_type, ":type", ":item_no"),
+			(this_or_next|eq, ":type", itp_type_shield),
             (is_between, ":type", itp_type_foot_armor, itp_type_pistol),
             (val_add, "$temp_2", 1),
           (try_end),
@@ -14965,6 +14967,7 @@ presentations = [
             (try_begin),
               (this_or_next|is_between, ":type", itp_type_arrows, itp_type_goods),
               (is_between, ":type", itp_type_pistol, itp_type_animal),
+			  (neq, ":type", itp_type_shield),
               (assign, ":continue", 1),
             (else_try),
               (assign, ":continue", 0),
@@ -14988,6 +14991,7 @@ presentations = [
           (else_try),
             (eq, "$temp", 4), # armors
             (try_begin),
+			  (this_or_next|eq, ":type", itp_type_shield),
               (is_between, ":type", itp_type_foot_armor, itp_type_pistol),
               (assign, ":continue", 1),
             (else_try),
