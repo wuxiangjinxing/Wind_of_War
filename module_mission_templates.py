@@ -1753,14 +1753,15 @@ custom_commander_fill_agent_empty_wpn_slot =(
         (try_end),
       (try_end),
 
-        (try_for_range, ":cur_slot", 0, 4),
-          (agent_get_item_slot, ":cur_weapon", ":agent_no", ":cur_slot"),
-          (gt, ":cur_weapon", 0),
-          (call_script,"script_get_weapon_type",":cur_weapon"),
-          (assign,":weapon_type",reg0),
-          (gt, ":weapon_type", -1),
-          (agent_set_slot,":agent_no",":weapon_type",":cur_weapon"),
-        (try_end),
+      (try_for_range, ":cur_slot", 0, 4),
+        (agent_get_item_slot, ":cur_weapon", ":agent_no", ":cur_slot"),
+        (gt, ":cur_weapon", 0),
+        (call_script,"script_get_weapon_type",":cur_weapon"),
+        (assign,":weapon_type",reg0),
+        #(gt, ":weapon_type", -1),
+		(is_between, ":weapon_type", slot_agent_two_handed_wp, slot_agent_spear + 1),
+        (agent_set_slot,":agent_no",":weapon_type",":cur_weapon"),
+      (try_end),
     ])
 
 custom_commander_agent_weapons_fix =(
