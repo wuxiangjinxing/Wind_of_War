@@ -664,7 +664,7 @@ cast_magic_Arcane_Orb = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
+      (gt, ":weapon", 0),
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
       
@@ -6116,6 +6116,7 @@ missile_force_trigger = [
     [
       (store_trigger_param_1, ":shooter"),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
+	  (gt, ":weapon", 0),
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
       (agent_get_troop_id, ":shooter_troop", ":shooter"),
@@ -6172,7 +6173,7 @@ missile_freezing_trigger = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
+      (gt, ":weapon", 0),
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
 
@@ -6334,6 +6335,7 @@ missile_fire_2_trigger = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
+	  (gt, ":weapon", 0),
       (assign,":damage",0),
 
       (item_has_property, ":weapon", itp_is_magic_staff),
