@@ -14019,7 +14019,8 @@ shoot_ai = (
        (this_or_next|eq,":item_type",itp_type_pistol),
        (this_or_next|eq,":item_type",itp_type_musket),
        (eq,":item_type",itp_type_crossbow),
-       
+       (agent_get_ammo,":ammo",":agent_no",0),
+	   (gt,":ammo",0),
        (try_begin),
          (assign,":continue",0),
          (agent_ai_get_look_target,":target",":agent_no"),
