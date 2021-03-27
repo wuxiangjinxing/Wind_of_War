@@ -15307,7 +15307,8 @@ presentations = [
 
         (store_attribute_level, reg1, "$g_player_troop", ca_strength),
         (store_attribute_level, reg2, "$g_player_troop", ca_intelligence),
-        (str_store_string, s3, "@STR: {reg1}^INT: {reg2}^"),
+		(str_clear, s3),
+        (str_store_string, s3, "@{s3}^STR: {reg1}^INT: {reg2}^"),
         (store_skill_level, reg1, skl_power_strike, "$g_player_troop"),
         (store_skill_level, reg2, skl_power_draw, "$g_player_troop"),
         (store_skill_level, reg3, skl_precise_shot, "$g_player_troop"),
@@ -15329,7 +15330,8 @@ presentations = [
 
         (store_attribute_level, reg1, "$g_player_troop", ca_agility),
         (store_attribute_level, reg2, "$g_player_troop", ca_charisma),
-        (str_store_string, s4, "@AGI: {reg1}^CHA: {reg2}^"),
+		(str_clear, s4),
+        (str_store_string, s4, "@{s4}^AGI: {reg1}^CHA: {reg2}^"),
         (store_skill_level, reg1, skl_ironflesh, "$g_player_troop"),
         (store_skill_level, reg2, skl_physique, "$g_player_troop"),
         (store_skill_level, reg3, skl_shield, "$g_player_troop"),
