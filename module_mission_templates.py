@@ -4972,7 +4972,7 @@ init_troop_extra_power = (
             (val_add, ":weapon_speed_factor", 50),
             (val_add, ":reload_speed_factor", 50), 
             (val_add, ":damage_factor", 25),
-          (try_end),
+          #(try_end),
         (else_try),
           (agent_has_item_equipped,":agent_no","itm_khorne_helm"),
           (call_script, "script_agent_get_num_enemies_nearby", ":agent_no", 1000),
