@@ -29928,7 +29928,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
 	  (store_character_level, reg6, "$g_talk_troop"),
 	  (val_sub, reg6, ":persuasion_level"),
 	  (val_max, reg6, 0),	  
-      (val_mul, reg6,reg6),
+      #(val_mul, reg6,reg6),
       (val_mul, reg6, 1000),
 
       (party_get_num_companion_stacks, ":num_stacks","$g_encountered_party"),
