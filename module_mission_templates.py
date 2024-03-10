@@ -12068,7 +12068,7 @@ custom_commander_special_strike =(
               (store_random_in_range, ":r1", 0, 100),
               (le, ":r1", 33),
               (agent_set_hit_points,":inflicted_agent",0, 1),
-              (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+              (val_mul, ":inflicted_damage", 2),
             (else_try),
               (store_agent_hit_points, ":hp", ":inflicted_agent"),
               (le, ":hp", 50),
@@ -12133,7 +12133,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
           
           (try_begin),
@@ -12157,7 +12157,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
           (try_begin),
             (call_script, "script_cf_agent_has_skill", ":dealer_agent", "itm_perk_crossbow_7"),
@@ -12170,7 +12170,7 @@ custom_commander_special_strike =(
             (store_random_in_range, ":random_no", 0, 100),
             (le, ":random_no", 10),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
           
           (try_begin),
@@ -12246,7 +12246,7 @@ custom_commander_special_strike =(
             (eq, ":cur_animation", "anim_lancer_ride_4_no_shield"),          
             (item_has_property, ":dealer_item_id", itp_couchable),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
             (agent_unequip_item, ":dealer_agent", ":dealer_item_id"),
           (try_end),
           
@@ -12271,7 +12271,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
           
           (try_begin),
@@ -12301,7 +12301,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
           
           (try_begin),
@@ -12322,7 +12322,7 @@ custom_commander_special_strike =(
             (store_random_in_range, ":random_no", 0, 100),
             (le, ":random_no", 10),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
           
         (try_end),
@@ -13059,7 +13059,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
           
           (try_begin),
@@ -13085,7 +13085,7 @@ custom_commander_special_strike =(
             (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
             (ge, ":dealer_troop_max_hp", ":inflicted_troop_max_hp"),
             (agent_set_hit_points,":inflicted_agent",0,0),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+            (val_add, ":inflicted_damage", 100),
           (try_end),
        
           (try_begin),
@@ -14857,7 +14857,7 @@ custom_commander_special_strike =(
             
             (le, ":r1", 33),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
           (try_begin),
             (agent_get_wielded_item, ":weapon", ":dealer_agent", 0),
@@ -14867,7 +14867,7 @@ custom_commander_special_strike =(
             (store_random_in_range, ":r1", 0, 100),
             (le, ":r1", 33),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (else_try),
             (agent_get_wielded_item, ":weapon", ":dealer_agent", 0),
             (eq, ":weapon", "itm_kwan_dao"),
@@ -14878,7 +14878,7 @@ custom_commander_special_strike =(
             (store_random_in_range, ":r1", 0, 100),
             (le, ":r1", 50),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
           (try_begin),
             (agent_get_wielded_item, ":weapon", ":dealer_agent", 0),
@@ -14891,7 +14891,7 @@ custom_commander_special_strike =(
             (this_or_next|eq, ":inflicted_troop", "trp_ent_1"),
             (eq, ":inflicted_troop", "trp_ent_2"),
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
           
           
@@ -14927,7 +14927,7 @@ custom_commander_special_strike =(
             (store_agent_hit_points, ":hp", ":inflicted_agent", 1),
             (ge,":inflicted_damage",":hp"), 
             (agent_set_hit_points,":inflicted_agent",0, 1),
-            (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent"),
+            (val_mul, ":inflicted_damage", 2),
           (try_end),
                     
           (try_begin),
@@ -15070,7 +15070,7 @@ custom_commander_special_strike =(
               (assign, ":dest_damage", ":inflicted_damage"),
               (val_div, ":dest_damage", 2),
               (val_max, ":dest_damage", 1),
-              (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", ":dest_damage"),
+              (val_add, ":inflicted_damage", ":dest_damage"),
               (troop_get_slot, ":inflicted_troop_max_hp", ":inflicted_troop", slot_troop_max_hp),
             
               (store_random_in_range, ":random_no", 0, ":inflicted_troop_max_hp"),
@@ -15079,7 +15079,7 @@ custom_commander_special_strike =(
               (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
               (ge, ":dest_damage", ":inflicted_troop_max_hp"),
               (agent_set_hit_points,":inflicted_agent",0,0),
-              (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+              (val_add, ":inflicted_damage", 100),
               
               (agent_set_slot, ":inflicted_agent", slot_agent_special_damage_type, freeze),
                                                                                        
@@ -15124,7 +15124,7 @@ custom_commander_special_strike =(
                 (ge, 20, ":random_no"),
                 (val_mul,":dest_damage", 5),
               (try_end),
-              (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", ":dest_damage"),
+              (val_add, ":inflicted_damage", ":dest_damage"),
           (try_end),
           
           (try_begin),
@@ -15650,7 +15650,7 @@ custom_commander_special_strike =(
               (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
               (ge, ":dest_damage", ":inflicted_troop_max_hp"),
               (agent_set_hit_points,":inflicted_agent",0,0),
-              (agent_deliver_damage_to_agent, ":dealer_agent", ":inflicted_agent", 100),
+              (val_add, ":inflicted_damage", 100),
               
               (agent_set_slot, ":inflicted_agent", slot_agent_special_damage_type, freeze),
                                                                                        
