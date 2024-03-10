@@ -35733,7 +35733,7 @@ mission_templates = [
            
            (assign, ":continue", 1),
          (else_try),
-           (this_or_next|neq|eq, ":template", "pt_looter_lair"),
+           (this_or_next|neq, ":template", "pt_looter_lair"),
            (neg|check_quest_active, "qst_save_relative_of_merchant"),
 
            (store_mission_timer_a,":cur_time"),
