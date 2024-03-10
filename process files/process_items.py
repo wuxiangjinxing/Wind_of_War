@@ -30,7 +30,11 @@ def write_items(variable_list,variable_uses,tag_uses,quick_strings):
     item_variations = item[2]
     for item_variation in item_variations:
       ofile.write(" %s %d "%(item_variation[0],item_variation[1]))
-    ofile.write(" %d %d %d %d %f %d %d %d %d %d %d %d %d %d %d %d %d\n"%(item[3], item[4], item[5], item[7],
+    if (item[0] == "no_item"):
+      item_price = len(items)
+    else:
+      item_price = item[5]
+    ofile.write(" %d %d %d %d %f %d %d %d %d %d %d %d %d %d %d %d %d\n"%(item[3], item[4], item_price, item[7],
                                                    get_weight(item[6]),
                                                    get_abundance(item[6]),                  
                                                    get_head_armor(item[6]),
@@ -57,11 +61,16 @@ def write_items(variable_list,variable_uses,tag_uses,quick_strings):
       trigger_list = item[8]
     ## CC
     item_type = item[3] & 0x00ff
-    if (item_type == itp_type_shield):
+    if (item_type == itp_type_one_handed_wpn):
+      trigger_list += weapon_cleave_trigger
+    elif (item_type == itp_type_polearm):
+      trigger_list += weapon_cleave_trigger
+    elif (item_type == itp_type_two_handed_wpn):
+      trigger_list += weapon_cleave_trigger
+    elif (item_type == itp_type_shield):
       trigger_list += shield_hit_trigger
     ## CC
     save_simple_triggers(ofile,trigger_list, variable_list,variable_uses,tag_uses,quick_strings)
-
 
   ofile.close()
 

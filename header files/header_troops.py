@@ -23,6 +23,7 @@ tf_titan          = 12
 tf_demon_human    = 13
 tf_orc            = 14  
 
+
 troop_type_mask   = 0x0000000f
 tf_hero              = 0x00000010
 tf_inactive          = 0x00000020

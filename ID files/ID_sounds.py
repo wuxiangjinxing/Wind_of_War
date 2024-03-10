@@ -302,5 +302,11 @@ snd_voice_ice_form = 300
 snd_voice_marked_for_death = 301
 snd_voice_soul_tear = 302
 snd_voice_drain_vitality = 303
+snd_tc_boss_tadi = 304
+snd_tc_boss_jianta = 305
+snd_tc_boss_sutiao = 306
+snd_tc_boss_tiaoyue = 307
+snd_tc_fangun = 308
+snd_tc_heshui = 309
 
 

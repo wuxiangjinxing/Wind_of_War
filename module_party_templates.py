@@ -211,32 +211,32 @@ party_templates = [
   ("titan_huge",   "titan",  icon_huge_axeman|carries_goods(2),0, fac_dark_knights, dark_personality, [(trp_titan_0,4,15),(trp_human_magic_2,5,10),(trp_golem_3,10,15),(trp_titan_1,1,5),(trp_titan_2,1,2)]),
   
   ("mummy","mummy",icon_skeletons|carries_goods(2),0,fac_demon,dark_personality,[(trp_mummy_1,4,28),(trp_mummy_2,4,15),(trp_mummy_3,1,3)]),
-  ("mummy_2","mummy",icon_skeletons|carries_goods(2),0,fac_demon,dark_personality,[(trp_mummy_2_1,4,28),(trp_werewolf_1,4,15),(trp_mummy_4,1,3)]),
+  ("mummy_2","mummy",icon_skeletons|carries_goods(2),0,fac_demon,dark_personality,[(trp_mummy_2_1,4,10),(trp_werewolf_1,4,28),(trp_mummy_4,1,3)]),
   
-  ("mummy_huge","mummy",icon_skeletons_x3|carries_goods(10),0,fac_demon,dark_personality,[(trp_mummy_4,1,3),(trp_mummy_2_1,5,10),(trp_mummy_2,4,10),(trp_werewolf_1,5,10),(trp_mummy_3,1,3)]),
+  ("mummy_huge","mummy",icon_skeletons_x3|carries_goods(10),0,fac_demon,dark_personality,[(trp_mummy_4,1,3),(trp_mummy_2_1,2,5),(trp_mummy_2,4,10),(trp_werewolf_1,5,10),(trp_mummy_3,1,3)]),
   
   ("werewolf_1","werewolf",icon_axeman|carries_goods(2),0,fac_demon,dark_personality,[(trp_werewolf_1,6,30),(trp_werewolf_1_a,3,4)]),
   #("werewolf_2","White Werewolf",icon_axeman|carries_goods(2),0,fac_dark_knights,dark_personality,[(trp_werewolf_2,6,30)]),
   
-  ("werewolf_1_huge","werewolf",icon_huge_axeman|carries_goods(10),0,fac_demon,dark_personality,[(trp_mummy_4,1,3),(trp_werewolf_1,6,30),(trp_werewolf_1_a,3,15)]),
+  ("werewolf_1_huge","werewolf",icon_huge_axeman|carries_goods(10),0,fac_demon,dark_personality,[(trp_mummy_4,1,3),(trp_mummy_2_3,1,3),(trp_werewolf_1,6,30),(trp_werewolf_1_a,3,15)]),
   #("werewolf_2_huge","White Werewolf",icon_huge_axeman|carries_goods(10),0,fac_dark_knights,dark_personality,[(trp_werewolf_2,6,30),(trp_werewolf_2_a,6,15)]),
   
   ("undead_1","undead_Party",icon_skeletons|carries_goods(2),0,fac_undeads_2,bandit_personality,
   [(trp_lich_1,0,1),(trp_zombie_2,2,18),(trp_zombie_1,14,40),(trp_undead_magic_2,1,4)]),
   
   ("undead_1_2","undead_Party",icon_skeleton_archer|carries_goods(2),0,fac_undeads_2,bandit_personality,
-  [(trp_undead_horse_2,0,1),(trp_skeleton_lord,3,9),(trp_se_pikeman_1,2,10),(trp_se_musketeer_1,2,13),(trp_se_billman_1,6,20)]),
+  [(trp_undead_horse_2,0,1),(trp_skeleton_cav,3,9),(trp_se_pikeman_1,2,10),(trp_se_musketeer_1,2,13),(trp_se_billman_1,6,20)]),
   ("undead_1_3","undead_Party",icon_skeletons|carries_goods(2),0,fac_undeads_2,bandit_personality,
   [(trp_wraith,0,1),(trp_dullahan,2,6),(trp_wight,2,13),(trp_ghost,5,20)]),
   
   ("undead_2","undead_warband",icon_single_unholy_knight|carries_goods(2),0,fac_undeads_2,dark_personality,
-  [(trp_undead_horse_3,1,2),(trp_undead_horse_2,2,6),(trp_undead_horse_1,3,12),(trp_skeleton_warrior,4,18),(trp_skeleton_archer,4,24)]),
+  [(trp_undead_horse_3,1,2),(trp_undead_horse_2,2,6),(trp_undead_horse_1,3,12),(trp_skeleton_spearman,4,18),(trp_skeleton_archer,4,24)]),
   ("undead_3","undead_army",icon_skeleton_archer|carries_goods(2),0,fac_undeads_2,dark_personality,
   [(trp_lich_2,1,3),(trp_lich_1,2,6),(trp_undead_magic_2,2,12),(trp_skeleton_lord,8,16),(trp_ghost,8,10),(trp_wight,4,10)]),
   ("undead_2_huge","undead_warband",icon_unholy_knights|carries_goods(2),0,fac_undeads_2,dark_personality,
-  [(trp_wraith,3,6),(trp_undead_horse_3,3,9),(trp_undead_horse_1,9,20),(trp_undead_horse_2,4,18),(trp_dullahan,4,24),(trp_skeleton_archer,4,24)]),
+  [(trp_wraith,3,6),(trp_undead_horse_3,3,9),(trp_undead_horse_1,9,20),(trp_skeleton_cav,4,18),(trp_dullahan,4,24),(trp_skeleton_archer,4,24)]),
   ("undead_3_huge","undead_army",icon_undead_army|carries_goods(2),0,fac_undeads_2,dark_personality,
-  [(trp_ghost_dragon,4,12),(trp_lich_2,4,9),(trp_lich_1,4,12),(trp_skeleton_lord,8,16),(trp_wight,12,20),(trp_undead_magic_2,2,12)]),
+  [(trp_ghost_dragon,4,12),(trp_lich_2,4,9),(trp_lich_1,4,12),(trp_skeleton_cav,8,16),(trp_wight,12,20),(trp_undead_magic_2,2,12)]),
   
   ("undead_4","vampire_army",icon_shadows|carries_goods(20),0,fac_undeads_2,dark_personality,
   [(trp_vampire_3,1,6),(trp_undead_horse_1,2,6),(trp_vampire_2,3,12),(trp_vampire_assassin,6,24),(trp_peasant_woman,2,5,pmf_is_prisoner)]),
@@ -273,7 +273,7 @@ party_templates = [
   ("demon_3","demon_army",icon_demons|carries_goods(2),0,fac_demon,dark_personality,
   [(trp_demon_5,1,1),(trp_demon_4,2,4),(trp_demon_3,2,4),(trp_demon_1_2,4,16),(trp_demon_2,8,16)]),
   ("demon_3_huge","demon_army",icon_demon_x3|carries_goods(2),0,fac_demon,dark_personality,
-  [(trp_demon_5,3,6),(trp_demon_3,2,12),(trp_demon_1_2,8,16),(trp_demon_2,8,16),(trp_demon_4,2,12)]),
+  [(trp_demon_5,3,6),(trp_demon_3,2,12),(trp_demon_1_2,8,16),(trp_slaanesh_witch_1,8,16),(trp_demon_4,2,12)]),
   
     
   ("hospitalier_cultists", "Order of the hospitalier Cultists", icon_axeman|carries_goods(5), 0, fac_demon_hunters, soldier_personality, [(trp_teutonic_pilgrim,6,12),(trp_teutonic_spearman,3,8),(trp_teutonic_horse_1,2,4),(trp_monk,3,7)] ),
@@ -479,24 +479,24 @@ party_templates = [
   ("khergit_lance_end", "{!}Lance", 0, 0, fac_neutral, 0, []),
   
   
-  ("orc_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_blackorc_boss, 1, 3),(trp_troll_1, 1, 1),(trp_ogre_war, 2, 2),(trp_demon_4_2, 1, 1),(trp_orc_boar_big, 1, 2)]),
+  ("orc_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_blackorc_boss, 1, 3),(trp_troll_1, 1, 2),(trp_ogre_war, 2, 2),(trp_demon_4_2, 1, 1),(trp_harpy_2, 2, 5)]),
 
   ("orc_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_veterun_blackorc, 5, 5), (trp_orc_blackorc, 10, 10)]),
-  ("orc_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_boar_big, 5, 5), (trp_orc_veteran_boar, 10, 10)]),
+  ("orc_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_harpy_2, 5, 5), (trp_orc_veteran_boar, 10, 10)]),
   ("orc_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_4_3, 1, 5), (trp_demon_4_2, 5, 5)]),
-  ("orc_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_blackorc_boss, 1, 3), (trp_orc_veterun_blackorc, 10, 10)]),
-  ("orc_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_troll_2, 0, 1), (trp_orc_veterun_arrer, 10, 10)]),
+  ("orc_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_blackorc_boss, 5, 5), (trp_orc_veterun_blackorc, 10, 10)]),
+  ("orc_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_troll_2, 1, 1), (trp_ogre_gunner2, 10, 10)]),
   
   ("orc_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_big, 5, 5), (trp_orc_warrior, 15, 20)]),
   ("orc_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_veteran_boar, 5, 5), (trp_orc_boar_boy, 15, 20)]),
-  ("orc_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_goblin_knight, 5, 5), (trp_goblin_horseman, 15, 20)]),
+  ("orc_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_harpy_1, 5, 5), (trp_goblin_horseman, 15, 20)]),
   ("orc_lance_t2_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_veterun_blackorc, 5, 5), (trp_orc_blackorc, 10, 10)]),
-  ("orc_lance_t2_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_orc_arrer_boy, 5, 5), (trp_arrer_youngun, 15, 15)]),
+  ("orc_lance_t2_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_ogre_gunner, 5, 5), (trp_arrer_youngun, 15, 15)]),
 
   ("orc_lance_t1_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_goblin_horseman, 5, 5), (trp_orc_boy, 20, 20)]),
   ("orc_lance_t1_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_goblin_infantry, 10, 10), (trp_goblin_footman, 20, 20)]),
   ("orc_lance_t1_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_goblin_crossbowman, 10, 10), (trp_goblin_skirmisher, 20, 20)]),
-  ("orc_lance_t1_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_arrer_youngun, 5, 5), (trp_orc, 20, 20)]),
+  ("orc_lance_t1_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_troll_1, 2, 2), (trp_orc, 20, 20)]),
 
   ("orc_lance_end", "{!}Lance", 0, 0, fac_neutral, 0, []),
   
@@ -544,15 +544,15 @@ party_templates = [
 
   ("woodelf_lance_end", "{!}Lance", 0, 0, fac_neutral, 0, []),
 
-  ("italian_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_bone_dragon, 1, 2),(trp_undead_horse_2, 1, 2),(trp_italian_horse_4, 2, 4),(trp_wight, 1, 2)]),
+  ("italian_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_4, 1, 1),(trp_undead_horse_3, 1, 1),(trp_undead_horse_1, 2, 4),(trp_undead_horse_2, 2, 3)]),
   
-  ("italian_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_town_footman_3, 5, 5), (trp_italian_town_footman_2, 10, 10)]),
+  ("italian_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_bone_dragon, 3, 5), (trp_wraith, 5, 10)]),
   ("italian_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_crossbow_3, 5, 5), (trp_italian_crossbow_2, 10, 10)]),
   ("italian_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_undead_horse_2, 1, 5), (trp_undead_horse_1, 10, 10)]),
   ("italian_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_cannon_man, 1, 2), (trp_italian_town_footman_3, 10, 10)]),
-  ("italian_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_ghost_dragon, 1, 2), (trp_wight, 10, 10)]),
+  ("italian_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_bone_dragon, 3, 5), (trp_undead_horse_2, 10, 10)]),
   
-  ("italian_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_horse_4, 5, 5), (trp_italian_horse_2, 20, 20)]),
+  ("italian_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_3, 5, 5), (trp_vampire_2, 20, 20)]),
   ("italian_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_crossbow_2, 5, 5), (trp_italian_town_footman_2, 20, 20)]),
   ("italian_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_pikeman_3, 5, 5), (trp_se_pikeman_2, 20, 20)]),
   ("italian_lance_t2_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_town_footman_2, 5, 5), (trp_italian_town_footman_1, 20, 20)]),
@@ -560,23 +560,22 @@ party_templates = [
 
   ("italian_lance_t1_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_pikeman_2, 5, 5), (trp_se_pikeman_1, 20, 20)]),
   ("italian_lance_t1_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_crossbow_1, 5, 5), (trp_italian_town_recruit, 25, 25)]),
-  ("italian_lance_t1_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_horse_3, 5, 5), (trp_italian_horse_1, 25, 25)]),
+  ("italian_lance_t1_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_cav, 1, 5), (trp_skeleton_spearman, 10, 10)]),
   ("italian_lance_t1_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_town_footman_1, 5, 5), (trp_italian_town_militia, 15, 15)]),
   ("italian_lance_t1_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_crossbow_2, 5, 5), (trp_italian_crossbow_1, 15, 15)]),
 
   ("italian_lance_end", "{!}Lance", 0, 0, fac_neutral, 0, []),
 
-  ("undead_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_4, 1, 1),(trp_undead_horse_3, 0, 1),(trp_undead_horse_1, 2, 4),(trp_undead_horse_2, 2, 3)]),
+    ("undead_lance_t4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_bone_dragon, 1, 2),(trp_zombie_6, 1, 2),(trp_skeleton_cav, 2, 4),(trp_dullahan, 1, 2)]),
   
-  ("undead_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_3, 1, 5), (trp_vampire_2, 10, 10)]),
-  ("undead_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_lord, 10, 10), (trp_undead_horse_2, 5, 5)]),
-  ("undead_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_lich_1, 5, 5), (trp_se_musketeer_2, 20, 20)]),
-  ("undead_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_spearman, 5, 5), (trp_se_pikeman_3, 20, 20)]),
-  ("undead_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_2, 5, 5), (trp_se_pikeman_3, 20, 20)]),
-  ("undead_lance_t3_6", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_bone_dragon, 3, 5), (trp_undead_horse_2, 10, 10)]),
+  ("undead_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_lord, 10, 10), (trp_zombie_5, 5, 5)]),
+  ("undead_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_lich_1, 5, 5), (trp_se_musketeer_2, 20, 20)]),
+  ("undead_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_cav, 5, 10), (trp_skeleton_spearman, 20, 20)]),
+  ("undead_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_zombie_6, 5, 5), (trp_skeleton_warrior, 20, 20)]),
+  ("undead_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_ghost_dragon, 1, 2), (trp_wight, 10, 10)]),
 
-  ("undead_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_musketeer_2, 5, 5), (trp_se_musketeer_1, 20, 20)]),
-  ("undead_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_vampire_2, 1, 5), (trp_vampire_1, 10, 10)]),
+  ("undead_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_zombie_5, 5, 5), (trp_zombie_3, 15, 15)]),
+  ("undead_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_dullahan, 1, 5), (trp_zombie_4, 10, 10)]),
   ("undead_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_undead_magic_2, 1, 5), (trp_vampire_assassin, 10, 10)]),
   ("undead_lance_t2_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_pikeman_3, 5, 5), (trp_se_pikeman_2, 20, 20)]),
   ("undead_lance_t2_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_billman_2, 5, 5), (trp_se_billman_1, 20, 20)]),
@@ -585,7 +584,7 @@ party_templates = [
   ("undead_lance_t1_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_italian_crossbow_1, 5, 5), (trp_zombie_2, 15, 15)]),
   ("undead_lance_t1_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_wight, 5, 5), (trp_ghost, 10, 10)]),
   ("undead_lance_t1_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_musketeer_1, 5, 5), (trp_se_skirmisher, 20, 20)]),
-  ("undead_lance_t1_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_se_pikeman_2, 5, 5), (trp_se_pikeman_1, 20, 20)]),
+  ("undead_lance_t1_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_zombie_4, 5, 5), (trp_zombie_2, 15, 15)]),
 
   ("undead_lance_end", "{!}Lance", 0, 0, fac_neutral, 0, []),
 
@@ -595,8 +594,8 @@ party_templates = [
   ("german_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_german_twohander_3, 5, 5), (trp_german_twohander_2, 10, 10)]),
   ("german_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_german_crossbow_4, 5, 5), (trp_german_crossbow_3, 10, 10)]),
   ("german_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_gargoyle, 1, 5), (trp_human_magic_3, 3, 5)]),
-  ("german_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_iberian_knight_3, 1, 5), (trp_iberian_town_footman_2, 10, 10)]),
-  ("german_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_german_reitern_2, 1, 5), (trp_german_reitern_1, 10, 10)]),
+  ("german_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_german_twohander_3, 1, 5), (trp_iberian_town_footman_2, 10, 10)]),
+  ("german_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_human_magic_3, 1, 5), (trp_german_reitern_1, 10, 10)]),
   ("german_lance_t3_6", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_iberian_town_footman_3, 5, 5), (trp_german_pikeman_3, 10, 10)]),
   
   ("german_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_german_twohander_2, 5, 5), (trp_german_twohander_1, 20, 20)]),
@@ -619,12 +618,12 @@ party_templates = [
   ("hungary_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_crossbow_3_2, 1, 5), (trp_polish_crossbow_3_1, 10, 10)]),
   ("hungary_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_werewolf_huge, 1, 3), (trp_balkan_billman_3, 10, 10)]),
   ("hungary_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_balkan_billman_3, 5, 5), (trp_polish_pikeman_2, 10, 10)]),
-  ("hungary_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_knight_2, 1, 5), (trp_polish_horse_4, 10, 10)]),
-  ("hungary_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_which_2, 1, 5), (trp_polish_horse_4, 10, 10)]),
+  ("hungary_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_knight_2, 1, 5), (trp_polish_horse_3, 10, 10)]),
+  ("hungary_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_horse_4, 1, 5), (trp_polish_horse_3, 10, 10)]),
   ("hungary_lance_t3_6", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_which_2, 1, 5),(trp_polish_which_1, 5, 10)]),
   
   ("hungary_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_crossbow_3_1, 5, 5), (trp_polish_crossbow_2, 20, 20)]),
-  ("hungary_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_horse_4, 1, 5), (trp_polish_horse_3, 15, 15)]),
+  ("hungary_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_horse_3, 1, 5), (trp_polish_horse_3, 15, 15)]),
   ("hungary_lance_t2_2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_rus_cossack_3, 5, 5), (trp_rus_cossack_2, 20, 20)]),
   ("hungary_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_balkan_billman_3, 5, 5), (trp_balkan_billman_2, 15, 15)]),
   ("hungary_lance_t2_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_pikeman_2, 5, 5), (trp_polish_pikeman_1, 20, 20)]),
@@ -643,12 +642,12 @@ party_templates = [
   ("drowelf_lance_t3_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_raider_2, 2, 5), (trp_drowelf_raider_1,10, 10)]),
   ("drowelf_lance_t3_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_assassin_3, 2, 5), (trp_drowelf_assassin_3, 10, 10)]),
   ("drowelf_lance_t3_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_infantry_2, 5, 5), (trp_drowelf_infantry_1, 10, 10)]),
-  ("drowelf_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_minotaur_3, 2, 5), (trp_minotaur_3, 10, 10)]),
+  ("drowelf_lance_t3_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_balkan_billman_4, 2, 5), (trp_balkan_billman_3, 10, 10)]),
   ("drowelf_lance_t3_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_medusa_2, 5, 5), (trp_medusa_2, 10, 10)]),
   
   ("drowelf_lance_t2_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_raider_1, 5, 5), (trp_drowelf_footman, 10, 10)]),
   ("drowelf_lance_t2_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_assassin_3, 10, 10), (trp_drowelf_assassin_1, 15, 15)]),
-  ("drowelf_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_minotaur_2, 5, 5), (trp_minotaur_2, 15, 15)]),
+  ("drowelf_lance_t2_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_minotaur_2, 5, 5), (trp_balkan_billman_2, 15, 15)]),
   ("drowelf_lance_t2_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_drowelf_infantry_1, 5, 5), (trp_minotaur_1, 15, 15)]),
   ("drowelf_lance_t2_5", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_medusa_1, 5, 5), (trp_medusa_1, 15, 15)]),
 
@@ -935,18 +934,22 @@ party_templates = [
   ("mage_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_human_magic_3, 5, 5),(trp_golem_3, 10, 10),(trp_gargoyle, 1, 2)]),
   ("mage_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_human_magic_3, 3, 7),(trp_human_magic_2, 4, 9),(trp_we_recruit, 3, 6)]),
 
-  ("demon_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_5, 1, 3), (trp_demon_4_2, 3, 5), (trp_demon_3, 5, 8)]),
-  ("demon_merc_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_6, 1, 5), (trp_demon_1, 13, 27)]),
+  ("demon_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_5, 1, 3), (trp_demon_2, 5, 8), (trp_demon_1_2, 5, 8)]),
+  ("demon_merc_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_6, 1, 5), (trp_demon_1_4, 10, 20)]),
+  ("demon_merc_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_daemon_prince_slaanesh, 1, 5), (trp_slaanesh_chosen, 2, 5), (trp_slaanesh_witch_2, 3, 5)]),
+  ("demon_merc_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_daemon_prince_nurgle, 1, 5),(trp_demon_8, 5, 7), (trp_demon_1_3, 10, 10)]),
   
   
   ("undead_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_undead_horse_3, 1, 3),(trp_vampire_1, 6, 18),(trp_undead_magic_2, 3, 5)]),
   ("undead_merc_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_lich_2, 1, 5), (trp_wight, 10, 10)]),
   ("undead_merc_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_skeleton_warrior, 10, 18),(trp_skeleton_archer, 12, 18),(trp_dullahan, 6, 6)]),
+  ("undead_merc_4", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_zombie_6, 5, 5),(trp_zombie_3, 6, 18),(trp_zombie_5, 5, 5)]),
+
 
   ("werewolf_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_werewolf_1, 6, 30),(trp_werewolf_1_a,3,15)]),
   #("werewolf_merc_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_werewolf_2, 4, 12),(trp_werewolf_2_a,2,6)]),
 
-  ("mummy_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_mummy_4, 0, 1),(trp_mummy_3, 1, 5), (trp_mummy_1, 13, 27)]),
+  ("mummy_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_mummy_4, 0, 1),(trp_mummy_2_2, 1, 5),(trp_mummy_3, 1, 5), (trp_mummy_1, 10, 15)]),
 
   ("titan_merc_1", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_titan_1, 2, 5), (trp_titan_2, 1, 1)]),
   ("titan_merc_2", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_red_dragon, 1, 3), (trp_black_dragon, 1, 1)]),
@@ -967,7 +970,7 @@ party_templates = [
   ("wood_elven_merc_3", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_woodelf_sharpshooter, 2, 4), (trp_woodelf_druid_1, 2, 3), (trp_woodelf_spearman, 6, 8), (trp_woodelf_m_hunter, 3, 5)]),
 
   ("troll_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_troll_2, 1, 3), (trp_troll_1, 4, 8)]),
-  ("ogre_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_demon_4_3, 1, 3),(trp_ogre_war, 5, 5), (trp_ogre, 15, 20), (trp_ogre_mega, 1, 1)]),
+  ("ogre_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_ogre_cannon, 1, 3),(trp_ogre_war, 5, 5),(trp_ogre_gunner2, 5, 5), (trp_ogre, 15, 20), (trp_ogre_mega, 1, 1)]),
   
   ("witch_merc", "{!}Lance", 0, 0, fac_neutral, 0, [(trp_polish_which_2, 1, 1), (trp_polish_which_1, 1, 3), (trp_werewolf_1, 4, 12)]),
   
@@ -1016,7 +1019,7 @@ party_templates = [
 
 ("keep","{!}keep",0,0,fac_neutral,0,[(trp_hired_blade,15,50)]),
 ("cathedral","{!}cathedral",0,0,fac_neutral,0,[(trp_sissofbattle,4,7),(trp_angle, 1, 2)]),
-("demon_gate","{!}demon_gate",0,0,fac_neutral,0,[(trp_demon_3,5,8),(trp_demon_4, 3, 5),(trp_demon_5, 1, 3)]),
+("demon_gate","{!}demon_gate",0,0,fac_neutral,0,[(trp_demon_3,5,8),(trp_demon_4, 3, 5),(trp_slaanesh_witch_2, 3, 5)]),
 ("clan_halls","{!}clan_halls",0,0,fac_neutral,0,[(trp_giant_1,7,14),(trp_giant_2, 2, 6), (trp_giant_3, 2, 6)]),
 ("vampire_estate","{!}vampire_estate",0,0,fac_neutral,0,[(trp_vampire_1,5,10),(trp_undead_horse_1,3,6),(trp_lich_1,0,1)]),
 
@@ -1025,7 +1028,7 @@ party_templates = [
 ("wolf_pen","{!}wolf_pen",0,0,fac_neutral,0,[(trp_scottish_jav,4, 10),(trp_werewolf_1,2,5)]),
 ("labyrinth","{!}labyrinth",0,0,fac_neutral,0,[(trp_rat_3,12,15), (trp_minotaur_2, 5, 5),(trp_undead_magic_1, 2, 6)]),
 
-("tomb_of_curses","{!}tomb_of_curses",0,0,fac_neutral,0,[(trp_mummy_2,4,15),(trp_mummy_1,4,28),(trp_mummy_3,1,3),(trp_mummy_4,0,1)]),
+("tomb_of_curses","{!}tomb_of_curses",0,0,fac_neutral,0,[(trp_mummy_2_2,4,4),(trp_mummy_2_1,2,2),(trp_mummy_2,6,25),(trp_mummy_2_3,1,2),(trp_mummy_3,1,3),(trp_mummy_4,1,1)]),
 ("treant_alcove","{!}treant_alcove",0,0,fac_neutral,0,[(trp_ent_2, 2, 6), (trp_woodelf_sharpshooter, 2, 4), (trp_woodelf_sworddancer, 6, 8), (trp_woodelf_m_hunter, 3, 5)]),
 
 ("knights_chapter","{!}knights_chapter",0,0,fac_neutral,0,[(trp_hired_blade,15,50)]),
@@ -1064,7 +1067,10 @@ party_templates = [
   [(trp_demon_5,1,3),(trp_turk_roy_sipahi,3,6),(trp_demon_1_2,8,16),(trp_janissary_infantry_2, 4, 8),(trp_mamluke_horseman_2,2,4),(trp_turk_sipahi,3,5)]),
 
   ("mira_army","demon_army",icon_demons|carries_goods(2),0,fac_demon,dark_personality,
-  [(trp_demon_6,3,3),(trp_drowelf_which_2,3,6),(trp_drowelf_assassin_2,4,8),(trp_medusa_2, 4, 8),(trp_drowelf_raider_2,2,4),(trp_minotaur_3,10,15)]),
+  [(trp_slaanesh_chosen,3,3),(trp_drowelf_which_2,3,6),(trp_drowelf_assassin_2,4,8),(trp_slaanesh_witch_1, 4, 8),(trp_drowelf_raider_2,2,4),(trp_minotaur_3,10,15)]),
+    
+  ("rogue_army","demon_army",icon_demons|carries_goods(2),0,fac_demon,dark_personality,
+  [(trp_slaanesh_chosen,3,3),(trp_drowelf_which_1,3,6),(trp_slaanesh_witch_2,4,8),(trp_slaanesh_witch_1, 4, 8),(trp_daemon_prince_slaanesh,0,2),(trp_minotaur_3,10,15)]),
     
   ("kugath_army","demon_army",icon_demons|carries_goods(2),0,fac_demon,dark_personality,
   [(trp_demon_9,2,3),(trp_mamluke_horseman_2,3,6),(trp_demon_1_3,8,16),(trp_chaos_warrior_1, 4, 8),(trp_chaos_warrior_2,2,4),(trp_demon_magic_2,3,5)]),
@@ -1118,7 +1124,7 @@ party_templates = [
   
   ("dragon_utopia", "Dragon Utopia", icon_map_f_dragon_utopia|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_lich_dragon, 1, 5),(trp_red_dragon, 5, 7),(trp_green_dragon, 5, 7),(trp_fire_dragon, 5, 7),(trp_bone_dragon, 8, 8)]),
   ("crypt", "Crypt", icon_map_f_crypt|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_zombie_1, 20, 20),(trp_se_tribesman, 20, 40),(trp_ghost, 5, 10),(trp_undead_magic_2, 5, 10),(trp_bone_dragon,0,1)]),
-  ("pyramid", "Pyramid", icon_map_pyramid|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_mummy_2,4,15),(trp_mummy_1,4,28),(trp_mummy_3,1,3),(trp_mummy_4,0,1)]),
+  ("pyramid", "Pyramid", icon_map_pyramid|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_mummy_2_2,4,4),(trp_mummy_2_1,2,2),(trp_mummy_2,6,25),(trp_mummy_2_3,1,2),(trp_mummy_3,1,3),(trp_mummy_4,1,1)]),
   ("imp_cache_2", "Imp Cache", icon_map_f_imp_cache|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_1,10,20),(trp_demon_1_2,10,20),(trp_demon_1_3,10,20),(trp_demon_2,10,20),(trp_demon_3, 5, 10),(trp_demon_4, 5, 10)]),
   ("golem_factory", "Gargoyle Stonevault", icon_map_f_golem_factory|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_golem_1,10,20),(trp_golem_3,10,20),(trp_golem_2,6,12),(trp_golem_4, 9, 18),(trp_gargoyle, 0, 5)]),
   ("dragon_fly_hive", "Dragon Fly Hive", icon_map_f_dragon_fly_hive|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_dragonfly, 20, 60),(trp_firefly, 10, 30)]),
@@ -1177,9 +1183,9 @@ party_templates = [
   
   ("forsaken_palace_1", "Khorne Palace", icon_hill_fort_evil|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_7, 8, 12),(trp_demon_5, 2, 3),(trp_demon_3, 8, 12),(trp_demon_1_2, 12, 12)]),
   ("forsaken_palace_2", "Tzeentch Palace", icon_evil_tower|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_human_5_1, 8, 12),(trp_demon_6, 2, 3)]),
-  ("forsaken_palace_3", "Nurgle Palace", icon_map_f_forsaken_palace|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_8, 8, 12),(trp_demon_9, 2, 3),(trp_demon_1_3, 12, 12)]),
-  ("forsaken_palace_4", "Slaanesh Palace", icon_map_prison|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_human_5_2, 8, 12),(trp_demon_human_5_2, 2, 3)]),
-    
+  ("forsaken_palace_3", "Nurgle Palace", icon_map_f_forsaken_palace|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_8, 8, 12),(trp_daemon_prince_nurgle, 1, 3),(trp_demon_1_3, 12, 12)]),
+  ("forsaken_palace_4", "Slaanesh Palace", icon_map_prison|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_demon_human_5_2, 8, 12),(trp_slaanesh_chosen, 5, 8),(trp_daemon_prince_slaanesh, 2, 3)]),
+
   ("vampire_palace_1", "Scholomance", icon_evil_tower|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_lich_1, 8, 12),(trp_lich_2, 2, 3)]),
   ("vampire_palace_2", "vampire Palace", icon_map_prison|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_undead_horse_2, 8, 12),(trp_undead_horse_3, 2, 3)]),
   ("vampire_palace_3", "vampire Palace", icon_map_prison|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_vampire_3, 8, 12),(trp_vampire_4, 2, 3)]),
@@ -1213,7 +1219,7 @@ party_templates = [
   ("obelisk_6", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_red_dragon, 1, 1),(trp_lich_3,1,1),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),
   ("obelisk_7", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_gold_dragon, 1, 1),(trp_lich_3,1,1),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),
 
-  ("obelisk_8", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_lich_dragon, 1, 1),(trp_lich_3,1,1),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),
+  ("obelisk_8", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_lich_dragon, 3, 3),(trp_lich_3,5,5),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),
   ("obelisk_9", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_red_dragon, 1, 1),(trp_lich_3,1,1),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),
 
   ("obelisk_10", "obelisk", icon_map_f_obelisk|pf_is_static|pf_hide_defenders, 0, fac_neutral, bandit_personality, [(trp_red_dragon, 1, 1),(trp_lich_3,1,1),(trp_draugr_lord, 6, 8),(trp_draugr_1, 12, 16),]),

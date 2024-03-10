@@ -378,6 +378,12 @@ sounds = [
 ("voice_soul_tear",sf_priority_10|sf_vol_10, ["Soul_Tear.mp3"]),
 ("voice_drain_vitality",sf_priority_10|sf_vol_10, ["Drain_Vitality.mp3"]),
  
+("tc_boss_tadi", sf_priority_6|sf_vol_4, ["tc_boss_tadi.mp3"]),
+("tc_boss_jianta", sf_priority_6|sf_vol_4, ["tc_boss_jianta.mp3"]),
+("tc_boss_sutiao", sf_priority_6|sf_vol_4, ["tc_boss_sutiao.mp3"]),
+("tc_boss_tiaoyue", sf_priority_6|sf_vol_4, ["tc_boss_tiaoyue.mp3"]),
+("tc_fangun", sf_2d, ["tc_fangun.mp3"]),
+("tc_heshui", sf_2d, ["tc_heshui.mp3"]),
 
 ]
 # modmerger_start version=201 type=2

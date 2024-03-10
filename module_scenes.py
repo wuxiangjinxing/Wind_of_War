@@ -1448,39 +1448,25 @@ scenes = [
 # multiplayer
   ("multi_scene_1",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b",
     [],[],"outer_terrain_plain"),
-  ("multi_scene_2",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000012002a0b20004992700006e54000007fe00001fd2",
-    [],[],"outer_terrain_steppe"),
-  ("multi_scene_3",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000013002e0b20005154500006e540000235600007b55",
-    [],[],"outer_terrain_plain"),
   ("multi_scene_4",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300659630003c8f300003ca000006a8900003c89",
-    [],[],"outer_terrain_plain"),
-  ("multi_scene_5",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000023002a1ba0004210900003ca000006a8900007a7b",
-    [],[],"outer_terrain_plain"),
-  ("multi_scene_6",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000002300494b200048524000059e80000453300001d32",
     [],[],"outer_terrain_plain"),
   ("multi_scene_7",sf_generate,"none", "none", (0,0),(100,100),-100,"0x0000000130010e0e0005fd84000011c60000285b00005cbe",
     [],[],"outer_terrain_plain"),
-  ("multi_scene_8",sf_generate,"none", "none", (0,0),(100,100),-100,"0x0000000020004db18004611400005c918000397b00004c2e",
-    [],[],"outer_terrain_plain"),
   ("multi_scene_9",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000400032320003c0f300001f9e000011180000031c",   
     [],[],"outer_terrain_snow"),
-  ("multi_scene_10",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000003009cde1000599630000423b00005756000000af",
-    [],[],"outer_terrain_plain"),
   ("multi_scene_11",sf_generate,"none", "none", (0,0),(100,100),-100,"0x0000000030015f2b000350d4000011a4000017ee000054af",
     [],[],"outer_terrain_plain"),
   ("multi_scene_12",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000013003d7e30005053f00003b4e0000146300006e84",
     [],[],"outer_terrain_beach"),
-  ("multi_scene_13",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b",
-    [],[],"outer_terrain_plain"),
   ("multi_scene_14",sf_generate,"none", "none", (0,0),(100,100),-100,"0x0000000040000c910003e8fa0000538900003e9e00005301",
     [],[],"outer_terrain_snow"),
-  ("multi_scene_15",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000500b1d158005394c00001230800072880000018f",
-    [],[],"outer_terrain_desert"),       
-  ("multi_scene_16",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000d007abd20002c8b1000050c50000752a0000788c",
-    [],[],"outer_terrain_desert"),
   ("multi_scene_17",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000002200005000005f57b00005885000046bd00006d9c",
     [],[],"outer_terrain_plain"),
   ("multi_scene_18",sf_generate|sf_muddy_water,"none", "none", (0,0),(100,100),-100,"0x00000000b00037630002308c00000c9400005d4c00000f3a",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_19",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_20",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000013002ab630004651800000d7a00007f3100002701",
     [],[],"outer_terrain_plain"),
   
   ("random_multi_plain_medium",sf_generate|sf_randomize|sf_auto_entry_points,"none", "none", (0,0),(240,240),-0.5,"0x00000001394018dd000649920004406900002920000056d7",
@@ -1494,6 +1480,25 @@ scenes = [
 
   ("multiplayer_maps_end",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b",
     [],[],"outer_terrain_plain"),
+
+  ("multi_scene_2",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000012002a0b20004992700006e54000007fe00001fd2",
+    [],[],"outer_terrain_steppe"),
+  ("multi_scene_3",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000013002e0b20005154500006e540000235600007b55",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_5",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000023002a1ba0004210900003ca000006a8900007a7b",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_6",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000002300494b200048524000059e80000453300001d32",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_8",sf_generate,"none", "none", (0,0),(100,100),-100,"0x0000000020004db18004611400005c918000397b00004c2e",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_10",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000003009cde1000599630000423b00005756000000af",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_13",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b",
+    [],[],"outer_terrain_plain"),
+  ("multi_scene_15",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000500b1d158005394c00001230800072880000018f",
+    [],[],"outer_terrain_desert"),       
+  ("multi_scene_16",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000d007abd20002c8b1000050c50000752a0000788c",
+    [],[],"outer_terrain_desert"),
 
   ("wedding",sf_indoors, "castle_h_interior_a", "bo_castle_h_interior_a", (-100,-100),(100,100),-100,"0", [],[]),
   ("lair_steppe_bandits",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000200c69ac80043d0d0000556b0000768400003ea9",
@@ -1544,6 +1549,14 @@ scenes = [
     [],[], "outer_terrain_desert"),
   ("Ruined_Fort_island", sf_generate|sf_muddy_water, "none", "none", (0,0),(100, 100), -0.5, "0x0000000230000500000769d8000000000000000000000000",
     [],[], "outer_terrain_beach"),
+
+
+
+
+
+
+
+
 
 
   ("quick_battle_scene_1",sf_generate,"none", "none", (0,0),(120,120),-100,"0x000000023002dee300045d1d000001bf0000299a0000638f", 
@@ -1624,6 +1637,167 @@ scenes = [
   ("tent_interior", sf_indoors, "tent_interior", "bo_tent_interior", (-100, -100), (100, 100), -100, "0",
     [],[]),
     
+  ("Hvall",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000b000050000025896000010250000001700006f82", 
+    [],[], "outer_terrain_plain_2"),
+    
+  ("Verdentil",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000300516158004790e000072070000278800001e71", 
+    [],[], "outer_terrain_plain_2"),
+  ("Virelvild",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000b00037630002308c00000c9400005d4c00000f3a", 
+    [],[], "outer_terrain_plain"),
+  ("Forest_Village",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b", 
+    [],[], "outer_terrain_plain"),
+  ("Rupt",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000300796140007ddf500005ee600004fdc00000488", 
+    [],[], "outer_terrain_plain"),
+  ("Farvale",sf_generate,"none", "none", (0,0),(100,100),-100,"0x000000003000000000022083000041ef00005ae800003c55", 
+    [],[], "outer_terrain_plain"),
+  ("Wildling_Village",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000b00893e30004851f0000457900001af000004ca7", 
+    [],[], "outer_terrain_plain"),
+
+  ("lair_pirate",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000b0000500000258960000536e00000d8800007930", 
+    [],[], "sea_outer_terrain_2"),
+  ("lair_jungle",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000000300005000002589600005bbe000065a000001b43", 
+    [],[], "outer_terrain_plain"),
+  ("hidden_village",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300389800003a4ea000058340000637a0000399b", 
+    [],[], "outer_terrain_plain"),
+  ("Library",sf_generate,"none", "none", (0,0),(100,100),-100,"0x00000001300659630003c8f300003ca000006a8900003c89", 
+    [],[], "sea_outer_terrain_1"),
+
+#The Monastery
+  ("castle_89_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300399c5000fffff0000290a0000409c00000c49",
+    [],[],"outer_terrain_beach"),
+    
+#Tower of Eternity
+  ("castle_96_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300005000004e93c000038e700001bb200002608",
+    [],[],"outer_terrain_town_thir_1"),
+    
+#Sea Raider Fortress
+  ("castle_88_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000013003d7e30005053f00003b4e0000146300006e84",
+    [],[],"outer_terrain_beach"),
+#castle_karlsfell
+  ("castle_95_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300017000007c1f100006bad000073e300002cc8",
+    [],[],"outer_terrain_castle_9"),
+
+#Avolire Castle
+  ("castle_76_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000003000001500062183000041ef00005ae800003c55",
+    [],[], "outer_terrain_plain"),
+#Eldren Castle
+  ("castle_77_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000003009cde1000599630000423b00005756000000af",
+    [],[],"outer_terrain_plain"),
+#Numenor
+  ("castle_78_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000003009cde1000599630000423b00005756000000af",
+    [],[],"outer_terrain_sea"),
+#muros_de_cecilia
+  ("castle_79_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000b0064a008006bdb9000052f500004725000020c7",
+    [],[],"outer_terrain_plain"),
+#The Fall of Fargrave
+  ("castle_80_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300017000007c1f100006bad000073e300002cc8",
+    [],[],"outer_terrain_beach"),
+#Volcanic Keep
+  ("castle_81_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000013003d7e30005053f00003b4e0000146300006e84",
+    [],[],"outer_terrain_beach"),
+#Stonehill Castle
+  ("castle_82_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000001300659630003c8f300003ca000006a8900003c89",
+    [],[],"outer_terrain_plain"),
+    
+#Theodosian Walls
+  ("castle_83_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000230054f630005fd820000222a00003de000005f00",
+    [],[],"outer_terrain_plain"),
+#Brunwud Castle    
+  ("castle_84_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000001300389800003a4ea000058340000637a0000399b",
+    [],[],"outer_terrain_plain"),
+#Chateau de la Marche    
+  ("castle_85_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300730ba00064d93000039c100002d9600004ced",
+    [],[],"outer_terrain_town_thir_1"),
+    
+#Forteresse de Mornas
+  ("castle_86_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000002000050000085a110000330d00000b4e00007893",
+    [],[],"outer_terrain_steppe"),
+    
+#The Crow's Stronghold
+  ("castle_87_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000300032630004d53700003e24000029a300001809",
+    [],[],"outer_terrain_beach"),
+    
+    
+    
+#castillo_de_escalona
+  ("castle_90_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000030002b3b0004b538000052f50000726700002819",
+    [],[],"outer_terrain_plain"),
+    
+#Oasis
+  ("castle_91_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000001500000000004b12c000041ef00005ae800003c55",
+    [],[],"outer_terrain_desert"),
+    
+#northmarch_keep
+  ("castle_92_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000a0094fd10005595800006abc00000e49000037d3",
+    [],[],"outer_terrain_steppe"),
+    
+#Krak des Serfes
+  ("castle_93_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000230025b8d0006459400006a3700002adb00007091",
+    [],[],"outer_terrain_plain"),
+    
+#Eryas Castle
+  ("castle_94_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000002b00005000005d57800004f3600004b7a000071ef",
+    [],[],"outer_terrain_plain"),
+    
+    
+    
+#The Wizard's Tower
+  ("castle_97_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000003000000000080200000000010000000100000001",
+    [],[],"outer_terrain_plain"),
+    
+#Nighthelm Castle
+  ("castle_98_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000c00355b5000d23480000736b000076c3000028e0",
+    [],[],"sea_outer_terrain_2"),
+    
+#Lakeview Keep
+  ("castle_99_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000350000000000fffff000041ef00005ae800003c55",
+    [],[],"outer_terrain_plain"),
+    
+#The Rock
+  ("castle_100_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000240000500000d234800007e3e00004fd900006cf1",
+    [],[],"outer_terrain_plain"),
+    
+#Nordhaven
+  ("castle_101_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000b0000000000fffff000041ef00005ae800003c55",
+    [],[],"sea_outer_terrain_1"),
+    
+#Claremont
+  ("castle_102_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000030015f2b000350d4000011a4000017ee000054af",
+    [],[],"outer_terrain_beach"),
+    
+#Unsettled
+  ("castle_103_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000000b0001e124004f54000001cb40000545f00005edf",
+    [],[],"outer_terrain_plain"),
+    
+#Muidestein
+  ("castle_104_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000003a6a3232800258960000697500007fe900001f4b",
+    [],[],"outer_terrain_plain"),
+    
+#Viking Earthwood Castle
+  ("castle_105_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000023007b23200049d2a00003c37000040ef000037cd",
+    [],[],"outer_terrain_castle_9"),
+    
+#Overlooking Reef Castle
+  ("castle_106_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0xb0000500000fa3e800001c0d0000401000003455",
+    [],[]),
+#Death Lighthouse Fortress
+  ("castle_107_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0xb0000500000fa3e800001c0d0000401000003455",
+    [],[]),
+#Camp of Hawks
+  ("castle_108_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x000000023007b23200049d2a00003c37000040ef000037cd",
+    [],[],"outer_terrain_castle_9"),
+    
+#Six Traitor Castle
+  ("castle_109_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x00000001300009838009024000002b0f0000336a00007686",
+    [],[],"outer_terrain_plain"),
+
+#Brenawacht
+  ("castle_110_exterior", sf_generate, "none", "none", (0, 0), (100, 100), -100, "0x0000000230029cb2000709c200003c9500004b9b00002f4d",
+    [],[],"outer_terrain_plain"),
+
+
+
+
   ("bridge_1",sf_generate,"none", "none", (0,0),(120,120),-100,"0x3a078bb2000589630000667200002fb90000179c", 
     [],[], "outer_terrain_plain"),
   ("bridge_2",sf_generate,"none", "none", (0,0),(120,120),-100,"0x3a078bb2000589630000667200002fb90000179c", 

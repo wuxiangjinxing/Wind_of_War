@@ -946,6 +946,8 @@ meshes = [
   #("flag_nord", 0, "banner_a03", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   #("flag_rhodok", 0, "banner_a04", 0, 0, 0, 0, 0, 0, 1, 1, 1),  
 
+
+
   ("mouse_arrow_down", 0, "mouse_arrow_down", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   ("mouse_arrow_right", 0, "mouse_arrow_right", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   ("mouse_arrow_left", 0, "mouse_arrow_left", 0, 0, 0, 0, 0, 0, 1, 1, 1),
@@ -985,6 +987,8 @@ meshes = [
   ("mp_ui_host_maps_16", 0, "mp_ui_host_maps_d1", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   ("mp_ui_host_maps_17", 0, "mp_ui_host_maps_d2", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   ("mp_ui_host_maps_18", 0, "mp_ui_host_maps_d3", 0, 0, 0, 0, 0, 0, 1, 1, 1),
+  ("mp_ui_host_maps_19", 0, "mp_ui_host_maps_e2", 0, 0, 0, 0, 0, 0, 1, 1, 1),
+  ("mp_ui_host_maps_20", 0, "mp_ui_host_maps_e1", 0, 0, 0, 0, 0, 0, 1, 1, 1),
 ## CC
   ("longer_button", 0, "longer_button", 0, 0, 0, 0, 0, 0, 0.4, 0.5, 0.5),
   ("longer_button_down", 0, "longer_button_down", 0, 0, 0, 0, 0, 0, 0.4, 0.5, 0.5),
@@ -1014,7 +1018,7 @@ meshes = [
 
   ("relation_bar", 0, "talk_relation_bar", 0, 0, 0, 0, 0, 0, 1.06, 1, 1),
   ("reln_pointer", 0, "talk_reln_pointer", 0, 0, 0, 0, 0, 0, 1.06, 1, 1),
-
+  ("recruit_troop_background", 0, "window_11", 0, 0, 0, 0, 0, 0, 1, 1, 1),
 
 ##diplomacy begin
   # Jrider +
@@ -1163,6 +1167,8 @@ meshes = [
   
   
   ("pic_hunting", 0, "lair_elf_homestead", 0, 0, 0, 0, 0, 0, 1, 1, 1),
+  
+  ("menu_flag1", 0, "banners_default_e", 0, 0, 0, 0, 0, 0, 1, 1, 1),
   
 ]
 # modmerger_start version=201 type=2

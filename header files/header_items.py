@@ -108,11 +108,6 @@ itp_disable_agent_sounds     = 0x0040000000000000 #disable agent related sounds,
 itp_kill_info_mask           = 0x0700000000000000
 itp_kill_info_bits           = 56 # 0x0700000000000000
 
-itp_shield_no_parry = 0x0000000000004000 # left handed item without shield functionality
-itp_offset_mortschlag = 0x1000000000000000 # offsets melee weapon to mortschlag grip
-itp_covers_hands = 0x1000000000000000 # remove hands mesh (works on body armor items)
-itp_offset_flip = 0x4000000000000000 # flips melee weapon model 180 degrees on y-axis
-
 #equipment slots
 ek_item_0 = 0
 ek_item_1 = 1

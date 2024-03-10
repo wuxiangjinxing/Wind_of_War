@@ -10,7 +10,7 @@ copy ".\process files\*.*" ".\" >>Process_Log.txt
 echo Start Processing...
 echo ______________________________
 echo.
-py -2 process_skins.py
+python process_skins.py
 @del *.pyc
 @del header_*.py
 copy ".\ID_*.py" ".\ID files\" >>Process_Log.txt

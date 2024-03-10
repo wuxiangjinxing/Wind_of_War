@@ -1,4 +1,4 @@
-# -*- coding: cp1254 -*-
+# -*- coding: UTF-8 -*-
 from header_common import *
 from header_dialogs import *
 from header_operations import *
@@ -1147,43 +1147,27 @@ dialogs = [
   (gt, "$g_main_attacker_agent", 0),
   (neg|agent_is_alive, "$g_main_attacker_agent"),
   (agent_get_troop_id, ":type", "$g_main_attacker_agent"),
+  (store_character_level, ":gold", ":type"),
+  (val_mul, ":gold", 5),
+  (troop_add_gold, "trp_player", ":gold"),
   (try_begin),
-    #(neg|agent_is_alive, "$g_main_attacker_agent"),    
     (eq, ":type", "trp_hired_assassin"),
     (str_store_string, s9, "str_strange_that_one_didnt_seem_like_your_ordenary_troublemaker_he_didnt_drink_all_that_much__he_just_stood_there_quietly_and_watched_the_door_you_may_wish_to_consider_whether_you_have_any_enemies_who_know_you_are_in_town_a_pity_that_blood_had_to_be_spilled_in_my_establishment"),
-
     (assign, "$g_main_attacker_agent", 0),
-    (troop_add_gold, "trp_player", 50),
-
     (troop_add_item, "trp_player", "$g_attacker_drawn_weapon", imod_deadly),
     (troop_remove_items, "trp_hired_assassin", "$g_attacker_drawn_weapon", 1),
     (store_random_in_range, "$g_attacker_drawn_weapon", "itm_sword_medieval_a","itm_mace_1"),
-    (troop_add_item, "trp_hired_assassin", "$g_attacker_drawn_weapon", imod_deadly),#reset item
-    (troop_set_slot, "trp_hired_assassin", slot_troop_cur_center, -1),
-  (else_try),
-    #(display_message, "str_wielded_item_reg3"),
+    (troop_add_item, "trp_hired_assassin", "$g_attacker_drawn_weapon", imod_deadly),#reset item    
+  (else_try),    
     (lt, "$g_attacker_drawn_weapon", "itm_tutorial_spear"),
     (str_store_string, s9, "str_you_never_let_him_draw_his_weapon_still_it_looked_like_he_was_going_to_kill_you_take_his_sword_and_purse_i_suppose_he_was_trouble_but_its_not_good_for_an_establishment_to_get_a_name_as_a_place_where_men_are_killed"),
-    #(agent_get_troop_id, ":troop_no", "$g_main_attacker_agent"),
-    (assign, "$g_main_attacker_agent", 0),
-    #(troop_add_gold, "trp_player", 50),
-    #(troop_add_item, "trp_player", "$g_attacker_drawn_weapon", imod_rusty),
-    #(troop_remove_items, ":troop_no", "$g_attacker_drawn_weapon", 1),
-    #(store_random_in_range, "$g_attacker_drawn_weapon", "itm_sword_medieval_a","itm_mace_1"),
-    #(troop_add_item, ":troop_no", "$g_attacker_drawn_weapon", 0),#reset item
-    #(call_script, "script_troop_change_relation_with_troop", "trp_player", "$g_talk_troop", -1),#change relationship with town instead
     (call_script, "script_change_player_relation_with_center", "$current_town", -1),
   (else_try),
-    #(neg|agent_is_alive, "$g_main_attacker_agent"),
     (str_store_string, s9, "str_well_id_say_that_he_started_it_that_entitles_you_to_his_sword_and_purse_i_suppose_have_a_drink_on_the_house_as_i_daresay_youve_saved_a_patron_or_two_a_broken_skull_still_i_hope_he_still_has_a_pulse_its_not_good_for_an_establishment_to_get_a_name_as_a_place_where_men_are_killed"),
-    (agent_get_troop_id, ":troop_no", "$g_main_attacker_agent"),
-	(store_character_level, ":gold", ":troop_no"),
-	(val_mul, ":gold", 3),
-    (troop_add_gold, "trp_player", ":gold"),
 	(try_begin),
 	  (neg|is_vanilla_warband),
-	  #(agent_get_wielded_item_slot_no, ":ek_slot", "$g_main_attacker_agent"),
-	  (store_random_in_range, ":ek_slot", ek_item_0, ek_horse),
+	  (agent_get_wielded_item_slot_no, ":ek_slot", "$g_main_attacker_agent"),
+	  #(store_random_in_range, ":ek_slot", ek_item_0, ek_horse),
 	  (agent_get_item_slot, ":item", "$g_main_attacker_agent", ":ek_slot"),
 	  (gt, ":item", 0),
 	  (agent_get_item_slot_modifier, ":imod", "$g_main_attacker_agent", ":ek_slot"),
@@ -1197,18 +1181,15 @@ dialogs = [
 	  (neg|item_has_property, ":item", itp_next_item_as_melee),
 	  (val_add, ":item", 1),
 	(try_end),	
-	(troop_add_item, "trp_player", ":item", ":imod"),
-	(assign, "$g_main_attacker_agent", 0),
-    #(troop_remove_items, ":troop_no", "$g_attacker_drawn_weapon", 1),
-    #(store_random_in_range, "$g_attacker_drawn_weapon", "itm_sword_medieval_a","itm_mace_1"),
-    #(troop_add_item, ":troop_no", "$g_attacker_drawn_weapon", imod_powerful),#reset item
+    (troop_add_item, "trp_player", ":item", ":imod"),
     (try_begin),
       (store_random_in_range, ":c", 0, 4),
       (eq, ":c", 0),
       (call_script, "script_change_player_relation_with_center", "$current_town", 1),
-    (try_end),    
-    #(call_script, "script_troop_change_relation_with_troop", "trp_player", "$g_talk_troop", 1),
-  (try_end), 
+    (try_end),
+  (try_end),
+  (assign, "$g_main_attacker_agent", 0),
+  (troop_set_slot, "trp_hired_assassin", slot_troop_cur_center, -1),
   ],
    "{!}{s9}", "player_duel_response", [
    ]],
@@ -1658,6 +1639,36 @@ dialogs = [
   
   [trp_nameless, "start", [], "what's up? {playername} .", "nameless_begin",[]],
   [trp_nameless, "nameless_pretalk", [], "anything else.", "nameless_begin",[]],
+    
+  [anyone|plyr,"nameless_begin", [
+  (neg|troop_slot_ge,"trp_player",slot_troop_player_class,7),
+  (neg|troop_slot_ge,"$g_talk_troop",slot_troop_father,10),
+  (store_current_hours, ":hours"),
+  (troop_get_slot, ":lady_last_met_hour", "$g_talk_troop", slot_troop_last_talk_time),
+  (val_sub, ":hours", ":lady_last_met_hour"),
+  (ge, ":hours", 24),
+  
+  ], "Could you give me a few coins?", "nameless_begging",[
+  (store_current_hours, "$g_current_hours"),
+  (troop_set_slot, "$g_talk_troop", slot_troop_last_talk_time, "$g_current_hours"),                     
+  ]],
+    
+  [trp_nameless,"nameless_begging", [(troop_slot_eq,"$g_talk_troop",slot_troop_father,0),], "Take this, poor soul.", "close_window",
+  [(troop_set_slot,"$g_talk_troop",slot_troop_father,1),
+   (try_for_range, ":unused", -1, "$g_game_difficulty"),
+    (call_script, "script_give_special_loot_2"),
+    (store_random_in_range, ":gold", 5000, 10000),
+    (troop_add_gold,0,":gold"),
+   (try_end),
+   (change_screen_loot, "trp_find_item_cheat"),]],
+    
+  [trp_nameless,"nameless_begging", [(neg|troop_slot_ge,"$g_talk_troop",slot_troop_father,10),], "Here you are, now get out of my way!", "close_window",[
+  (troop_get_slot, ":num_begging", "$g_talk_troop", slot_troop_father),
+  (val_add, ":num_begging", 1),
+  (troop_set_slot, "$g_talk_troop", slot_troop_father, ":num_begging"),
+  (store_mul, ":add_money", ":num_begging", 5000),
+  (store_mul, ":add_renown", ":num_begging", -10),                   
+  (troop_add_gold,0,":add_money"),(call_script, "script_change_troop_renown", "trp_player", ":add_renown"),]],
     
   [trp_nameless|plyr,"nameless_begin", [], "I want to exchange trophy.", "exchange_trophy",[]],
   [trp_nameless|plyr,"nameless_begin", [],"I want to reinforce one of my item in my inventory.", "reinforce_item",[]],
@@ -2595,7 +2606,7 @@ dialogs = [
   [anyone ,"member_chat", [(is_between, "$g_talk_troop", pretenders_begin, pretenders_end),],
    "Greetings, {playername}, my first and foremost vassal. I await your counsel.", "supported_pretender_talk", []],
   [anyone ,"supported_pretender_pretalk", [],
-   "Anything else?", "supported_pretender_talk", []],
+   "Anything else?", "supported_pretender_talk", [(set_player_troop, "trp_player"),]],
 
   [anyone|plyr,"supported_pretender_talk", [],
    "What do you think about our progress so far?", "pretender_progress",[]],
@@ -2751,11 +2762,11 @@ dialogs = [
   [anyone|plyr,"supported_pretender_talk", [],
    "{reg65?My lady:My lord}, would you allow me to check out your equipment?", "supported_pretender_equip",[]],
   [anyone,"supported_pretender_equip", [], "Very well, it's all here...", "supported_pretender_pretalk",[
-      (change_screen_equip_other),
+      (set_player_troop, "trp_player"),(change_screen_equip_other),
       ]],
 
   [anyone|plyr,"supported_pretender_talk", [], "If it would please you, can you tell me about your skills?", "pretneder_view_char_requested",[]],
-  [anyone,"pretneder_view_char_requested", [], "Well, all right.", "supported_pretender_pretalk",[(change_screen_view_character)]],
+  [anyone,"pretneder_view_char_requested", [], "Well, all right.", "supported_pretender_pretalk",[(set_player_troop,"$g_talk_troop"),(change_screen_view_character)]],
 
   
   [anyone|plyr,"supported_pretender_talk", [
@@ -2802,7 +2813,7 @@ dialogs = [
   
 
   [anyone|plyr,"supported_pretender_talk", [],
-   "Let us keep going, {reg65?my lady:sir}.", "close_window",[]],
+   "Let us keep going, {reg65?my lady:sir}.", "close_window",[(set_player_troop, "trp_player"),]],
 
 
   [anyone,"do_member_trade", [], "Anything else?", "member_talk",[]],
@@ -3155,13 +3166,13 @@ dialogs = [
    "Let me see your equipment.", "member_equipment",[]],
   [anyone,"member_equipment", [], "Very well, it's all here...", "do_member_personal_action",[
       #(change_screen_loot),
-      (change_screen_equip_other),
+      (set_player_troop, "trp_player"),(change_screen_equip_other),
       ]],
 
   [anyone|plyr,"member_personal_action", [],
    "Let me see your inventory.", "member_inventory",[]],
   [anyone,"member_inventory", [], "Very well, it's all here...", "do_member_personal_action",[
-      (change_screen_loot, "$g_talk_troop"),
+      (set_player_troop, "trp_player"),(change_screen_loot, "$g_talk_troop"),
       #(change_screen_equip_other),
       ]],
       
@@ -3171,7 +3182,7 @@ dialogs = [
   [anyone,"do_member_trade", [], "Anything else?", "member_talk",[]],
 
   [anyone|plyr,"member_talk", [], "What can you tell me about your skills?", "view_member_char_requested",[]],
-  [anyone,"view_member_char_requested", [], "All right, let me tell you...", "do_member_view_char",[(change_screen_view_character)]],
+  [anyone,"view_member_char_requested", [], "All right, let me tell you...", "do_member_view_char",[(set_player_troop,"$g_talk_troop"),(change_screen_view_character)]],
 
   [anyone|plyr,"member_talk", [], "We need to separate for a while.", "member_separate",[
             (call_script, "script_npc_morale", "$g_talk_troop"),
@@ -3200,12 +3211,16 @@ dialogs = [
             (troop_set_slot, "$g_talk_troop", slot_troop_occupation, 0),
             (troop_set_slot, "$g_talk_troop", slot_troop_playerparty_history, pp_history_dismissed),
             (remove_member_from_party, "$g_talk_troop"),
+            (store_random_in_range, ":random", 0, 100),
+            (lt, ":random", 50),
+            (troop_slot_eq, "$g_talk_troop", slot_troop_occupation, slto_retirement),
+
        ]],
 
 
   [anyone|plyr,"member_talk", [], "I'd like to ask you something.", "member_question",[]],
 
-  [anyone|plyr,"member_talk", [], "Never mind.", "close_window",[]],
+  [anyone|plyr,"member_talk", [], "Never mind.", "close_window",[(set_player_troop, "trp_player"),]],
 
   [anyone,"member_question", [], "Very well. What did you want to ask?", "member_question_2",[]],
 
@@ -8162,6 +8177,7 @@ dialogs = [
    ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_summon_undead"),
     (assign,":sell","itm_sg_black_big"),
@@ -8184,6 +8200,7 @@ dialogs = [
   ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_summon_undead_near_ememy"),
     (assign,":sell","itm_sg_black_big"),
@@ -8206,6 +8223,7 @@ dialogs = [
   ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_summon_neutral_near_ememy"),
     (assign,":sell","itm_sg_human_small"),
@@ -8227,6 +8245,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_summon_demon_near_ememy"),
     (assign,":sell","itm_sg_purple_big"),
@@ -8250,6 +8269,7 @@ dialogs = [
   
   
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_meteor_shower"),
     (assign,":sell","itm_sg_purple_small"),
@@ -8271,6 +8291,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_death_cloud"),
     (assign,":sell","itm_sg_green_small"),
@@ -8292,6 +8313,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_summon_blade"),
     (assign,":sell","itm_sg_green_big"),
@@ -8313,6 +8335,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_incediary_cloud"),
     (assign,":sell","itm_sg_orange_big"),
@@ -8335,6 +8358,7 @@ dialogs = [
   ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_lightning"),
     (assign,":sell","itm_sg_blue_small"),
@@ -8357,6 +8381,7 @@ dialogs = [
   ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_fireball"),
     (assign,":sell","itm_sg_orange_small"),
@@ -8378,6 +8403,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_heaven_fist"),
     (assign,":sell","itm_sg_yellow_small"),
@@ -8399,6 +8425,7 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_column_of_fire"),
     (assign,":sell","itm_sg_yellow_big"),
@@ -8421,6 +8448,7 @@ dialogs = [
   ]],
 
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
     (assign,":buy","itm_magic_armageddon"),
     (assign,":sell","itm_sg_purple_big"),
@@ -8442,8 +8470,9 @@ dialogs = [
     (try_end),
   ]],
   [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (eq,0,1),
     (assign,":troop_no","trp_custom_cannon_man"),
-    (assign,":buy","itm_magic_deep_freeze"),
+    (assign,":buy","itm_magic_chill_wind"),
     (assign,":sell","itm_sg_blue_big"),
     (assign,":price",1),
     (player_has_item,":buy"),
@@ -8453,7 +8482,7 @@ dialogs = [
     (store_item_kind_count,reg10,":sell","trp_player"),
     (ge,reg10,":price"),], 
    "buy {s1} for {s3} need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
-    (assign,":buy","itm_magic_deep_freeze"),
+    (assign,":buy","itm_magic_chill_wind"),
     (assign,":sell","itm_sg_blue_big"),
     (assign,":price",1),
     (troop_remove_items,"trp_player",":sell",":price"),
@@ -8563,6 +8592,585 @@ dialogs = [
    ]],
 
 
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 1),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_order_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_order_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 1),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_burning_gaze", "itm_magic_spark"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 2),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_air mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 2),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_spark", "itm_magic_fire_ray"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 3),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_fire_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_fire_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 3),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_fire_ray", "itm_magic_searing_doom"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 4),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_metal_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_metal_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 4),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_searing_doom", "itm_magic_earth_blood"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 5),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_life_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_life_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 5),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_earth_blood", "itm_magic_amber_spear"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 6),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_wild_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_wild_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 6),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_amber_spear", "itm_magic_shadow_bolt"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 7),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_shadow_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_shadow_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 7),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_shadow_bolt", "itm_magic_spirit_leech"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 8),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_necro_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_necro_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 8),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_spirit_leech", "itm_magic_turn_vampire"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 9),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_dark_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_dark_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 9),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_chill_wind", "itm_magic_soul_quench"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 10),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_elf_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_elf_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 10),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_soul_quench", "itm_magic_mana_tempest_dummy"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 11),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_ice_mage_guild", 1),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_ice_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 11),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_ice_ray", "itm_magic_summon_demon_k"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 12),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_demon_guild", 2),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_tzeentch_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 12),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_summon_demon_t", "itm_magic_summon_demon_s"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 13),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_demon_guild", 3),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_slaanesh_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 13),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_summon_demon_s", "itm_magic_summon_demon_n"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 14),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_demon_guild", 4),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_nurgle_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 14),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_for_range, ":item_id", "itm_magic_summon_demon_n", "itm_magic_blue_fire_of_tzeentch_dummy"),
+        (item_slot_eq, ":item_id", slot_item_special_given, 1),
+        (troop_add_items,":troop_no",":item_id",1),
+      (try_end),
+    (try_end),
+  ]],
+
+  [anyone|plyr,"upgrade_personal_troop_cannon_2", [  #item
+    (assign,":troop_no","trp_custom_cannon_man"),
+    (neg|troop_slot_eq, ":troop_no", slot_lord_reputation_type, 15),
+    #(assign,":buy","itm_magic_chill_wind"),
+    (eq, "$join_demon_guild", 4),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (str_store_item_name,s2,":sell"),
+    (str_store_troop_name, s3, ":troop_no"),
+    (store_item_kind_count,reg10,":sell","trp_player"),
+    (ge,reg10,":price"),], 
+   "All {s3} join_nurgle_mage_guild need {reg11}{s2} (now you have {reg10}{s2}).", "upgrade_personal_troop_cannon_3",[
+    #(assign,":buy","itm_magic_chill_wind"),
+    (assign,":sell","itm_sg_blood"),
+    (assign,":price",3),
+    (troop_remove_items,"trp_player",":sell",":price"),
+    (troop_set_slot, "trp_custom_cannon_man", slot_lord_reputation_type, 15),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+        (troop_get_inventory_capacity, ":capacity", ":troop_no"),
+        (try_for_range, ":i_inv", 0, ":capacity"),
+          (troop_get_inventory_slot, ":item_id", ":troop_no", ":i_inv"),
+          (ge, ":item_id", 0),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, quick_spell),
+          (this_or_next|item_slot_eq, ":item_id", slot_item_magic_type, spell),
+          (item_slot_eq, ":item_id", slot_item_magic_type, buff),
+          (troop_set_inventory_slot,":troop_no", ":i_inv", -1),
+        (try_end),
+    (try_end),
+    
+    (try_for_range, ":troop_no", "trp_custom_cannon_man", "trp_custom_troops_end"),
+      (try_begin),
+        (item_slot_eq, "itm_magic_summon_demon_k", slot_item_special_given, 1),
+        (troop_add_items,":troop_no","itm_magic_summon_demon_k",1),
+      (try_end),
+      (try_begin),
+        (item_slot_eq, "itm_magic_meteor_shower", slot_item_special_given, 1),
+        (troop_add_items,":troop_no","itm_magic_meteor_shower",1),
+      (try_end),
+      (try_begin),
+        (item_slot_eq, "itm_magic_armageddon", slot_item_special_given, 1),
+        (troop_add_items,":troop_no","itm_magic_armageddon",1),
+      (try_end),
+    (try_end),
+  ]],
+
   [anyone|plyr,"dplmc_constable_talk", [],
    "I want to give_personal_troop special_ability", "choosen_special_ability",[]],
 
@@ -8607,7 +9215,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special",shadowstep),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -8663,7 +9271,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special",shadowking),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -8719,7 +9327,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special",force_jump),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -8787,7 +9395,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special",dive),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_knight_1"),
@@ -8845,7 +9453,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special",flamestrike),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -8889,7 +9497,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", bloodlust),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -8983,7 +9591,7 @@ dialogs = [
     (assign,":special", khorne_blessing),
     (this_or_next|eq,"$character_gender", tf_ogre),
     (eq,"$character_gender", tf_demon_human),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9078,7 +9686,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", multishot),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9162,7 +9770,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", #it_is_high_noon
   [
     (assign,":special", it_is_high_noon),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9244,7 +9852,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", windforce),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9313,10 +9921,10 @@ dialogs = [
 
   [anyone|plyr,"choosen_special_ability_3", 
   [
-    (assign,":special", shadow_blade),
+    (assign,":special", power_blade),
     (this_or_next|eq, "$character_gender", tf_male_elf),
     (eq,"$character_gender", tf_female_elf),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9340,7 +9948,7 @@ dialogs = [
   ],
   "choose {s2} for {s1} to {s4} ,need {reg11}{s3} (now you have {reg10}{s3}).", "dplmc_constable_pretalk",
    [
-    (assign,":special", shadow_blade),
+    (assign,":special", power_blade),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
       (assign,":begin_troop","trp_custom_recruit"),
@@ -9364,7 +9972,7 @@ dialogs = [
     (assign,":special", dragon_blade),
     (this_or_next|eq, "$character_gender", tf_male),
     (eq,"$character_gender", tf_female),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9460,7 +10068,7 @@ dialogs = [
     (assign,":special", ground_stomp),
     (this_or_next|eq,"$character_gender", tf_ogre),
     (eq,"$character_gender", tf_dwarf),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -9505,7 +10113,7 @@ dialogs = [
     (assign,":special", ground_stomp),
     (this_or_next|eq,"$character_gender", tf_ogre),
     (eq,"$character_gender", tf_dwarf),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -9544,7 +10152,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", fright_aura),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_knight_1"),
@@ -9606,7 +10214,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", holy_light),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9692,7 +10300,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", battlecry),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9788,7 +10396,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", warcry),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -9874,7 +10482,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", inspire),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -9958,7 +10566,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", regeneration),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -10029,7 +10637,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", divine_strength),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_cannon_man"),
@@ -10072,7 +10680,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", stoneskin),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -10128,7 +10736,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", mass_slow),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_musket"),
@@ -10199,7 +10807,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", weakness),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_cannon_man"),
@@ -10259,7 +10867,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3", 
   [
     (assign,":special", mass_haste),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -10368,7 +10976,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",berserk),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -10423,7 +11031,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",grasp),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -10468,7 +11076,7 @@ dialogs = [
   [
     (assign,":special",sidearm_1),
         (eq, "$character_gender", tf_male),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_musket"),
@@ -10529,7 +11137,7 @@ dialogs = [
          (this_or_next|eq,"$background_answer_3",cb3_squire),
          (this_or_next|eq,"$background_answer_2",cb2_steppe_child),
          (eq,"$background_type",cb_nomad),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_horseman"),
@@ -10587,7 +11195,7 @@ dialogs = [
     (assign,":special",master_archer),
          (eq,"$background_answer_3",cb3_poacher),
          (eq,"$background_type",cb_forester),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -10658,7 +11266,7 @@ dialogs = [
     (assign,":special",wushuang),
          (eq,"$background_answer_2",cb2_steppe_child),
          (eq,"$background_type",cb_nomad),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_horseman"),
@@ -10714,8 +11322,9 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",shadow_blade),
-    (eq, "$character_gender", tf_female),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (this_or_next|eq, "$character_gender", tf_male_elf),
+    (eq,"$character_gender", tf_female_elf),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -10761,7 +11370,7 @@ dialogs = [
     (assign,":special", seismic_slam),
     (this_or_next|eq,"$character_gender", tf_ogre),
     (eq,"$character_gender", tf_dwarf),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -10843,7 +11452,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",haste_reload),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -10937,7 +11546,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",sinper_shot),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11031,7 +11640,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",entangle),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11125,7 +11734,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special",focus),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11208,7 +11817,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", skill_charge),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11300,7 +11909,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", haste),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11380,7 +11989,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", slow),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11460,7 +12069,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", smite_undead),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11563,7 +12172,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", smite_orc),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11667,7 +12276,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", head_hunted),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11771,7 +12380,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_extra_3", 
   [
     (assign,":special", power_strike),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -11841,7 +12450,7 @@ dialogs = [
     (eq, "$background_answer_2",cb2_apprentice),
     (eq,"$background_answer_3",cb3_student),
     (assign,":special",call_lightning),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -11952,7 +12561,7 @@ dialogs = [
     (this_or_next|eq,"$background_answer_3",cb3_squire),
     (eq,"$background_answer_3",cb3_lady_in_waiting),
     (assign,":special",earth_shock),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12015,7 +12624,7 @@ dialogs = [
     (this_or_next|eq,"$background_answer_3",cb3_squire),
     (eq,"$background_answer_3",cb3_lady_in_waiting),
     (assign,":special",rend),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12112,7 +12721,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special",battlerage),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12192,7 +12801,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special",frenzy),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12274,7 +12883,7 @@ dialogs = [
     (assign,":special",sidearm_2),
          (eq,"$background_type",cb_thief),
          (eq,"$background_answer_2",cb2_urchin),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12354,7 +12963,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", powercharge),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12422,7 +13031,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", undead_horse),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12490,7 +13099,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", deadly_strike),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12570,7 +13179,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", mark_of_khorne),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12652,7 +13261,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", wound_strike),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12720,7 +13329,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", ironshield),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -12788,7 +13397,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", retribution),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12882,7 +13491,7 @@ dialogs = [
        (this_or_next|eq,"$background_type",cb_forester),
        (eq,"$background_answer_3",cb3_poacher),
     (assign,":special", block),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -12976,7 +13585,7 @@ dialogs = [
     (assign,":special",arrow_of_slaying),
          (eq,"$background_answer_3",cb3_poacher),
          (eq,"$background_type",cb_forester),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13038,7 +13647,7 @@ dialogs = [
     (this_or_next|eq,"$background_answer_3",cb3_squire),
     (eq,"$background_answer_3",cb3_lady_in_waiting),
     (assign,":special", revelation),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13127,7 +13736,7 @@ dialogs = [
        (this_or_next|eq,"$background_type",cb_forester),
        (eq,"$background_answer_3",cb3_poacher),
     (assign,":special", skeletal),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13230,7 +13839,7 @@ dialogs = [
        (try_end),
        (eq,  ":c", 2),
     (assign,":special", smite_life),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13309,8 +13918,8 @@ dialogs = [
   
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
-    (assign,":special", smite_undead),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (assign,":special", bane_undead),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13364,7 +13973,7 @@ dialogs = [
   ],
   "choose {s2} for {s1} to {s4} ,need {reg11}{s3} (now you have {reg10}{s3}).", "dplmc_constable_pretalk",
    [
-    (assign,":special", smite_undead),
+    (assign,":special", bane_undead),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
       (assign,":begin_troop","trp_custom_recruit"),
@@ -13412,8 +14021,8 @@ dialogs = [
    ]],
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
-    (assign,":special", smite_orc),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (assign,":special", bane_orc),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13467,7 +14076,7 @@ dialogs = [
   ],
   "choose {s2} for {s1} to {s4} ,need {reg11}{s3} (now you have {reg10}{s3}).", "dplmc_constable_pretalk",
    [
-    (assign,":special", smite_orc),
+    (assign,":special", bane_orc),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
       (assign,":begin_troop","trp_custom_recruit"),
@@ -13516,7 +14125,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", smite_human),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_recruit"),
@@ -13620,7 +14229,7 @@ dialogs = [
   [anyone|plyr,"choosen_special_ability_3_passive", 
   [
     (assign,":special", life_drain),
-    (call_script, "script_cf_troop_can_use_special_ability", ":special"),
+    (call_script, "script_cf_troop_can_use_special_ability", ":special", 0),
     (assign,":price",-1),
     (try_begin),
       (eq, "$temp", "trp_custom_footman"),
@@ -19926,6 +20535,9 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
    "Then this is goodbye. Perhaps I'll see you around, {playername}.", "close_window", [
           (troop_set_slot, "$map_talk_troop", slot_troop_playerparty_history, pp_history_quit), 
           (call_script, "script_retire_companion", "$map_talk_troop", 100),
+            (store_random_in_range, ":random", 0, 100),
+            (lt, ":random", 50),
+            (troop_slot_eq, "$g_talk_troop", slot_troop_occupation, slto_retirement),
        ]],
 
   [anyone, "companion_quitting_no_confirmed", [
@@ -22034,6 +22646,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
  Anyway, I thank you for lending your surgeon to me {sir/madam}. You have a noble spirit. I will not forget it.", "lord_generic_mission_completed",
   [
     (call_script, "script_finish_quest", "qst_lend_surgeon", 100),
+    (troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
   ]],
   
 ##### TODO: QUESTS COMMENT OUT BEGIN
@@ -22128,6 +22741,10 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
    "I have no faith that this wedding will be concluded. Please return my dower.", "lord_return_dower", #add in new dialog
    []],
 
+  [anyone|plyr, "lord_wedding_reschedule", [(ge, "$cheat_mode", 1),(quest_get_slot, "$g_player_bride", "qst_wed_betrothed", slot_quest_target_troop),],
+   "CHEAT:  Let's finish the wedding right now.", "wedding_ceremony_bride_vow",
+   []],
+   
   [anyone, "lord_return_dower", [],
    "Well, that is your right, if you indeed have no confidence in our family's commitments. Take your money.", "close_window",
    [
@@ -22720,7 +23337,8 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
     ]],
 
   [anyone, "lord_mission_told_deliver_cattle_to_army_rejected", [], "That . . . is unfortunate, {playername}. I shall have to find someone else who's up to the task. Please go now, I've work to do.", "close_window",
-   [(assign, "$g_leave_encounter",1),]],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
+    (assign, "$g_leave_encounter",1),]],
   
 
   [anyone,"lord_start",[(check_quest_active,"qst_report_to_army"),
@@ -22813,7 +23431,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
     ]],
 
   [anyone,"lord_mission_told_scout_waypoints_rejected", [], "Hm. I'm disappointed, {playername}. Very disappointed. We'll talk later, I need to go and find somebody to scout for us.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
   
@@ -23496,14 +24114,14 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
     (lt, "$g_encountered_party_relation", 0),
     (encountered_party_is_attacker),
   ],
-   "But enough talking - yield or fight!", "party_encounter_lord_hostile_attacker_2",[]],
+   "But enough talking - yield or fight!", "party_encounter_lord_hostile_attacker_2",[(set_player_troop, "trp_player"),]],
 #lord recruitment changes end
 
 
 
 
   [anyone,"lord_pretalk", [(troop_slot_eq,"$g_talk_troop",slot_troop_occupation, slto_kingdom_hero)],
-   "Anything else?", "lord_talk",[]],
+   "Anything else?", "lord_talk",[(set_player_troop, "trp_player"),]],
 
    
   #[anyone,"hero_pretalk", [(troop_slot_eq,"$g_talk_troop",slot_troop_occupation, slto_adventurer)],"Anything else?", "adventurer_talk",[]],
@@ -27382,7 +28000,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
         (troop_add_item,"trp_temp_array_b",":item"),
         (troop_set_inventory_slot, "trp_temp_array_b", ":i_slot", -1),
       (try_end),
-  
+      (set_player_troop, "trp_player"),
       (change_screen_loot, "trp_temp_array_b"),
     ]],
   [anyone, "do_view_lord_inventory", [],
@@ -27400,7 +28018,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
   ],
    "If it would please you, can you tell me about your skills?", "lord_talk_ask_skill",[]],
   
-  [anyone,"lord_talk_ask_skill", [], "Well, all right.", "lord_pretalk",[(change_screen_view_character)]],
+  [anyone,"lord_talk_ask_skill", [], "Well, all right.", "lord_pretalk",[(set_player_troop,"$g_talk_troop"),(change_screen_view_character)]],
 ## CC
 
   [anyone,"lord_talk_ask_something_again", [],
@@ -29365,9 +29983,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
       ]],
   
   [anyone|plyr,"knight_offer_join_accept_party", [], "You may disband your men. I've no need for other troops.", "knight_join_party_disband",[]],
-  [anyone|plyr,"knight_offer_join_accept_party", [(troop_get_slot, ":companions_party","$g_talk_troop", slot_troop_leaded_party),
-                                       (party_can_join_party,":companions_party","p_main_party"),
-      ], "Your men may join as well. We need every soldier we can muster.", "knight_join_party_join",[]],
+  [anyone|plyr,"knight_offer_join_accept_party", [], "Your men may join as well. We need every soldier we can muster.", "knight_join_party_join",[]],
   [anyone|plyr,"knight_offer_join_accept_party", [(eq,1,0),(is_between,"$g_encountered_party",centers_begin, centers_end)], "Lead your men out of the town. I shall catch up with you on the road.", "knight_join_party_lead_out",[]],
   [anyone|plyr,"knight_offer_join_accept_party", [(eq,1,0),(neg|is_between,"$g_encountered_party",centers_begin, centers_end)],
    "Keep doing what you were doing. I'll catch up with you later.", "knight_join_party_lead_out",[]],
@@ -30350,6 +30966,26 @@ Hand over my {reg19} denars, if you please, and end our business together.", "lo
   [anyone|plyr,"lord_suggest_action", [],
    "{!}CHEAT: Like me.", "lord_pretalk",[(call_script,"script_change_player_relation_with_troop","$g_talk_troop",20)]],
 
+  [anyone|plyr,"lord_suggest_action", [(faction_slot_eq, "$g_talk_troop_faction", slot_faction_leader, "$g_talk_troop"),],
+   "{!}CHEAT: Make peace with me.", "lord_pretalk",[
+     (call_script, "script_diplomacy_start_peace_between_kingdoms", "$g_talk_troop_faction", "$players_kingdom", 1),
+      	 (store_relation, ":players_kingdom_relation", "$g_talk_troop_faction", "$players_kingdom"),
+	 
+     (try_begin),
+       (this_or_next|eq, "$players_kingdom", 0),
+		(ge, ":players_kingdom_relation", 0),
+       (call_script, "script_set_player_relation_with_faction", "$g_talk_troop_faction", 0),
+     (else_try),
+       (call_script, "script_diplomacy_start_peace_between_kingdoms", "$g_talk_troop_faction", "$players_kingdom", 1),
+     (try_end),]],
+  [anyone|plyr,"lord_suggest_action", [(faction_slot_eq, "$g_talk_troop_faction", slot_faction_leader, "$g_talk_troop"),],
+   "{!}CHEAT: Make your faction like me.", "lord_pretalk",[
+     (store_relation, ":players_kingdom_relation", "$g_talk_troop_faction", "$players_kingdom"),
+     (val_add,":players_kingdom_relation",20),
+     (val_min,":players_kingdom_relation",100),
+     (call_script, "script_set_player_relation_with_faction", "$g_talk_troop_faction", ":players_kingdom_relation"),
+     ]],
+
   [anyone,"lord_suggest_lift_siege", [],
    "{!}As you wish, {playername}.", "close_window",[(call_script, "script_party_set_ai_state", "$g_talk_troop_party", spai_undefined),
                                            (party_leave_cur_battle, "$g_talk_troop_party"),
@@ -30501,7 +31137,7 @@ Hand over my {reg19} denars, if you please, and end our business together.", "lo
 
     (assign, ":num_enemies", 0),
     (try_for_range, ":faction_no", kingdoms_begin, kingdoms_end),
-      (faction_slot_eq, "$g_talk_troop_faction", slot_faction_state, sfs_active),
+      (faction_slot_eq, ":faction_no", slot_faction_state, sfs_active),
       (store_relation, ":reln", "$g_talk_troop_faction", ":faction_no"),
       (lt, ":reln", 0),
       (val_add, ":num_enemies", 1),
@@ -30889,7 +31525,7 @@ Hand over my {reg19} denars, if you please, and end our business together.", "lo
    ]],
 
   [anyone,"lord_mission_deliver_message_rejected", [], "Ah, all right then. Well, I am sure I will find someone else.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
   
   [anyone,"lord_mission_deliver_message_rejected_rudely", [], "Hm, is this how you respond to a polite request\
  for a small favor? A poor show, {playername}. I didn't know you would take offence.", "lord_mission_deliver_message_rejected_rudely_2",[]],
@@ -30899,7 +31535,8 @@ Hand over my {reg19} denars, if you please, and end our business together.", "lo
 
   [anyone,"lord_mission_deliver_message_rejected_rudely_3", [], "All right. I will remember that.", "close_window",[
     (call_script, "script_change_player_relation_with_troop","$g_talk_troop",-4),
-    (quest_set_slot, "$random_quest_no", slot_quest_dont_give_again_remaining_days, 150), 
+    (quest_set_slot, "$random_quest_no", slot_quest_dont_give_again_remaining_days, 150),
+    (troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),    
     (assign, "$g_leave_encounter",1),
       ]],
 
@@ -31139,7 +31776,7 @@ I'd like nothing better than to go out there and teach them a lesson,\
    ]],
 
   [anyone,"lord_mission_deal_with_bandits_rejected", [], "Ah... Very well then, forget I brought it up.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 # Raise troops
   [anyone,"lord_tell_mission", [(eq,"$random_quest_no","qst_raise_troops")],
@@ -31182,7 +31819,7 @@ I'd like nothing better than to go out there and teach them a lesson,\
    ]],
 
   [anyone,"lord_mission_raise_troops_rejected", [], "Oh, of course. I had expected as much. Well, good luck to you then.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
   
 
 #Collect Taxes
@@ -31226,7 +31863,7 @@ I'd like nothing better than to go out there and teach them a lesson,\
    ]],
   
   [anyone,"lord_mission_collect_taxes_rejected", [], "Oh, yes. Well, good luck to you then.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 #Hunt down fugitive
   [anyone,"lord_tell_mission", [(eq,"$random_quest_no","qst_hunt_down_fugitive")],
@@ -31261,7 +31898,7 @@ I'd like nothing better than to go out there and teach them a lesson,\
 
   [anyone,"lord_mission_hunt_down_fugitive_rejected", [], "As you wish, {playername}.\
 I suppose there are plenty of bounty hunters around to get the job done . . .", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
 
@@ -31383,7 +32020,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
    []],
 
   [anyone,"quest_meet_spy_in_enemy_town_rejected", [], "As you wish, {playername}, but I strongly advise you to forget anything I told you about any spies. They do not exist, have never existed, and no one will ever find them. Remember that.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
     
@@ -31444,10 +32081,10 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ]],
 
   [anyone,"quest_raid_caravan_to_start_war_rejected_1", [], "Ah, you think so? But how long will your precious peace last? Not long, believe me.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
   [anyone,"quest_raid_caravan_to_start_war_rejected_2", [], "Hm. As you wish, {playername}.\
  I thought you had some fire in you, but it seems I was wrong.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
    
@@ -31522,7 +32159,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone,"lord_tell_mission_follow_spy_rejected", [],
    "A shame. Well, carry on as you were, {playername}...", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
 
@@ -31560,7 +32197,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone,"lord_tell_mission_capture_enemy_hero_rejected", [],
    "Clearly you lack the mettle I had thought you possessed. Very well, {playername}, I will find someone else.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
 
 
@@ -31610,7 +32247,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone,"lord_tell_mission_lend_companion_rejected", [],
    "Well, that's damned unfortunate, but I suppose I cannot force you or {s3} to agree.\
  I shall have to make do without.", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 
  
   [anyone,"lord_tell_mission", [(eq,"$random_quest_no","qst_collect_debt")],
@@ -31644,7 +32281,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
    ]],
 
   [anyone,"lord_tell_mission_collect_debt_rejected", [], "Perhaps not, {playername}. I suppose I'm never getting that money back...", "lord_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
  
 ##
 ##  [anyone,"lord_tell_mission", [(eq,"$random_quest_no","qst_capture_conspirators")],
@@ -31959,6 +32596,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
       (quest_slot_eq, "$random_quest_no", slot_quest_dont_give_again_remaining_days, 0),
       (quest_set_slot, "$random_quest_no", slot_quest_dont_give_again_remaining_days, 1),
     (try_end),
+    (troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
     ]],
 
 
@@ -33229,7 +33867,9 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     "So be it -- let us then part", "lady_conclude_relationship",[
     ]],
 
-    
+    [anyone|plyr,"lady_betrothed", [(eq, "$cheat_mode", 1),],
+    "CHEAT:  Wed me.","lady_pretalk",[(call_script, "script_courtship_event_bride_marry_groom", "$g_talk_troop", "trp_player", 0),]],
+            
     [anyone,"lady_suggest_elope", [(troop_slot_eq, "$g_talk_troop", slot_lord_reputation_type, lrep_conventional)],
     "Good {playername} -- you are a good and kind man, but a lady cannot defy her family. Such things are not done!", "lady_conclude_relationship",[]],
 
@@ -33386,7 +34026,18 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone, "lady_meet_end", [],  "Can I help you with anything?", "lady_talk", []],
 
-  
+[anyone|plyr,"lady_talk", [(ge, "$cheat_mode", 1),],
+   "{!}CHEAT: Like me.", "lady_pretalk",[(call_script,"script_change_player_relation_with_troop","$g_talk_troop",20)]],  
+   
+  [anyone|plyr,"lady_talk", [(ge, "$cheat_mode", 1),(troop_slot_eq, "$g_talk_troop", slot_troop_spouse, -1),],
+   "{!}CHEAT: Break ties with other suitors.", "lady_pretalk",[
+	(try_for_range, ":active_npc", active_npcs_begin, active_npcs_end),
+		(try_for_range, ":love_interest_slot", slot_troop_love_interest_1, slot_troop_love_interests_end),
+			(troop_slot_eq, ":active_npc", ":love_interest_slot", "$g_talk_troop"),
+			(call_script, "script_courtship_event_lady_break_relation_with_suitor", "$g_talk_troop", ":active_npc"),
+		(try_end),
+	(try_end),
+]],   
   [anyone|plyr,"lady_talk", [(neg|troop_slot_ge, "$g_talk_troop", slot_troop_prisoner_of_party, 0),
                              (ge, "$g_encountered_party_relation", 0),
   ],
@@ -34182,7 +34833,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone,"lady_quest_duel_for_lady_3_rejected", [], "Oh... Perhaps you're right, {playername}.\
  I should let go of these silly childhood ideas of chivalry and courage. {Men/People} are not like that,\
  not anymore. Good day to you.", "close_window",
-   [
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
     (call_script, "script_change_player_relation_with_troop", "$g_talk_troop", -1),
     ]],
 
@@ -34205,6 +34856,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
  Please leave me, I have some important embroidery to catch up.", "close_window",
    [
      (call_script, "script_change_player_relation_with_troop", "$g_talk_troop", -1),
+     (troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
     ]],
 
 #Leave
@@ -34993,6 +35645,16 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (call_script, "script_set_player_relation_with_faction", "$g_encountered_party_faction", ":rel"),
     (call_script, "script_diplomacy_party_attacks_neutral", "p_main_party", "$g_encountered_party"), 
     ]],
+
+  #trade with caravan master
+  [anyone|plyr,"merchant_talk",
+        [
+            (store_relation, ":rel", "$g_encountered_party_faction", "fac_player_supporters_faction"),
+            (ge, ":rel", 0),
+            (store_conversation_troop, ":car_master"),
+            (is_between, ":car_master", custom_caravan_masters_begin, custom_caravan_masters_end),
+        ],
+        "Wanna trade?","merchant_pretalk",[(change_screen_trade),]],
 
   [anyone|plyr,"merchant_talk", [], "[Leave]", "close_window",[(assign, "$g_leave_encounter",1)]],
 
@@ -36533,7 +37195,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
       (val_mul, ":persuasion_level", 2),
       (val_add, ":talk_faction", ":persuasion_level"),
       (ge, ":talk_faction", -60),
-      #(neg|eq, "$g_game_difficulty",3),
+      (neg|eq, "$g_game_difficulty",3),
       (store_num_free_stacks,":stack_left","p_main_party"),
       (party_stack_get_troop_id, ":troop_no", "$g_encountered_party", 0),
       (this_or_next|gt, ":stack_left", 0),
@@ -36848,8 +37510,10 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 [
     (store_repeat_object, ":var_0"),
     (is_between, ":var_0", active_npcs_begin, active_npcs_end),
+    (this_or_next|troop_slot_eq, ":var_0", slot_troop_occupation, slto_retirement),
+    (this_or_next|troop_slot_eq, ":var_0", slot_troop_occupation, slto_inactive),
     (troop_slot_eq, ":var_0", slot_troop_occupation, slto_adventurer),
-    (this_or_next|troop_slot_ge,"trp_player", slot_troop_player_class,8),
+    (this_or_next|troop_slot_ge,"trp_player", slot_troop_player_class,5),
     (troop_slot_eq, ":var_0", slot_troop_met, 1),
     (str_store_troop_name, s11, ":var_0"),
     (call_script, "script_troop_get_relation_with_troop", ":var_0", "trp_player"),
@@ -36867,9 +37531,6 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
 [anyone, "tavernkeeper_adventurer_location_tell",
 [
-],
-"{s15} is close to {s11} ({reg10},{reg11}), and {reg1?his:her} current mission is to {s5}", "tavernkeeper_pretalk", 
-[
     (troop_get_type, ":var_0", "$temp"),
       (try_begin),
         (this_or_next|eq, ":var_0", tf_female_elf),
@@ -36886,21 +37547,41 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (try_end),
     (str_store_troop_name, s15, "$temp"),
     (troop_get_slot, ":adventurer_party", "$temp", slot_troop_leaded_party),
-    (assign, ":var_2", "p_town_1"),
-    (assign, ":var_3", 999999),
-    (try_for_range, ":var_4", "p_town_1", "p_salt_mine"),
+    (try_begin),
+      (party_is_active, ":adventurer_party"),
+      (assign, ":var_3", 999999),
+      (assign, ":var_2", "p_town_1"),
+      (assign, ":var_3", 999999),
+      (try_for_range, ":var_4", "p_town_1", "p_salt_mine"),
         (store_distance_to_party_from_party, ":var_5", ":adventurer_party", ":var_4"),
         (neg|gt, ":var_5", ":var_3"),
         (assign, ":var_3", ":var_5"),
         (assign, ":var_2", ":var_4"),
+      (try_end),
+      (str_store_party_name, s11, ":var_2"),
+      (party_get_position, pos51, ":adventurer_party"),
+      (position_get_x, ":x_party", pos51),
+      (position_get_y, ":y_party", pos51),
+      (assign, reg10, ":x_party"),
+      (assign, reg11, ":y_party"),
+      (str_store_string, s6, "@{s15} is close to {s11} ({reg10},{reg11})"),
+    (else_try),
+      (str_store_string, s6, "@{s15} party has been Defeated"),
     (try_end),
-    (str_store_party_name, s11, ":var_2"),
-    (party_get_position, pos51, ":adventurer_party"),
-    (position_get_x, ":x_party", pos51),
-    (position_get_y, ":y_party", pos51),
-    (assign, reg10, ":x_party"),
-    (assign, reg11, ":y_party"),
     (try_begin),
+      (this_or_next|troop_slot_eq, "$temp", slot_troop_occupation, slto_retirement),
+      (troop_slot_eq, "$temp", slot_troop_occupation, slto_inactive),
+      (store_troop_gold, ":gold", "$temp"),
+      (assign, reg5, ":gold"),
+      (str_store_string, s5, "@Rebuilding the adventure party, progress {reg5}/20000"),
+    (else_try),
+      (troop_slot_eq, "$temp", slot_troop_occupation, slto_adventurer),
+      (troop_get_slot, ":adventurer_party", "$temp", slot_troop_leaded_party),
+      (neg|troop_slot_ge, "$temp", slot_troop_leaded_party, 1),
+      (neg|party_is_active, ":adventurer_party"),
+      (str_store_troop_name, s10, "$temp"),
+      (str_store_string, s5, "str_tavernkeeper_ask_npc_place_1"),
+    (else_try),
       (party_slot_eq, ":adventurer_party", slot_party_had_mission, party_mission_join_faction),
       (get_party_ai_object,":town",":adventurer_party"),
       (gt, ":town", -1),
@@ -36944,7 +37625,9 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (else_try),
       (str_store_string, s5, "@travel around the land"),
     (try_end),
-]],
+],
+"{s6}, and {reg1?his:her} current mission is to {s5}", "tavernkeeper_pretalk", 
+[]],
 
   [anyone|plyr,"tavernkeeper_talk", [
    (eq, "$g_player_troop", "trp_player"),
@@ -37314,7 +37997,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone,"tavernkeeper_mission_hunt_down_fugitive_rejected", [], "As you wish, {playername}.\
 I suppose there are plenty of bounty hunters around to get the job done . . .", "tavernkeeper_pretalk",
-   []],
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1)]],
 #end hunt down fugitive
 
 #Tavernkeepers quest
@@ -38360,7 +39043,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone|plyr,"buy_special_1", [  
     (assign,":buy","itm_midas_hand"),
     (assign,":sell","itm_diamonds"),
-    (assign,":price",2),
+    (assign,":price",1),
     (assign,reg11,":price"),
     (str_store_item_name,s1,":buy"),
     (str_store_item_name,s2,":sell"),
@@ -38369,7 +39052,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   "buy {s1} need {reg11}{s2} (now you have {reg10}{s2}).", "buy_special_2",[
     (assign,":buy","itm_midas_hand"),
     (assign,":sell","itm_diamonds"),
-    (assign,":price",2),
+    (assign,":price",1),
     (troop_remove_items,"trp_player",":sell",":price"),
     (troop_add_items,"trp_player",":buy",1),
     ]],
@@ -38393,8 +39076,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone|plyr,"buy_special_1", [  
     (assign,":buy","itm_flamberge_fire"),
-    (assign,":sell","itm_sg_blood"),
-    (assign,":price",4),
+    (assign,":sell","itm_diamonds"),
+    (assign,":price",1),
     (assign,reg11,":price"),
     (str_store_item_name,s1,":buy"),
     (str_store_item_name,s2,":sell"),
@@ -38402,8 +39085,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (ge,reg10,":price"),], 
   "buy {s1} need {reg11}{s2} (now you have {reg10}{s2}).", "buy_special_2",[
     (assign,":buy","itm_flamberge_fire"),
-    (assign,":sell","itm_sg_blood"),
-    (assign,":price",4),
+    (assign,":sell","itm_diamonds"),
+    (assign,":price",1),
     (troop_remove_items,"trp_player",":sell",":price"),
     (troop_add_items,"trp_player",":buy",1),
     ]],
@@ -38580,7 +39263,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     
   [anyone|plyr,"buy_special_1", [  
     (assign,":buy","itm_gwilith_2"),
-    (assign,":sell","itm_sg_blood"),
+    (assign,":sell","itm_diamonds"),
     (assign,":price",1),
     (assign,reg11,":price"),
     (str_store_item_name,s1,":buy"),
@@ -38589,7 +39272,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (ge,reg10,":price"),], 
   "buy {s1} need {reg11}{s2} (now you have {reg10}{s2}).", "buy_special_2",[
     (assign,":buy","itm_gwilith_2"),
-    (assign,":sell","itm_sg_blood"),
+    (assign,":sell","itm_diamonds"),
     (assign,":price",1),
     (troop_remove_items,"trp_player",":sell",":price"),
     (troop_add_items,"trp_player",":buy",1),
@@ -38651,8 +39334,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     
   [anyone|plyr,"buy_special_1", [  
     (assign,":buy","itm_great_lance2"),
-    (assign,":sell","itm_sg_blood"),
-    (assign,":price",4),
+    (assign,":sell","itm_diamonds"),
+    (assign,":price",1),
     (assign,reg11,":price"),
     (str_store_item_name,s1,":buy"),
     (str_store_item_name,s2,":sell"),
@@ -38660,8 +39343,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (ge,reg10,":price"),], 
   "buy {s1} need {reg11}{s2} (now you have {reg10}{s2}).", "buy_special_2",[
     (assign,":buy","itm_great_lance2"),
-    (assign,":sell","itm_sg_blood"),
-    (assign,":price",4),
+    (assign,":sell","itm_diamonds"),
+    (assign,":price",1),
     (troop_remove_items,"trp_player",":sell",":price"),
     (troop_add_items,"trp_player",":buy",1),
     ]],
@@ -41990,9 +42673,10 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
       (assign, ":back", -1),
       (try_begin),
         (item_has_property, ":weapons", itp_unique),
-        (gt, ":weapons_cost", 40000),
+        (gt, ":weapons_cost", 50000),
         (assign, ":back", "itm_diamonds"),
       (else_try),
+        (gt, ":weapons_cost", 10000),
         (item_has_property, ":weapons", itp_unique),
         (assign, ":back", "itm_sg_blood"),
       (else_try),
@@ -42008,17 +42692,17 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
         (eq,":imod", imod_champion),
         (assign, ":back", "itm_trophy_b"),
       (else_try),
-        (ge, ":weapons_cost", 3000),
-        (assign, ":back", "itm_trophy_a"),
-      (else_try),
-        (item_get_slot, ":quality", ":imod", slot_item_modifier_quality),
-        (eq,":quality", 1),
+        (ge, ":weapons_cost", 5000),
         (assign, ":back", "itm_trophy_a"),
       (try_end),
       
       
       (gt, ":back", -1),
-      
+      (store_item_value, ":weapons_cost", ":weapons"),
+      (call_script, "script_game_get_item_buy_price_factor", ":weapons"),
+      (val_mul, ":weapons_cost", reg0),
+      (val_div, ":weapons_cost", 100),
+      (val_div, ":weapons_cost", 10),
       (str_store_item_name,s5,":weapons"),
       (str_store_item_name,s6,":back"),
       (store_item_value, ":weapons_cost", ":weapons"),
@@ -42033,14 +42717,14 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
       (assign, ":back", -1),
       (try_begin),
         (item_has_property, ":weapons", itp_unique),
-        (gt, ":weapons_cost", 40000),
+        (gt, ":weapons_cost", 50000),
         (assign, ":back", "itm_diamonds"),
       (else_try),
         (gt, ":weapons_cost", 10000),
         (item_has_property, ":weapons", itp_unique),
         (assign, ":back", "itm_sg_blood"),
       (else_try),
-        (gt, ":weapons_cost", 20000),
+        (gt, ":weapons_cost", 40000),
         (assign, ":back", "itm_sg_blood"),
       (else_try),
         (eq,":imod", imod_masterwork),
@@ -42052,12 +42736,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
         (eq,":imod", imod_champion),
         (assign, ":back", "itm_trophy_b"),
       (else_try),
-        (ge, ":weapons_cost", 2000),
-        (assign, ":back", "itm_trophy_a"),
-      (else_try),
-        (gt, ":weapons_cost", 1000),
-        (item_get_slot, ":quality", ":imod", slot_item_modifier_quality),
-        (eq,":quality", 1),
+        (ge, ":weapons_cost", 5000),
         (assign, ":back", "itm_trophy_a"),
       (try_end),
       (gt, ":back", -1),
@@ -43215,7 +43894,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
                                              "str_you_will_not_be_disappointed_sirmadam_you_will_not_find_better_warriors_in_all_calradia"),
                                           (try_end),],
    "{s17}", "close_window", [
-                                          (party_get_slot, ":mercenary_troop", "$g_encountered_party", slot_center_mercenary_troop_type),
+                                          (party_get_slot, ":mercenary_troop", "$g_encountered_party", 
+slot_center_mercenary_troop_type),
                                           (party_get_slot, ":mercenary_amount", "$g_encountered_party", slot_center_mercenary_troop_amount),
 
                                           (call_script, "script_game_get_join_cost", ":mercenary_troop"),
@@ -44217,7 +44897,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone|plyr,"mayor_talk", [(store_partner_quest, ":partner_quest"),
                               (lt, ":partner_quest", 0),
-                              ],
+                              (neq, "$merchant_quest_last_offerer", "$g_talk_troop")],
    "Do you happen to have a job for me?", "merchant_quest_requested",[
      (assign,"$merchant_quest_last_offerer", "$g_talk_troop"),
      (call_script, "script_get_quest", "$g_talk_troop"),
@@ -44305,11 +44985,17 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone,"mayor_investment_advice",[], "A couple of things to keep in mind -- skilled laborers are always at a premium, so I doubt that you will be able to open up more than one enterprise here. In order to make a profit for yourself, you should choose a commodity which is in relatively short supply, but for which the raw materials are cheap. What sort of enterprise would you like to start?", "investment_choose_enterprise",[
   ]],
 
-  [anyone|plyr,"investment_choose_enterprise",[], "A mill and bakery, to make bread from grain", "investment_summary",[
+  [anyone|plyr,"investment_choose_enterprise",[
+    (assign, "$enterprise_production", "itm_bread"),
+    (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
+  ], "A mill and bakery, to make bread from grain", "investment_summary",[
   (assign, "$enterprise_production", "itm_bread"),
   ]],
 
-  [anyone|plyr,"investment_choose_enterprise",[], "A brewery, to make ale from grain", "investment_summary",[
+  [anyone|plyr,"investment_choose_enterprise",[
+    (assign, "$enterprise_production", "itm_ale"),
+    (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
+  ], "A brewery, to make ale from grain", "investment_summary",[
   (assign, "$enterprise_production", "itm_ale"),
   ]],
 
@@ -44317,6 +45003,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",4),
+     (assign, "$enterprise_production", "itm_leatherwork"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "A tannery, to make leather from hides", "investment_summary",[
   (assign, "$enterprise_production", "itm_leatherwork"),
   ]],
@@ -44325,6 +45013,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",2),
+     (assign, "$enterprise_production", "itm_wine"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "A wine press, to make wine from grapes", "investment_summary",[
   (assign, "$enterprise_production", "itm_wine"),
   ]],
@@ -44333,6 +45023,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",2),
+     (assign, "$enterprise_production", "itm_oil"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "An oil press, to make oil from olives", "investment_summary",[
   (assign, "$enterprise_production", "itm_oil"),
   ]],
@@ -44341,6 +45033,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",1),
+     (assign, "$enterprise_production", "itm_tools"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "An ironworks, to make tools from iron", "investment_summary",[
   (assign, "$enterprise_production", "itm_tools"),
   ]],
@@ -44349,6 +45043,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",5),
+     (assign, "$enterprise_production", "itm_velvet"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "A weavery and dyeworks, to make velvet from silk and dye", "investment_summary",[
   (assign, "$enterprise_production", "itm_velvet"),
   ]],
@@ -44357,6 +45053,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",3),
+     (assign, "$enterprise_production", "itm_wool_cloth"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "A weavery, to make wool cloth from wool", "investment_summary",[
   (assign, "$enterprise_production", "itm_wool_cloth"),
   ]],
@@ -44365,6 +45063,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      (call_script, "script_get_max_skill_of_player_party", "skl_trade"),
      (assign, ":trade_skill", reg0),
      (ge,":trade_skill",3),
+     (assign, "$enterprise_production", "itm_linen"),
+     (call_script, "script_process_player_enterprise", "$enterprise_production", "$g_encountered_party"),
   ], "A weavery, to make linen from flax", "investment_summary",[
   (assign, "$enterprise_production", "itm_linen"),
   ]],
@@ -46311,7 +47011,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ]],
   
   [anyone,"village_elder_deliver_grain_mission_reject", [], "Yes {sir/madam}, of course. I am sorry if I have bothered you with our troubles.", "close_window",
-   [
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
     ]],
 
 
@@ -46349,6 +47049,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone,"village_elder_train_peasants_against_bandits_mission_reject", [], "Yes, of course {sir/madam}.\
  Thank you for your counsel.", "close_window",
    [
+     (troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
      ]],
 
 
@@ -46383,7 +47084,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ]],
   
   [anyone,"village_elder_deliver_cattle_mission_reject", [], "Yes {sir/madam}, of course. I am sorry if I have bothered you with our troubles.", "close_window",
-   [
+   [(troop_set_slot, "$g_talk_troop", slot_troop_does_not_give_quest, 1),
     ]],
 
   [anyone,"village_elder_tell_mission", [], "Thank you, {sir/madam}, but we do not really need anything right now.", "village_elder_pretalk",[]],
@@ -48068,9 +48769,9 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
      ]],
 # Ryan END  
 
-  [anyone|plyr,"town_dweller_talk", [(neg|troop_slot_ge,"trp_player",slot_troop_player_class,7),(neg|agent_slot_eq,"$g_talk_agent",slot_agent_already_begg,1),], "Could you give me a few coins?", "town_dweller_begging",[(store_random_in_range, reg2, 1,4),(call_script, "script_change_troop_renown", "trp_player", -3),]],
-  [anyone,"town_dweller_begging", [(eq, reg2, 1),], "Take this, poor soul.", "close_window",[(agent_set_slot,"$g_talk_agent",slot_agent_already_begg,1),(store_random_in_range, ":gold", 0, 500),(troop_add_gold,0,":gold"),]],
-  [anyone,"town_dweller_begging", [(eq, reg2, 2),], "Here you are, now get out of my way!", "close_window",[(agent_set_slot,"$g_talk_agent",slot_agent_already_begg,1),(store_random_in_range, ":gold", 0, 300),(troop_add_gold,0,":gold"),]],
+  [anyone|plyr,"town_dweller_talk", [(neg|troop_slot_ge,"trp_player",slot_troop_player_class,7),(neg|agent_slot_eq,"$g_talk_agent",slot_agent_already_begg,1),], "Could you give me a few coins?", "town_dweller_begging",[(store_random_in_range, reg2, 1,4),(store_random_in_range, ":renown", -2,1),(call_script, "script_change_troop_renown", "trp_player", ":renown"),]],
+  [anyone,"town_dweller_begging", [(eq, reg2, 1),], "Take this, poor soul.", "close_window",[(agent_set_slot,"$g_talk_agent",slot_agent_already_begg,1),(store_random_in_range, ":gold", 500, 1000),(troop_add_gold,0,":gold"),]],
+  [anyone,"town_dweller_begging", [(eq, reg2, 2),], "Here you are, now get out of my way!", "close_window",[(agent_set_slot,"$g_talk_agent",slot_agent_already_begg,1),(store_random_in_range, ":gold", 0, 500),(troop_add_gold,0,":gold"),]],
   [anyone,"town_dweller_begging", [(eq, reg2, 3),], "GET OUT OF MY WAY!", "close_window",[(agent_set_slot,"$g_talk_agent",slot_agent_already_begg,1),]],
 
   [anyone|plyr,"town_dweller_talk", [(party_slot_eq, "$current_town", slot_party_type, spt_village),
@@ -48283,8 +48984,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone,"member_chat", [], "Your orders {sir/madam}?", "regular_member_talk",[]],
   [anyone|plyr,"regular_member_talk", [], "Tell me about yourself", "view_regular_char_requested",[]],
-  [anyone,"view_regular_char_requested", [], "Aye {sir/madam}. Let me tell you all there is to know about me.", "do_regular_member_view_char",[[change_screen_view_character]]],
-  [anyone,"do_regular_member_view_char", [], "Anything else?", "regular_member_talk",[]],
+  [anyone,"view_regular_char_requested", [], "Aye {sir/madam}. Let me tell you all there is to know about me.", "do_regular_member_view_char",[(set_player_troop,"$g_talk_troop"),[change_screen_view_character]]],
+  [anyone,"do_regular_member_view_char", [], "Anything else?", "regular_member_talk",[(set_player_troop, "trp_player"),]],
   
 # Custom Troops begin
   [anyone|plyr,"regular_member_talk", [(is_between,"$g_talk_troop",customizable_troops_begin, customizable_troops_end)], "I'd like to select your equipment.", "customize_troop_equipment_requested",[]],
@@ -48402,7 +49103,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (troop_set_slot, "$g_talk_troop", slot_troop_upgrade_knight_item, ":weapons"),
     #(store_add, ":dest_troop", "$g_talk_troop", 2),
     #(troop_add_items,":dest_troop",":weapons",1),
-    #(troop_remove_items,"trp_player",":weapons",1),
+    (troop_remove_items,"trp_player",":weapons",1),
    ]],
 
   [anyone|plyr, "upgrade_power_equip_confirm",[],"No, I've changed my mind.", "do_regular_member_view_char", 
@@ -48445,7 +49146,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (troop_set_slot, "$g_talk_troop", slot_troop_upgrade_knight_item, ":weapons"),
     #(store_add, ":dest_troop", "$g_talk_troop", 2),
     #(troop_add_items,":dest_troop",":weapons",1),
-    #(troop_remove_items,"trp_player",":weapons",1),
+    (troop_remove_items,"trp_player",":weapons",1),
    ]],
 
   [anyone|plyr, "upgrade_equip_confirm",[],"No, I've changed my mind.", "do_regular_member_view_char", 
@@ -49000,8 +49701,8 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
 
   [anyone,"start", [(neq, "$talk_context", tc_tavern_talk),], "Hello. What can I do for you?", "free",[]],
   [anyone|plyr,"free", [[neg|in_meta_mission]], "Tell me about yourself", "view_char_requested",[]],
-  [anyone,"view_char_requested", [], "Very well, listen to this...", "view_char",[[change_screen_view_character]]],
-  [anyone,"view_char", [], "Anything else?", "free",[]],
+  [anyone,"view_char_requested", [], "Very well, listen to this...", "view_char",[(set_player_troop,"$g_talk_troop"),[change_screen_view_character]]],
+  [anyone,"view_char", [], "Anything else?", "free",[(set_player_troop, "trp_player"),]],
 
   [anyone|plyr,"end", [], "[Done]", "close_window",[]],
   
@@ -49596,7 +50297,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     "I hope you serve me well, What are you?", "lord_specialise",[]],
 
    [anyone|plyr,"lord_specialise",[
-    (troop_slot_ge,"trp_player", slot_troop_player_class,2),
+    #(troop_slot_ge,"trp_player", slot_troop_player_class,2),
     (faction_get_slot, ":cur_troop", "$g_encountered_party_faction", slot_faction_tier_1_troop),
     (gt, ":cur_troop", 0),
    ],"farmer.","lord_request_enlistment",
@@ -49605,7 +50306,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
    ]],
    
    [anyone|plyr,"lord_specialise",[
-   (troop_slot_ge,"trp_player", slot_troop_player_class,3),
+   #(troop_slot_ge,"trp_player", slot_troop_player_class,3),
     (faction_get_slot, ":cur_troop", "$g_encountered_party_faction", slot_faction_tier_1_town_troop),
     (gt, ":cur_troop", 0),
    ],"town man","lord_request_enlistment",
@@ -49614,21 +50315,47 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
    ]],
    
    [anyone|plyr,"lord_specialise",[
-   ],"manhunter","lord_request_enlistment",
+        (troop_get_type, ":type", "trp_player"),
+        (this_or_next|eq, ":type", tf_female_elf),
+        (eq, ":type", tf_male_elf),        
+        (this_or_next|eq, "$g_encountered_party_faction", "fac_kingdom_1"),
+        (this_or_next|eq, "$g_encountered_party_faction", "fac_kingdom_4"),
+        (eq, "$g_encountered_party_faction", "fac_kingdom_8"),
+   ],"elf","lord_request_enlistment",
    [
-        (assign, "$player_cur_troop", "trp_farmer"),
+        (try_begin),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_1"),
+            (assign, "$player_cur_troop", "trp_grandelf_recruit"),
+        (else_try),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_4"),
+            (assign, "$player_cur_troop", "trp_woodelf_recruit"),
+        (else_try),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_8"),
+            (assign, "$player_cur_troop", "trp_drowelf_recruit"),
+        (try_end),
    ]],
 
    [anyone|plyr,"lord_specialise",[
-     (troop_slot_ge,"trp_player", slot_troop_player_class,4),
+        (this_or_next|eq, "$g_encountered_party_faction", "fac_kingdom_10"),
+        (this_or_next|eq, "$g_encountered_party_faction", "fac_kingdom_8"),
+        (eq, "$g_encountered_party_faction", "fac_kingdom_6"),
    ],"watchman","lord_request_enlistment",
    [
-        (assign, "$player_cur_troop", "trp_caravan_guard"),
+        (try_begin),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_6"),
+            (assign, "$player_cur_troop", "trp_ogre_young"),
+        (else_try),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_10"),
+            (assign, "$player_cur_troop", "trp_dwarf_miner"),
+        (else_try),
+            (eq, "$g_encountered_party_faction", "fac_kingdom_8"),
+            (assign, "$player_cur_troop", "trp_rat_1"),
+        (try_end),
    ]],
    
    [anyone|plyr,"lord_specialise",[
      (troop_slot_ge,"trp_player", slot_troop_player_class,5),
-
+    (eq, 1, 0),
    ],"town man","lord_request_enlistment",
    [
         (assign, "$player_cur_troop", "trp_we_noble_lad"),
@@ -49804,7 +50531,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
         ],    
 #+freelancer end 
 
-
+  
   [anyone,"start", 
    [
     (eq, "$talk_context", tc_tavern_talk),
@@ -49829,6 +50556,9 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     (this_or_next|eq, "$g_talk_troop", "trp_village_walker_1"),
     (eq, "$g_talk_troop", "trp_khergit_townsman"),
    ],"Be quiet i drink.", "fight_alcool1",[]],
+   
+  [anyone|plyr,"fight_alcool1", [(neg|troop_slot_ge,"trp_player",slot_troop_player_class,7),(neg|agent_slot_eq,"$g_talk_agent",slot_agent_already_begg,1),], "Could you give me a few coins?", "town_dweller_begging",[(store_random_in_range, reg2, 1,4),(call_script, "script_change_troop_renown", "trp_player", -3),]],
+   
   [anyone|plyr ,"fight_alcool1", 
    [
     (this_or_next|eq, "$g_talk_troop", "trp_dwarf_walker"),

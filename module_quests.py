@@ -476,7 +476,12 @@ quests = [
   "{!}The Guildmaster of {s4} has asked you to deal with the leader of desert bandits."
   ),
   ## CC
-  
+  ("freelancer_enlisted", "Enlisted in the Party of {s13}", 0,
+   "{!}You are currently enlisted in the party of {s13} of {s14}."),
+  ("freelancer_vacation", "Enlisted: On Leave", 0,
+   "{!}You have been granted leave from the party of {s13} of {s14}."),
+  ("freelancer_captured", "Enlisted: Captured", 0,
+   "{!}Your commander's party has been defeated and you have been captured. Return to the service of {s13} of {s14}."),
   
  ("quests_end", "Quests End", 0, "{!}."),
 ]

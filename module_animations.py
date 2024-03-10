@@ -1003,15 +1003,25 @@ animations = [
  ["ready_thrust_onehanded_lance",   acf_thrust|acf_rot_vertical_sword|acf_anim_length(100)|acf_enforce_rightside, amf_priority_attack|amf_use_weapon_speed|amf_use_inertia|amf_keep|amf_client_owner_prediction|amf_rider_rot_thrust,
 ##   [ready_durn, "anim_human", combat+9500, combat+9508, blend_in_ready], 
    [ready_durn, "thrust_onehanded_lance_hb", 5, 8, blend_in_ready], 
+   [ready_durn, "attacks_staff_thrust", 14, 21, blend_in_ready], 
+   [ready_durn, "attacks_staff_thrust_overhead", 14, 21, blend_in_ready], 
  ],
  ["release_thrust_onehanded_lance", acf_thrust|acf_rot_vertical_sword|acf_anim_length(100)|acf_enforce_rightside, amf_priority_attack|amf_use_weapon_speed|amf_play|amf_rider_rot_thrust|amf_continue_to_next,
 ##   [0.62, "anim_human", combat+9507, combat+9530, blend_in_release], 
    [0.47, "thrust_onehanded_lance_hb", 8, 33, blend_in_release], 
+   [0.35, "attacks_staff_thrust", 21, 40, blend_in_release], 
+   [0.35, "attacks_staff_thrust_overhead", 21, 40, blend_in_release], 
  ],
+ 
+ 
  ["release_thrust_onehanded_lance_continue", 0, amf_priority_continue|amf_use_weapon_speed|amf_play|amf_rider_rot_thrust|amf_client_owner_prediction,
 ##   [0.1, "anim_human", combat+9530, combat+9540, blend_in_continue], 
    [0.1, "thrust_onehanded_lance_hb", 33, 45, blend_in_continue], 
+   [0.3, "attacks_staff_thrust", 40, 58, blend_in_continue], 
+   [0.3, "attacks_staff_thrust_overhead", 40, 58, blend_in_continue], 
  ],
+ 
+ 
  ["blocked_thrust_onehanded_lance", acf_enforce_rightside, amf_priority_blocked|amf_use_weapon_speed|amf_play|amf_rider_rot_thrust,
    [0.1, "anim_human", combat+9515, combat+9513, blend_in_parry], 
  ],
@@ -1993,7 +2003,7 @@ animations = [
 	[ready_durn, "attacks_staff_thrust_overhead", 0, 20, blend_in_ready],
  ],
  ["release_overswing_spear", acf_overswing|acf_rot_vertical_bow|acf_anim_length(100), amf_priority_attack|amf_use_weapon_speed|amf_play|amf_continue_to_next,
- 	[0.6, "attacks_staff_thrust_overhead", 20, 41, blend_in_release],
+ 	[0.35, "attacks_staff_thrust_overhead", 20, 41, blend_in_release],
  ],
  ["release_overswing_spear_continue", acf_anim_length(100), amf_priority_continue|amf_use_weapon_speed|amf_play|amf_client_owner_prediction,
    [0.3, "attacks_staff_thrust_overhead", 41, 52, arf_blend_in_2],
@@ -2159,7 +2169,7 @@ animations = [
 
   
  ["cast_magic", acf_enforce_rightside, amf_play|amf_priority_mount|amf_use_weapon_speed,
-   [3.0, "ani_magic_1", 0, 43, arf_blend_in_5],
+   [2.0, "ani_magic_1", 0, 43, arf_blend_in_5],
    #[3.0, "man_cheer", 0, 60, arf_blend_in_5],
    #[3.0, "man_cheer", 200, 289, arf_blend_in_5],
  ],
@@ -2247,29 +2257,56 @@ animations = [
  ],
  
  ["fangun_forward", acf_enforce_all|acf_displace_position, amf_priority_defend_parry|amf_play|amf_accurate_body|amf_client_prediction,
-   [0.8, "fangun_forward", 0, 72,  arf_blend_in_1, 0, (0,3,0)], 
+   [0.5, "fangun_forward", 0, 72,  arf_blend_in_1, 0, (0,2,0)], 
 ],
 
 ["fangun_left", acf_enforce_all|acf_displace_position, amf_priority_defend_parry|amf_play|amf_accurate_body|amf_client_prediction,#
-   [0.8, "fangun_left", 0, 72, arf_blend_in_1, 0, (-3,0,0)], 
+   [0.5, "fangun_left", 0, 72, arf_blend_in_1, 0, (-2,0,0)], 
 ],
 
 ["fangun_right", acf_enforce_all|acf_displace_position, amf_priority_defend_parry|amf_play|amf_accurate_body|amf_client_prediction,#
-   [0.8, "fangun_right", 0, 72, arf_blend_in_1, 0, (3,0,0)], 
+   [0.5, "fangun_right", 0, 72, arf_blend_in_1, 0, (2,0,0)], 
 ],
 
 ["fangun_backward", acf_enforce_all|acf_displace_position, amf_priority_defend_parry|amf_play|amf_accurate_body|amf_client_prediction,#
-   [0.8, "fangun_backward", 0, 72, arf_blend_in_1, 0, (0,-3,0)], 
-   [0.8, "jump_y", 0, 18, arf_blend_in_1, 0, (0,-3,0)], 
+   [0.5, "fangun_backward", 0, 72, arf_blend_in_1, 0, (0,-2,0)], 
+   [0.5, "jump_y", 0, 18, arf_blend_in_1, 0, (0,-2,0)], 
 ],
 
 
  ["fast_kick", acf_enforce_lowerbody, amf_priority_kick|amf_play|amf_client_prediction,
-   [0.3, "kick_rightleg", 12, 33, arf_blend_in_1, 0, (0,-1.5,0)],
-   [0.3, "kick_leftleg", 10, 45, arf_blend_in_1, 0, (0,-1.5,0)],
-   [0.3, "defend_shield_right", 5, 40, arf_blend_in_1, 0, (0,-1.5,0)],
-   [0.3, "kick_rightlegreverse", 5, 50, arf_blend_in_1, 0, (0,-1.5,0)],
-   [0.3, "right_swing", 5, 50, arf_blend_in_1, 0, (0,-1.5,0)],
+   [0.3, "kick_rightleg", 12, 33, arf_blend_in_1, 0, (0,-2,0)],
+   [0.3, "kick_leftleg", 10, 45, arf_blend_in_1, 0, (0,-2,0)],
+   [0.3, "defend_shield_right", 5, 40, arf_blend_in_1, 0, (0,-2,0)],
+   [0.3, "kick_rightlegreverse", 5, 50, arf_blend_in_1, 0, (0,-2,0)],
+   [0.3, "right_swing", 5, 50, arf_blend_in_1, 0, (0,-2,0)],
+ ],
+ 
+ ["shoot_lefthand", acf_enforce_all, amf_rider_rot_pistol|amf_priority_mount|amf_play|amf_accurate_body|amf_client_prediction,
+   [0.5, "left_shoot", 6, 7, arf_blend_in_0],
+ ],
+
+ ["double_shoot", acf_enforce_all, amf_rider_rot_pistol|amf_priority_mount|amf_play|amf_accurate_body|amf_client_prediction,
+   [0.5, "double_shoot", 5, 6, arf_blend_in_0],
+ ],
+ ["boss_jianta", acf_enforce_all, 570425439, 
+  [1, "boss_jianta", 0, 50, arf_blend_in_0, 0, (0, 0, 0), 0],
+ ],
+
+ ["boss_sutiao", acf_enforce_all|acf_displace_position, amf_priority_jump|amf_priority_continue|amf_priority_cancel|amf_accurate_body|amf_client_prediction|amf_play|amf_continue_to_next, 
+   [2, "boss_sutiao", 0, 28, arf_blend_in_1, 0, (0, 6, 0), 0],
+ ],
+
+ ["boss_sutiao_b", 0, amf_priority_continue|amf_play|amf_client_owner_prediction, 
+   [1, "boss_sutiao", 31, 50, arf_blend_in_0|arf_blend_in_1, 0, (0, 0, 0), 0],
+ ],
+
+ ["boss_tiaoyue", acf_enforce_all|acf_displace_position, amf_priority_jump|amf_priority_continue|amf_priority_cancel|amf_accurate_body|amf_client_prediction|amf_play|amf_continue_to_next, 
+   [2, "boss_tiaoyue", 0, 25, arf_blend_in_1, 0, (0, 20, 0), 0],
+ ],
+
+ ["boss_tiaoyue_b", 0, amf_priority_continue|amf_play|amf_client_owner_prediction, 
+   [1, "boss_tiaoyue", 30, 50, arf_blend_in_0|arf_blend_in_1, 0, (0, 0, 0), 0],
  ],
 
 #["fei", acf_enforce_lowerbody, amf_priority_jump|amf_play|amf_accurate_body|amf_keep|amf_client_prediction,
@@ -2308,13 +2345,13 @@ animations = [
  #["unused_human_anim_86", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  #["unused_human_anim_87", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  #["unused_human_anim_88", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_89", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_90", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_91", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_92", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_93", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_94", 0, 0, [1.0, "anim_human", 0, 1, 0]],
- ["unused_human_anim_95", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_89", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_90", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_91", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_92", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_93", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_94", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ #["unused_human_anim_95", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  ["unused_human_anim_96", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  ["unused_human_anim_97", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  ["unused_human_anim_98", 0, 0, [1.0, "anim_human", 0, 1, 0]],
@@ -2465,6 +2502,7 @@ animations = [
    [1.2, "plus_attacks_staff_butterfly", 1, 49, arf_blend_in_0|arf_blend_in_7], 
  ], 
 
+ 
 
 
  #["unused_horse_anim_1", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
@@ -2486,16 +2524,16 @@ animations = [
  #["unused_horse_anim_17", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
  #["unused_horse_anim_18", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
  #["unused_horse_anim_19", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_20", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_21", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_22", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_23", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_24", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_25", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_26", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_27", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_28", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
- ["unused_horse_anim_29", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
+ ["unused_horse_anim_20", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_21", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_22", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_23", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_24", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_25", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_26", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_27", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_28", 0, 0, [1.0, "anim_human", 0, 1, 0]],
+ ["unused_horse_anim_29", 0, 0, [1.0, "anim_human", 0, 1, 0]],
  ["unused_horse_anim_30", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
  ["unused_horse_anim_31", 0, 0, [1.0, "anim_horse", 0, 1, 0]],
  ["unused_horse_anim_32", 0, 0, [1.0, "anim_horse", 0, 1, 0]],

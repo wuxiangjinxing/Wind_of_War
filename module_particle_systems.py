@@ -1793,6 +1793,20 @@ particle_systems = [
      0                        #rotation damping
     ),
         
+  ("green_light_aura", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "copy_prt_shield",
+     30, 1, 120.0, 0.0, 0.0, 0.1,
+     (0, 0.25), (1, 0),          #alpha keys
+     (0.5, 0.0), (1, 0.0),      #red keys
+     (0.5, 1.0),(1, 0.0),       #green keys
+     (0.5, 0.0), (1, 0.0),      #blue keys
+     (0, 1.5),   (1.0, 1.5),   #scale keys
+     (0.0, 0.0, 0.0),
+     (0.0, 0.0, 0.0),
+     0,                         #emit dir randomness
+     0,                       #rotation speed
+     0                        #rotation damping
+    ),
+        
     ("stoneskin_aura", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_AT_FIELD_a",
      1, 1, 120.0, 0.0, 0.0, 0.1,
      (0.0, 1.0), (1.0, 1.0),
@@ -2449,6 +2463,100 @@ particle_systems = [
      0,
      0.5,
     ),
+
+    ("thunder2", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder2",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder3", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder3",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder4", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder4",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder5", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder5",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder6", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder6",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder7", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder7",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+    ("thunder8", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "thunder8",
+     1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1.0), (1, 0.3),        #alpha keys
+     (3.0, 1.0), (5, 1.0),      #red keys
+     (3.0, 1.0), (5, 1.0),      #green keys
+     (3.0, 1.0), (5, 1.0),      #blue keys
+     (0, 5),   (1, 1),        #scale keys
+     (1, 1, 0.2),                #emit box size
+     (0, 0, -10),               #emit velocity
+     0.0,                        #emit dir randomness
+     0,
+     0.5,
+    ),
+
+
 
     ("small_thunder", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_size, "copy_thunder",
      1, 0.1, 0, 0, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
@@ -3251,7 +3359,7 @@ particle_systems = [
      0,                        #emit dir randomness
     ),
 	
-	("dummy_stone", psf_randomize_size | psf_randomize_rotation,  "prt_mesh_stone_1",
+	("dummy_stone", psf_randomize_size | psf_randomize_rotation,  "stone_ball",
      500, 1, 5, 0.9, 10, 2,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
      (0.1, 1), (1, 1),          #alpha keys
      (0.1, 0.6), (1, 0.6),      #red keys
@@ -3265,7 +3373,7 @@ particle_systems = [
      0,                       #rotation damping
     ),
 	
-	("dummy_salt", psf_randomize_size | psf_randomize_rotation,  "prt_mesh_salt_1",
+	("dummy_salt", psf_randomize_size | psf_randomize_rotation,  "salt_a",
      500, 1, 3, 0.9, 10, 2,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
      (0.1, 1), (1, 1),          #alpha keys
      (0.1, 0.6), (1, 0.6),      #red keys
@@ -3360,13 +3468,13 @@ particle_systems = [
      30.0,                       #emit dir randomness
     ),
     
-     ("black_hold", psf_billboard_3d|psf_randomize_size|psf_randomize_rotation|psf_2d_turbulance, "arcane_hydra_spiral",
-     15, 0.8,  0.4, 0.05, 10.0, 39.0, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     ("black_hold", psf_billboard_2d|psf_randomize_size|psf_randomize_rotation|psf_2d_turbulance, "black_aura",
+     2, 2,  0.4, 0.05, 10.0, 39.0, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
      (0.3, 1.0), (1, 0.3),        #alpha keys
      (1.0, 1.0), (1, 1.0),      #red keys
      (1.0, 1.0), (1, 1.0),      #green keys
      (1.0, 1.0), (1, 1.0),      #blue keys
-     (0.5, 30),   (1.0, 3.7),   #scale keys
+     (0.5, 30),   (2, 10),   #scale keys
      (0.2, 0.4, 0.1),           #emit box size
      (0, 0, 1),                 #emit velocity
      2,                         #emit dir randomness
@@ -3429,12 +3537,12 @@ particle_systems = [
     ),  
 
     ("fat_arrow", psf_always_emit|psf_billboard_2d|psf_global_emit_dir, "arrow_up_rot",
-     100, 0.2, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
-     (0.0, 0.7), (1.0, 0.7),          #alpha keys
+     10, 0.1, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.0, 0.6), (1.0, 0.7),          #alpha keys
      (0.0, 0.0), (1.0, 0.0),      #red keys
      (0.0, 1.0), (1.0, 1.0),       #green keys
      (0.0, 0.0), (1.0, 0.0),      #blue keys
-     (0, 30),    (1.0, 30.0),        #scale keys
+     (0, 20),    (1.0, 10.0),        #scale keys
      (0.0, 0.0, 0.0),           #emit box size
      (0.0, 0.0, 0.0),                 #emit velocity
      0.0,                       #emit dir randomness
@@ -3443,12 +3551,12 @@ particle_systems = [
     ),
     
     ("fat_arrow_red", psf_always_emit|psf_billboard_2d|psf_global_emit_dir, "arrow_up_rot",
-     50, 0.2, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     10, 0.1, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
      (0.0, 1.0), (1.0, 0.3),          #alpha keys
      (0.0, 1.0), (1.0, 1.0),      #red keys
      (0.0, 0.0), (1.0, 0.0),       #green keys
      (0.0, 0.0), (1.0, 0.0),      #blue keys
-     (0, 30),    (1.0, 30.0),        #scale keys
+     (0, 10),    (1.0, 10),        #scale keys
      (0.0, 0.0, 0.0),           #emit box size
      (0.0, 0.0, 0.0),                 #emit velocity
      0.0,                       #emit dir randomness
@@ -3462,7 +3570,7 @@ particle_systems = [
      (0.0, 0.0), (1.0, 0.0),      #red keys
      (0.0, 0.0), (1.0, 0.0),       #green keys
      (0.0, 1.0), (1.0, 1.0),      #blue keys
-     (0, 30),    (1.0, 30.0),        #scale keys
+     (0, 10),    (1.0, 10.0),        #scale keys
      (0.0, 0.0, 0.0),           #emit box size
      (0.0, 0.0, 0.0),                 #emit velocity
      0.0,                       #emit dir randomness
@@ -3471,7 +3579,7 @@ particle_systems = [
     ),
     
     ("fat_arrow_rising", psf_always_emit|psf_billboard_2d|psf_global_emit_dir, "arrow_up_rot",
-     100, 3, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     100, 0.1, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
      (0.0, 0.7), (1.0, 0.7),          #alpha keys
      (0.25, 0.0), (1, 1.0),      #red keys
      (0.0, 1.0),(0.5, 0.0),       #green keys
@@ -3484,6 +3592,1531 @@ particle_systems = [
      0
     ),
 
+("fire_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_fire_1",
+550, 0.55, -0.70, -0.05, 0.02, 0.02,
+(0.50, 1.00), (1.00, 0.00),
+(0.50, 1.00), (1.00, 0.90),
+(0.50, 0.70), (1.00, 0.30),
+(0.50, 0.20), (1.00, 0.00),
+(0.20, 0.05), (0.30, 0.20),
+(0.06, 0.48, 0.06),
+(0.00, 0.00, 0.00),
+0.20,
+50.00,
+0.50
+),
+("fire_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d, "prt_sparks_mesh_1",
+400, 0.70, 0.30, -0.20, 0.10, 10.00,
+(0.10, 0.80), (1.00, 0.00),
+(0.50, 1.00), (1.00, 0.90),
+(0.50, 0.60), (1.00, 0.10),
+(0.50, 0.20), (1.00, 0.00),
+(0.10, 0.05), (1.00, 0.05),
+(0.02, 0.45, 0.02),
+(0.00, 0.00, 0.00),
+0.10,
+0.00,
+0.00
+),
+("fire_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_fire_1",
+220, 0.55, -0.70, -0.05, 0.02, 0.02,
+(0.50, 1.00), (1.00, 0.00),
+(0.50, 1.00), (1.00, 0.90),
+(0.50, 0.70), (1.00, 0.30),
+(0.50, 0.20), (1.00, 0.00),
+(0.20, 0.05), (0.30, 0.20),
+(0.05, 0.05, 0.05),
+(0.00, 0.00, 0.00),
+0.20,
+50.00,
+0.50
+),
+("fire_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d, "prt_sparks_mesh_1",
+300, 0.70, 0.30, -0.20, 0.10, 10.00,
+(0.10, 0.80), (1.00, 0.00),
+(0.50, 1.00), (1.00, 0.90),
+(0.50, 0.60), (1.00, 0.10),
+(0.50, 0.20), (1.00, 0.00),
+(0.10, 0.05), (1.00, 0.05),
+(0.08, 0.08, 0.08),
+(0.00, 0.00, 0.00),
+0.10,
+0.00,
+0.00
+),
+("frost_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(0.00, 0.40), (0.90, 0.45),
+(0.00, 0.40), (0.90, 0.45),
+(0.00, 0.90), (1.00, 1.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.51, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("frost_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001000, 0.001000, 0.001000,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 0.70), (1.00, 0.80),
+(0.00, 0.70), (1.00, 0.80),
+(0.00, 0.90), (1.00, 1.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.52, 0.17),
+(0.00, 0.00, 0.00),
+0.000200,
+50.00,
+0.50
+),
+("frost_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+225, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(0.00, 0.40), (0.90, 0.45),
+(0.00, 0.40), (0.90, 0.45),
+(0.00, 0.90), (1.00, 1.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.04, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("frost_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001000, 0.001000, 0.001000,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 0.70), (1.00, 0.80),
+(0.00, 0.70), (1.00, 0.80),
+(0.00, 0.90), (1.00, 1.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.17, 0.17),
+(0.00, 0.00, 0.00),
+0.000200,
+50.00,
+0.50
+),
+("curse_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(0.00, 1.80), (1.00, 1.80),
+(0.00, 0.30), (1.00, 0.30),
+(0.00, 1.10), (1.00, 1.10),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.51, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("curse_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001000, 0.001000, 0.001000,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 1.80), (1.80, 1.80),
+(0.00, 0.30), (0.30, 0.30),
+(0.00, 1.10), (1.10, 1.10),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.52, 0.17),
+(0.00, 0.00, 0.00),
+0.000200,
+50.00,
+0.50
+),
+("curse_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+220, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(0.00, 1.80), (1.00, 1.80),
+(0.00, 0.30), (1.00, 0.30),
+(0.00, 1.10), (1.00, 1.10),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.04, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("curse_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001000, 0.001000, 0.001000,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 1.80), (1.80, 1.80),
+(0.00, 0.30), (0.30, 0.30),
+(0.00, 1.10), (1.10, 1.10),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.17, 0.17),
+(0.00, 0.00, 0.00),
+0.000200,
+50.00,
+0.50
+),
+("poison_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+200, 0.70, 5.20, 0.00, 0.00, 0.00,
+(0.00, 0.60), (1.00, 0.00),
+(0.00, 0.45), (1.00, 0.45),
+(0.00, 0.90), (1.00, 1.00),
+(0.00, 0.30), (1.00, 0.30),
+(0.01, 0.70), (1.00, 1.10),
+(0.01, 0.47, 0.01),
+(0.00, 0.00, 0.00),
+0.10,
+10.00,
+0.50
+),
+("poison_enchantment_2", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_fire_1",
+300, 0.50, 0.50, -0.00, 0.00, 0.00,
+(0.00, 0.20), (1.00, 0.00),
+(0.00, 0.40), (1.00, 0.40),
+(0.00, 0.90), (1.00, 1.00),
+(0.00, 0.30), (1.00, 0.30),
+(1.00, 0.20), (0.01, 0.20),
+(0.01, 0.47, 0.01),
+(0.00, 0.00, 0.00),
+0.000100,
+1000.00,
+0.001000
+),
+("poison_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d, "prt_sparks_mesh_1",
+2, 4.00, 0.50, 0.00, 0.10, 1.00,
+(0.10, 0.80), (1.00, 0.00),
+(0.10, 0.50), (1.00, 0.60),
+(0.00, 1.00), (1.00, 1.00),
+(0.10, 0.00), (0.50, 0.10),
+(0.10, 0.05), (1.00, 0.07),
+(0.11, 0.55, 0.11),
+(0.00, 0.00, 0.00),
+0.000200,
+0.00,
+0.00
+),
+("poison_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+200, 0.70, 5.20, 0.00, 0.00, 0.00,
+(0.00, 0.60), (1.00, 0.00),
+(0.00, 0.45), (1.00, 0.45),
+(0.00, 0.90), (1.00, 1.00),
+(0.00, 0.30), (1.00, 0.30),
+(0.01, 0.70), (1.00, 1.10),
+(0.02, 0.02, 0.02),
+(0.00, 0.00, 0.00),
+0.10,
+10.00,
+0.50
+),
+("poison_enchantment_2_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_fire_1",
+300, 0.50, 0.50, -0.00, 0.00, 0.00,
+(0.00, 0.20), (1.00, 0.00),
+(0.00, 0.40), (1.00, 0.40),
+(0.00, 0.90), (1.00, 1.00),
+(0.00, 0.30), (1.00, 0.30),
+(1.00, 0.20), (0.01, 0.20),
+(0.02, 0.02, 0.02),
+(0.00, 0.00, 0.00),
+0.000100,
+1000.00,
+0.001000
+),
+("poison_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d, "prt_sparks_mesh_1",
+2, 4.00, 0.50, 0.00, 0.10, 1.00,
+(0.10, 0.80), (1.00, 0.00),
+(0.10, 0.50), (1.00, 0.60),
+(0.00, 1.00), (1.00, 1.00),
+(0.10, 0.00), (0.50, 0.10),
+(0.10, 0.05), (1.00, 0.07),
+(0.11, 0.11, 0.11),
+(0.00, 0.00, 0.00),
+0.000200,
+0.00,
+0.00
+),
+("holy_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(1.00, 1.00), (1.00, 255.00),
+(1.00, 1.00), (1.00, 255.00),
+(1.00, 1.00), (1.00, 255.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.51, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("holy_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001000, 0.001000, 0.001000,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.90), (1.00, 255.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.52, 0.17),
+(0.00, 0.00, 0.00),
+0.000200,
+50.00,
+0.50
+),
+("holy_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(1.00, 1.00), (1.00, 255.00),
+(1.00, 1.00), (1.00, 255.00),
+(1.00, 1.00), (1.00, 255.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.05, 0.05, 0.05),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("holy_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001, 0.001, 0.001,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.90), (1.00, 255.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.17, 0.17),
+(0.00, 0.00, 0.00),
+0.200,
+50.00,
+0.50
+),
+("vampire_enchantment", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(1.00, 1.00), (1.00, 1.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.04, 0.51, 0.04),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("vampire_enchantment_sparks", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001, 0.001, 0.001,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 1.00), (1.00, 1.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.52, 0.17),
+(0.00, 0.00, 0.00),
+0.200,
+50.00,
+0.50
+),
+("vampire_enchantment_mace", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prtcl_dust_a",
+550, 0.80, 0.20, 0.01, 0.20, 0.20,
+(0.10, 0.75), (1.00, 0.00),
+(1.00, 1.00), (1.00, 1.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.00, 0.00), (0.00, 0.00),
+(0.01, 0.40), (1.00, 0.90),
+(0.05, 0.05, 0.05),
+(0.00, 0.00, 0.00),
+0.03,
+10.00,
+0.50
+),
+("vampire_enchantment_sparks_mace", psf_always_emit|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_snow_fall_1",
+13, 4.10, -0.03, 0.001, 0.001, 0.001,
+(0.10, 0.80), (1.00, 0.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.70), (1.00, 255.00),
+(0.00, 0.90), (1.00, 255.00),
+(0.10, 0.10), (1.00, 0.15),
+(0.17, 0.17, 0.17),
+(0.00, 0.00, 0.00),
+0.200,
+50.00,
+0.50
+),
+
+    ("explosion_1_cloud", psf_billboard_3d|psf_global_emit_dir|psf_always_emit|psf_randomize_rotation|psf_randomize_size, "prt_mesh_smoke_1",
+     50, 5, 12, -0.6, 2, 2, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 0.75), (1, 0),          #alpha keys
+     (0.0, 0.7), (1, 0.5),      #red keys
+     (0.0, 0.7),(1, 0.5),      #green keys
+     (0.0, 0.7), (1, 0.5),     #blue keys
+     (0, 1.5),   (0.2, 12),        #scale keys
+     (0.01, 0.01, 0.01),                 #emit box size
+     (0, 0, 2.2),               #emit velocity
+     0.1,                        #emit dir randomness
+    ),
+
+("portal1", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "portal1",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.30),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("portal2", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "portal2",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.30),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("portal3", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "portal3",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.30),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("portal4", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "portal4",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.30),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("portal5", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "portal5",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.30),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("teleport", psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size|psf_2d_turbulance, "prt_mesh_dust_10",
+1, 0.50, 10, 0.05, 10, 39,
+(0.30, 1), (1, 0.30),
+(0, 0), (0, 0),
+(0, 0), (0, 0),
+(1, 0.3), (5, 4),
+(0.50, 3), (1, 3.70),
+(0.20, 0.40, 0.10),
+(0, 0, 1),
+2,
+0,
+0
+),
+
+("iceexplode1", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode1",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode2", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode2",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode3", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode3",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode4", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode4",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode5", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode5",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode6", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "iceexplode6",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("iceexplode", psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size|psf_2d_turbulance, "prt_mesh_dust_10",
+1, 0.50, 10, 0.05, 10, 39,
+(0.30, 1), (1, 0.0),
+(1, 1), (1, 1),
+(1, 1), (1, 1),
+(1, 1), (1, 1),
+(0.50, 3), (1, 3.70),
+(0.20, 0.40, 0.10),
+(0, 0, 1),
+2,
+0,
+0
+),
+
+("earthexplode1", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode1",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("earthexplode2", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode2",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("earthexplode3", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode3",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("earthexplode4", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode4",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("earthexplode5", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode5",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("earthexplode6", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "earthexplode6",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("mentalstrike", psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size|psf_2d_turbulance, "prt_mesh_dust_10",
+1, 0.50, 10, 0.05, 10, 39,
+(0.30, 1), (1, 0.0),
+(0.50, 0.70), (1, 0.30),
+(0.50, 1), (1, 0.90),
+(0.50, 0.70), (1, 0.30),
+(0.50, 3), (1, 3.70),
+(0.20, 0.40, 0.10),
+(0, 0, 1),
+2,
+0,
+0
+),
+("arcanerift1", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "arcanerift1",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("arcanerift2", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "arcanerift2",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("arcanerift3", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "arcanerift3",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+
+("yellow_aura", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_size, "yellow_aura",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(0, 5), (1, 1),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("black_aura", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_size, "black_aura",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(0, 5), (1, 1),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("green_strike", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_size, "green_strike",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(0, 5), (1, 1),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("blood_strike", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_size, "blood_strike",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(0, 5), (1, 1),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("mana_strike", psf_billboard_3d|psf_2d_turbulance, "mana_strike",
+1, 0.40, 0, 0, 0, 0,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(0, 0, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+("green_strike_massive", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "green_strike_massive",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+
+("blood_strike_massive", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "blood_strike_massive",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+
+("mana_strike_massive", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "mana_strike_massive",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+
+("fireexplode1", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode1",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode2", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode2",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode3", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode3",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode4", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode4",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode5", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode5",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode6", psf_billboard_3d|psf_randomize_size|psf_2d_turbulance, "fireexplode6",
+1, 1, 10, 0, 7, 7,
+(0.30, 1), (1, 0.0),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(3, 1), (5, 1),
+(1, 0.3), (5, 4),
+(1, 1, 0.20),
+(0, 0, -10),
+2,
+0,
+0
+),
+("fireexplode", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "fireexplode6",
+1, 0.50, 10, 0.05, 10, 39,
+(0.30, 1), (1, 0.0),
+(0.50, 1), (1, 0.90),
+(0.50, 0.70), (1, 0.30),
+(0.50, 0.20), (1, 0),
+(0.50, 3), (1, 3.70),
+(0.20, 0.40, 0.10),
+(0, 0, 1),
+2,
+0,
+0
+),
+
+     ("mana_tempest", psf_billboard_3d|psf_randomize_size|psf_randomize_rotation|psf_2d_turbulance, "arcanerift1",#prt_mesh_dust_1prt_mesh_fire_1
+     5, 2,  10, 0.05, 7, 7, #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.3, 1), (1, 0.3),        #alpha keys
+     (3.0, 1), (5, 1),      #red keys
+     (3.0, 1), (5, 1),       #green keys
+     (3.0, 1), (5, 1),      #blue keys
+     (0.0, 0.1),(3, 5),  #scale keys
+     (10.0, 4.0, 3.0),           #emit box size
+     (0, 0, -10),               #emit velocity
+     0.5,                       #emit dir randomness
+     130,                       #rotation speed
+     0.5                        #rotation damping
+    ),  
+
+("gold_beam_medium", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_spellsphere",
+1, 1, 0, 0, 0, 0,
+(0.5, 0.10), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0.73), (1, 0.658),
+(0, 0), (1, 0),
+(0, 6.0), (1, 8.0),
+(0, 0, 0),
+(0, 0, 0),
+0,
+100,
+0.5
+),
+
+("light_beam_medium", psf_billboard_3d, "prt_spellsphere",
+5, 1, 0, 0, 0, 0,
+(0.5, 0.20), (1, 0),
+(0, 0.992), (1, 0.992),
+(0, 0.87), (1, 0.73),
+(0, 0.407), (1, 0.407),
+(0, 2.0), (1, 8.0),
+(0, 0, 0),
+(0, 0, 0),
+0,
+100,
+0.5
+),
+
+("bironas_timewarp_oncaster_1", psf_billboard_3d, "prt_spellsphere",
+1, 2, 0, 0, 0, 0,
+(0.5, 0.10), (1, 0),
+(0, 1.0), (1, 0),
+(0, 0.92), (1, 0.72),
+(0, 0.60), (1, 0.60),
+(0.1, 4.0), (1, 40),
+(0.2, 0.2, 0.2),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("bironas_timewarp_buff", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_buff_13",
+2, 0.8, 0, 0, 0, 0,
+(0.2, 0.50), (1, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0.1, 0.40), (1, 3.0),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+("bironas_timewarp_buff_burst", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_clock",
+1, 1.5, 0, 0, 0, 0,
+(0.1, 1.0), (1, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0.1, 0.90), (1, 2.0),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+
+("wind_of_death", psf_billboard_3d, "prt_spellsphere",
+1, 0.6, 0, 0, 0, 0,
+(0.1, 0.30), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0), (1, 0),
+(0, 0), (1, 0),
+(0, 1.0), (1, 80),
+(0, 0, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("banishment_onimpact", psf_global_emit_dir|psf_billboard_2d, "prt_spellpyramid",
+1, 1.8, 0, 0, 0, 0,
+(0.1, 0.80), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0, 9.0), (1, 10),
+(0, 0, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("arcanebanishment_onimpact_1", psf_global_emit_dir|psf_billboard_2d, "prt_spellpyramid",
+1, 1.8, 0, 0, 0, 0,
+(0.1, 0.80), (1, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0, 9.0), (1, 10.0),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+("arcanebanishment_onimpact_2", psf_global_emit_dir|psf_billboard_2d, "prt_spellpyramid",
+1, 1.8, 0, 0, 0, 0,
+(0.1, 0.80), (1, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0, 9.0), (1, 10.0),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+
+("banishment", psf_billboard_3d, "prt_spellsphere",
+1, 0.6, 0, 0, 0, 0,
+(0.1, 0.30), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0.80), (1, 0.76),
+(0, 0), (1, 0),
+(0, 1.0), (1, 80),
+(0, 0, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+("banishment_onagent_lightning", psf_always_emit|psf_global_emit_dir|psf_billboard_2d|psf_randomize_rotation, "prt_sparks_mesh_1",
+1, 0.8, 0, 0, 0, 0,
+(0.5, 0.10), (1, 0.70),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.80),
+(0, 0.60), (1, 0.60),
+(0, 1.0), (1, 1.0),
+(0.3, 0.3, 0.3),
+(0, 0, 0),
+0,
+0,
+0
+),
+("banishment_onimpact_sparkles", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_rotation, "prt_Halo_a",
+100, 0.6, 0, 0.7, 50, 40,
+(0.5, 1.0), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0.92), (1, 0.90),
+(0, 0.60), (1, 0.60),
+(0.1, 2.0), (1, 2.0),
+(0, 0, 0),
+(0.2, 0.2, 0.2),
+100,
+0,
+0
+),
+
+("net_of_amyntok", psf_always_emit, "propspell_netofamyntok",
+1, 2., 0, 0.1, 0, 0,
+(0, 1.0), (1, 0.0),
+(0, 1.0), (1, 0.862),
+(0, 1.0), (1, 0.607),
+(0, 1.0), (1, 0.035),
+(0.1, 3.50), (0.5, 1.70),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+
+("phas_protection_oncaster", psf_always_emit|psf_turn_to_velocity, "prt_phasprotection",
+100, 3., 0.2, 0, 0, 0,
+(0, 1.0), (1, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 1.0), (1, 1.0),
+(0, 1.0), (1, 1.0),
+(0, 2.0), (1, 6.0),
+(0, 0, 0),
+(5, 0, 0),
+0,
+0,
+0
+),
+
+("tempest_oncaster", psf_always_emit|psf_turn_to_velocity, "prt_phasprotection",
+100, 3., 0.2, 0, 0, 0,
+(0, 1.0), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 1.0), (1, 1.0),
+(0, 1.0), (1, 1.0),
+(0, 2.0), (1, 6.0),
+(0, 0, 0),
+(5., 0, 0),
+0,
+0,
+0
+),
+
+("poison_icon", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_poison",
+1, 1, 0, 0, 0, 0,
+(0.1, 0.90), (1, 0),
+(0, 0), (1, 0),
+(0, 0.90), (1, 0.90),
+(0, 0.10), (1, 0.10),
+(0.1, 1.50), (1, 2.0),
+(1, 1, 1.0),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("beastmen_icon", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_beasticon",
+1, 1.5, 0, 0, 0, 0,
+(0.0, 1.0), (1.0, 0.0),
+(0.0, 1.0), (1.0, 1.0),
+(0.0, 1.0), (1.0, 1.0),
+(0.0, 1.0), (1.0, 1.0),
+(0.1, 4.0), (1.0, 4.0),
+(1.0, 1.0, 1.0),
+(0.0, 0.0, 0.0),
+0.0,
+0.0,
+0.0
+),
+
+("harmonic_convergence", psf_always_emit|psf_global_emit_dir, "prt_harmonic",
+10, 2.0, 0.0, 0.0, 0.0, 0.0,
+(0.2, 0.5), (1.0, 0.0),
+(0.0, 0.556), (1.0, 0.556),
+(0.0, 0.878), (1.0, 0.878),
+(0.0, 0.941), (1.0, 0.941),
+(0.0, 6.0), (1.0, 0.1),
+(0.0, 0.0, 0.2),
+(0.0, 0.0, 0.0),
+0.0,
+0.0,
+0.0
+),
+("harmonic_grey", psf_always_emit|psf_global_emit_dir, "prt_harmonic",
+10, 2.0, 0.0, 0.0, 0.0, 0.0,
+(0.2, 0.5), (1.0, 0.0),
+(0.0, 0.25), (1.0, 0.25),
+(0.0, 0.25), (1.0, 0.25),
+(0.0, 0.25), (1.0, 0.25),
+(0.0, 6.0), (1.0, 0.1),
+(0.0, 0.0, 0.2),
+(0.0, 0.0, 0.0),
+0.0,
+0.0,
+0.0
+),
+
+("gift_of_the_spider_god_1", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_poison",
+5, 2., 0, 0, 0, 0,
+(0.1, 0.80), (1, 0),
+(0, 0), (1, 0),
+(0, 0.90), (1, 0.90),
+(0, 0.10), (1, 0.10),
+(0.1, 0.80), (1, 1.20),
+(0.3, 0.3, 0.30),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("golden_rays", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+1, 2., 0, 0, 0, 0,
+(0.5, 1.0), (1, 0),
+(0, 0.976), (1, 1.0),
+(0, 0.749), (1, 0.713),
+(0, 0.203), (1, 0.019),
+(0.1, 0.30), (1, 0.30),
+(0.6, 0.6, 0),
+(0, 0, 1.40),
+0,
+0,
+0
+),
+
+
+("transmutation_circle_ray_vertical", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+25, 2, 0, 0, 0, 0,
+(0.5, 1.0), (1, 0),
+(0, 0.976), (1, 1.0),
+(0, 0.749), (1, 0.713),
+(0, 0.203), (1, 0.019),
+(0.1, 3.0), (1, 3.0),
+(8, 8, 0),
+(0, 0, 7.30),
+0,
+0,
+0
+),
+("transmutation_circle_ray_vertical_grey", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+15, 1, 0, 0, 0, 0,
+(0.5, 1.0), (1, 0),
+(0, 0.545), (1, 0.69),
+(0, 0.537), (1, 0.69),
+(0, 0.537), (1, 0.69),
+(0.1, 0.25), (1, 0.25),
+(0.6, 0.6, 0),
+(0, 0, 0.40),
+0,
+0,
+0
+),
+
+("green_up_rays", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+20, 2, 1.2, -0.5, 0, 0,
+(0.5, 0.50), (1, 0),
+(0, 0.25), (1, 0.25),
+(0, 0.25), (1, 0.25),
+(0, 0.25), (1, 0.25),
+(0.1, 1.0), (1, 1.0),
+(1, 1, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+("jade_beam_medium", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+10, 2, 1.2, -0.5, 0, 0,
+(0.5, 0.70), (1, 0),
+(0, 0.098), (1, 0.027),
+(0, 0.501), (1, 0.69),
+(0, 0.239), (1, 0.258),
+(0.1, 1.0), (1, 1.0),
+(1, 1, -1),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("red_up_rays", psf_always_emit|psf_global_emit_dir|psf_billboard_2d, "prt_ray_particle",
+20, 2, 1.2, -0.5, 0, 0,
+(0.5, 0.50), (1, 0),
+(0, 1.0), (1, 1.0),
+(0, 0), (1, 0),
+(0, 0), (1, 0),
+(0.1, 1.0), (1, 1.0),
+(1, 1, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+("sneaky_stabbin", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "prt_ray3",
+10, 1, 0, 0.01, 0, 0,
+(0.1, 0.20), (1, 0),
+(0, 0), (1, 0.698),
+(0, 0.90), (1, 0.941),
+(0, 0.10), (1, 0.298),
+(0.1, 0.30), (1, 0.90),
+(0.8, 0.01, 0.01),
+(0, 0, 0),
+0,
+0,
+0
+),
+
+
+    ("propspell_transmutation_circle_lead", psf_billboard_3d|psf_global_emit_dir, "propspell_transmutation_circle_lead",
+     1, 5.0, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+
+    ("propspell_transmutation_circle_lead", psf_billboard_3d|psf_global_emit_dir, "propspell_transmutation_circle_lead",
+     1, 5.0, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("propspell_transmutation_circle", psf_billboard_3d|psf_global_emit_dir, "propspell_transmutation_circle",
+     1, 5.0, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    
+    
+    ("propspell_vinecage", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_vinecage",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("propspell_sword3", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_sword3",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("propspell_sword2", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_sword2",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("propspell_sword1", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_sword1",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("propspell_runecage1", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_runecage1",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    
+    ("propspell_netofamyntok", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_netofamyntok",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    
+    ("propspell_netofslaanesh", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "propspell_netofamyntok",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 1), (1, 1),      #red keys
+     (0.0, 0),(1, 0),       #green keys
+     (0.0, 0.45), (1, 0.45),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+
+    ("pvengeful_hood", psf_always_emit|psf_billboard_3d|psf_global_emit_dir, "prt_vengeful_hood",
+     10, 1, 120.0, 0.0, 0.0, 0.1,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0, 1.0), (1, 1.0),          #alpha keys
+     (0.0, 0), (1, 0),      #red keys
+     (0.0, 0), (1, 0),       #green keys
+     (0.0, 0), (1, 0),      #blue keys
+     (0, 1),   (1.0, 1),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0, 0, 0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+
+
+    ("magic_circle_1", psf_always_emit|psf_billboard_2d|psf_global_emit_dir|psf_turn_to_velocity, "prt_transmutation_circle_1",
+     10, 0.1, 0.0, 0.0, 0.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.0, 0.7), (1.0, 0.7),          #alpha keys
+     (0.0, 0.0), (1.0, 0.0),      #red keys
+     (0.0, 0.0), (1.0, 0.0),       #green keys
+     (0.0, 0.0), (1.0, 0.0),      #blue keys
+     (0, 10),    (1.0, 10.0),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0.0, 0.0, 0.0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+
+    ("magic_circle_2", psf_always_emit|psf_billboard_2d|psf_global_emit_dir|psf_turn_to_velocity, "prt_transmutation_circle_2",
+     10, 0.1, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.0, 0.7), (1.0, 0.7),          #alpha keys
+     (0.0, 0.0), (1.0, 0.0),      #red keys
+     (0.0, 0.0), (1.0, 0.0),       #green keys
+     (0.0, 0.0), (1.0, 0.0),      #blue keys
+     (0, 10),    (1.0, 10.0),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0.0, 0.0, 0.0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("magic_circle_3", psf_always_emit|psf_billboard_2d|psf_global_emit_dir|psf_turn_to_velocity, "prt_transmutation_circle_3",
+     10, 0.1, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.0, 0.7), (1.0, 0.7),          #alpha keys
+     (0.0, 0.0), (1.0, 0.0),      #red keys
+     (0.0, 0.0), (1.0, 0.0),       #green keys
+     (0.0, 0.0), (1.0, 0.0),      #blue keys
+     (0, 10),    (1.0, 10.0),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0.0, 0.0, 0.0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+    ("magic_circle_4", psf_always_emit|psf_billboard_2d|psf_global_emit_dir|psf_turn_to_velocity, "prt_transmutation_circle_4",
+     10, 0.1, 0.0, 0.0, 100.0, 0.0,     #num_particles, life, damping, gravity_strength, turbulance_size, turbulance_strength
+     (0.0, 0.7), (1.0, 0.7),          #alpha keys
+     (0.0, 0.0), (1.0, 0.0),      #red keys
+     (0.0, 0.0), (1.0, 0.0),       #green keys
+     (0.0, 0.0), (1.0, 0.0),      #blue keys
+     (0, 10),    (1.0, 10.0),        #scale keys
+     (0.0, 0.0, 0.0),           #emit box size
+     (0.0, 0.0, 0.0),                 #emit velocity
+     0.0,                       #emit dir randomness
+     0,
+     0
+    ),
+
+("transmutation_lead", psf_always_emit|psf_global_emit_dir|psf_billboard_3d, "transmutation_lead",
+1, 3, 0, 0, 0, 0,
+(0.1, 1.0), (2, 0.0),
+(0, 1.0), (1, 1.0),
+(0, 0.0), (1, 0.0),
+(0, 0.0), (1, 0.0),
+(0.1, 0.90), (3, 2.0),
+(0, 0, 0),
+(0, 0, 0),
+0,
+0,
+0
+),
+("tzeentch_beam_medium", psf_always_emit|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_spellsphere_big",
+10, 0.3, 0.1, 0, 0, 0,
+(0.5, 1.0), (1.00, 0.0),
+(0.0, 0.02), (1.0, 0.02),
+(0.0, 0.87), (1.0, 0.87),
+(0.0, 0.93), (1.0, 0.93),
+(0.0, 1.50), (1.0, 1.80),
+(0.3, 0.30, 0.20),
+(0.0, 0.0, -2.00),
+0.0,
+100.0,
+0.5
+),
+
+("net_of_slaanesh", psf_always_emit, "propspell_netofamyntok",
+1, 2., 0, 0.1, 0, 0,
+(0.5, 0.8), (1.0, 0.0),
+(0.0, 1.0), (1.0, 1.0),
+(0.0, 0.0), (1.0, 0.0),
+(0.0, 0.45), (1.0, 0.45),
+(0.1, 3.50), (0.5, 1.70),
+(0, 0, 0.0),
+(0, 0, 0.0),
+0,
+0,
+0.0
+),
+
+("massive_fire_pink", psf_always_emit|psf_global_emit_dir|psf_billboard_3d|psf_randomize_rotation|psf_randomize_size, "prt_mesh_fire_1",
+50, 2.0, 0.0, -1.3, 10.0, 0.0,
+(0.5, 0.5), (1.0, 0.0),
+(0.0, 1.0), (1.0, 1.0),
+(0.0, 0.2), (1.0, 0.2),
+(0.0, 0.6), (1.0, 0.6),
+(0.0, 6.0), (1.0, 15.),
+(3.0, 3.0, 0.2),
+(0.0, 0.0, 0.4),
+0.1,
+250.0,
+0.5
+),
+
+("dummy_stone_boss", psf_randomize_rotation|psf_randomize_size, "prt_mesh_stone_1",
+70, 0.1, 2, 0.9, 100, 2,
+(0.1, 1), (1, 1),
+(0.1, 0.6), (1, 0.6),
+(0.1, 0.5), (1, 0.5),
+(0.1, 0.4), (1, 0.4),
+(0, 0.3), (1, 0.3),
+(2.8, 2.8, 1),
+(0, 0, 0),
+2.3,
+200,
+0
+),
+("dummy_smoke_boss", psf_billboard_3d|psf_randomize_size, "prt_mesh_dust_1",
+50, 0.1, 15, -0.05, 100, 0.2,
+(0.1, 0.5), (1, 0),
+(0.1, 0.3), (1, 0.3),
+(0.1, 0.2), (1, 0.2),
+(0.1, 0.1), (1, 0.2),
+(0, 0.7), (1, 2.2),
+(2.8, 2.8, 1),
+(0, 0, 0.05),
+2,
+10,
+0.1
+),
 
 ]
 # modmerger_start version=201 type=2

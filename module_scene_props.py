@@ -3249,6 +3249,311 @@ scene_props = [
   
   ("bomb_blast", 0, "Trap", "0", []),
   ("trap", 0, "Trap", "0", []),
+  
+  ("dummy_lightning_burst", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_spark_explosion",pos6),
+    ]),
+  ]),
+  ("dummy_incediary_cloud", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_incediary_cloud",pos6),
+    ]),
+  ]),
+  ("dummy_black_hold", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_black_hold",pos6),
+    ]),
+  ]),
+  ("dummy_mana_tempest", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_mana_tempest",pos6),
+    ]),
+  ]),
+  ("dummy_death_cloud", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_death_cloud",pos6),
+    ]),
+  ]),
+  ("dummy_Frost_cloud", sokf_moveable, "0", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (prop_instance_get_position, pos6, ":instance_no"),
+        (position_move_z,pos6,200),
+        (particle_system_add_new, "psys_Ice_Storm",pos6),
+    ]),
+  ]),
+  
+  ("beam_emitter_transmutationcircle", sokf_moveable, "propspell_transmutation_circle", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (set_position_delta, 0, 0, 100),
+        (particle_system_add_new, "psys_transmutation_circle_ray_vertical"),
+        (scene_prop_fade_out, ":instance_no", 5),
+    ]),
+  ]),
+  
+  ("propspell_scythe", sokf_moveable, "propspell_scythe", "0", [
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (set_fixed_point_multiplier, 1),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (copy_position, pos2, pos1),
+        (position_rotate_x, pos2, -90),
+        (prop_instance_animate_to_position, ":instance_no", pos2, 150),
+        (scene_prop_fade_out, ":instance_no", 4),
+    ]),
+  ]),
+  #blue
+  ("propspell_forcefield1", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_forcefield1", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+#yellow
+  ("propspell_forcefield2", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_forcefield2", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  #red
+  ("propspell_forcefield3", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_forcefield3", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  #green
+  ("propspell_forcefield4", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_forcefield4", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+
+  ("propspell_forcefield5", sokf_dynamic|sokf_destructible|sokf_moveable, "prt_vengeful_hood", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+#green
+  ("propspell_vinecage", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_vinecage", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (set_position_delta, 0, 0, 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+#blue
+  ("propspell_sword1", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_sword1", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  
+#black
+  ("propspell_sword2", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_sword2", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (set_position_delta, 0, 0, 100),
+
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  
+#red
+  ("propspell_sword3", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_sword3", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        (set_position_delta, 0, 0, 100),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  
+  ("propspell_runecage1", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_runecage1", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  
+  ("propspell_netofamyntok", sokf_dynamic|sokf_destructible|sokf_moveable, "propspell_netofamyntok", "0", [
+    (ti_on_scene_prop_destroy,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_visibility, ":instance_no", 0),
+        (scene_prop_set_prune_time, ":instance_no", 1),
+        (scene_prop_fade_out, ":instance_no"),
+    ]),    
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (scene_prop_set_hit_points, ":instance_no", 10),
+        #(agent_set_attached_scene_prop, "$agenttoattach", ":instance_no"),
+        (store_mission_timer_a, ":var_1"),
+        (scene_prop_set_slot, ":instance_no", scene_prop_spawn_time, ":var_1"),
+    ]),
+  ]),
+  
+  ("spell_target_1",sokf_moveable,"rune_circle_8","0",[ 
+    (ti_on_init_scene_prop,
+    [
+        (store_trigger_param_1, ":instance_no"),
+        (prop_instance_enable_physics, ":instance_no", 0),
+        (set_position_delta, 0, 0, 100),
+        (particle_system_add_new, "psys_magic_circle_1"),
+     ]),
+  ]),
 ]
 
 

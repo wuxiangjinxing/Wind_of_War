@@ -8,7 +8,7 @@ from header_triggers import *
 # just define it here rather than copying it across each file, so
 # that it will be easy to change it if you need to.
 ##############################################################
-current_version = mod_version = 11780
+current_version = mod_version = 7526
  
 lock_item = 100
  
@@ -57,7 +57,7 @@ slot_item_enterprise_building_cost      = 58 #enterprise building cost
 
 slot_item_multiplayer_item_class   = 60 #temporary, can be moved to higher values
 slot_item_multiplayer_availability_linked_list_begin = 61 #temporary, can be moved to higher values
-
+slot_item_temp_slot  = slot_item_multiplayer_item_class
 
 ########################################################
 ##  AGENT SLOTS            #############################
@@ -93,12 +93,6 @@ slot_player_charge_time  = slot_agent_next_action_time
 slot_player_before_action  = slot_agent_cur_animation   
 slot_agent_already_begg  = slot_agent_arena_team_set   
 
-slot_agent_charm_time                  = 69
-slot_agent_old_team_set                = 70
-
-slot_agent_paragon_knight_level        = 71
-slot_agent_tenacity_level           = 72
-slot_agent_is_fly           = 73
 
 # agent slots
 slot_agent_refill_ammo_times      = 26
@@ -119,7 +113,8 @@ slot_agent_riding_level           = 22
 
 slot_agent_flamberge_attack_chance               = 36
 slot_agent_extra_hp                              = 37
-slot_agent_vc_wounded                              = slot_agent_extra_hp
+slot_agent_extra_shield                          = 74
+slot_agent_backup_hp                             = 75
 
 slot_agent_spawned                               = 38
 
@@ -154,8 +149,6 @@ slot_agent_cur_magic          = slot_agent_in_duel_with
 slot_agent_max_mana               = slot_agent_duel_start_time
 slot_agent_special_ability_extra_counter        = 23
 slot_agent_special_ability_extra_cooldown       = 24
-slot_agent_special_ability_affect_type           = 57
-slot_agent_special_ability_affect_time           = 58
 slot_agent_special_ability_cooldown              = 59
 slot_agent_special_ability_counter               = 60
 slot_agent_has_been_special_ability              = 61
@@ -164,18 +157,40 @@ slot_agent_special_ability_passiv_cooldown       = 63
 slot_agent_special_damage_type                   = 64
 slot_agent_special_damage_time                   = 65
 slot_agent_special_damage_power                  = 66
-slot_agent_spell_1_cooldown       = 69
-slot_agent_spell_2_cooldown       = 70
-slot_agent_spell_3_cooldown       = 71
-slot_agent_spell_4_cooldown       = 72
-slot_agent_spell_5_cooldown       = 73
+slot_agent_spell_1_cooldown       = 79
+slot_agent_spell_2_cooldown       = 80
+slot_agent_spell_3_cooldown       = 81
+slot_agent_spell_4_cooldown       = 82
+slot_agent_spell_cast_time        = 83
 
-slot_agent_double_wings_state        = 74
-slot_agent_double_wings_dest_pos     = 75
+slot_agent_special_ability_affect_type           = 57
+slot_agent_special_ability_affect_time           = 58
 
-slot_agent_archer_state = 35
-slot_next_shoot_time = 67
-slot_agent_next_release_time = 68
+slot_agent_buff_affect_type           = 87
+slot_agent_buff_affect_time           = 88
+
+slot_agent_debuff_affect_type           = 89
+slot_agent_debuff_affect_time           = 90
+
+slot_agent_forcefield_id                = 91
+slot_agent_forcefield_instance_no       = 92
+
+slot_agent_temp_slot       = 84
+
+slot_agent_vc_wounded       = 85
+slot_agent_vortice          = 86
+
+slot_agent_charm_time                  = 69
+slot_agent_old_team_set                = 70
+
+slot_agent_paragon_knight_level        = 71
+slot_agent_tenacity_level           = 72
+slot_agent_is_fly           = 73
+slot_agent_resilience           = 93
+
+slot_agent_archer_state              = 76
+slot_next_shoot_time                 = 77
+slot_agent_next_release_time         = 78
 
 burn  = 1
 wound  = 2
@@ -189,6 +204,8 @@ curse = 9
 power_jump = 10 
 power_poison = 11 
 marked_for_death = 12 
+blinding = 13 
+
 
 ########################################################
 ##  FACTION SLOTS          #############################
@@ -374,11 +391,6 @@ slot_faction_sum_advice_about_factions_begin 			= 180
 dplmc_slot_faction_attitude_begin             = 200
 dplmc_slot_faction_attitude                   = 200
 
-slot_faction_num_raider = 201
-slot_faction_num_scout = 202
-slot_faction_num_patrol = 203
-slot_faction_num_train = 204
-
 #revolts -- notes for self
 #type 1 -- minor revolt, aimed at negotiating change without changing the ruler
 #type 2 -- alternate ruler revolt (ie, pretender, chinese dynastic revolt -- keep the same polity but switch the ruler)
@@ -431,6 +443,8 @@ spt_portal_2            = 27
 spt_portal_3            = 28
 spt_portal_4            = 29
 spt_enhancement              = 30
+spt_obelisk              = 31
+
 
 slot_party_retreat_flag        = 2
 slot_party_ignore_player_until = 3
@@ -1325,7 +1339,7 @@ enctype_catched_during_village_raid   = 2
 
 
 ### Troop occupations slot_troop_occupation
-##slto_merchant           = 1
+slto_merchant           = 1
 slto_inactive           = 0 #for companions at the beginning of the game
 slto_wait_for_hire      = 11
 slto_kingdom_hero       = 2
@@ -1446,8 +1460,13 @@ scene_prop_next_entry_point_id      = 4 #for belfries only
 scene_prop_belfry_platform_moved    = 5 #for belfries only
 scene_prop_slots_end                = 6
 
-scene_prop_slots_mine_spawn                = 6
-scene_prop_slots_mine_time                 = 8
+scene_prop_owner                = 10
+scene_prop_owner_team           = 11
+scene_prop_spell_id             = 12
+scene_prop_spawn_time           = 13
+scene_prop_attached_agent       = 14
+scene_prop_scale                = 15
+scene_prop_is_move              = 16
 
 ########################################################
 rel_enemy   = 0
@@ -1688,6 +1707,10 @@ raid_distance = 4
 
 surnames_begin = "str_surname_1"
 surnames_end = "str_surnames_end"
+
+merchant_surname_begin = "str_merchant_surname_1"
+merchant_surname_end = "str_merchant_surname_end"
+
 names_begin = "str_name_1"
 names_end = surnames_begin
 countersigns_begin = "str_countersign_1"
@@ -1713,7 +1736,7 @@ bandit_kingdoms_end = "fac_kingdom_1"
 npc_kingdoms_begin = "fac_kingdom_1"
 npc_kingdoms_end = kingdoms_end
 
-quick_battle_kingdoms_end = "fac_forest_ranger"
+quick_battle_kingdoms_end = npc_kingdoms_end
 
 kingdom_ladies_begin = "trp_knight_1_1_wife"
 kingdom_ladies_end = "trp_heroes_end"
@@ -1743,7 +1766,7 @@ adventurer_troops_begin = "trp_adventurer_troop_1"
 adventurer_troops_end = "trp_knight_1_1_wife"
 
 quick_battle_troops_begin = "trp_quick_battle_troop_1"
-quick_battle_troops_end = "trp_knight_1_1_wife"
+quick_battle_troops_end = "trp_kingdom_1_lady_1"
 
 #"active_npcs_begin replaces kingdom_heroes_begin to allow for companions to become lords. Includes anyone who may at some point lead their own party: the original kingdom heroes, companions who may become kingdom heroes, and pretenders. (slto_kingdom_hero as an occupation means that you lead a party on the map. Pretenders have the occupation "slto_inactive_pretender", even if they are part of a player's party, until they have their own independent party)
 #If you're a modder and you don't want to go through and switch every kingdom_heroes to active_npcs, simply define a constant: kingdom_heroes_begin = active_npcs_begin., and kingdom_heroes_end = active_npcs_end. I haven't tested for that, but I think it should work.
@@ -2203,12 +2226,12 @@ arena_tier1_prize = 20
 arena_tier2_opponents_to_beat = 6
 arena_tier2_prize = 40
 arena_tier3_opponents_to_beat = 10
-arena_tier3_prize = 60
+arena_tier3_prize = 100
 arena_tier4_opponents_to_beat = 20
-arena_tier4_prize = 80
+arena_tier4_prize = 150
 arena_tier5_opponents_to_beat = 40
-arena_tier5_prize = 100
-arena_grand_prize = 2000
+arena_tier5_prize = 240
+arena_grand_prize = 1000
 
 
 #Additions
@@ -2346,19 +2369,20 @@ banner_scene_props_back_end_minus_one = "spr_banner_f21_back"
 #slot_item_leg_armor               = 78
 #slot_item_length                  = 79
 #slot_item_speed                   = 80
-slot_item_voice_get       = slot_item_book_read                = 3
+slot_item_voice_get       = slot_item_book_read               
 
 
-slot_item_is_magic_spell       = 75
+slot_item_is_magic_spell               = 75
 slot_item_magic_cost                   = 66
 slot_item_magic_type                   = 68
 slot_item_magic_cooldown               = 70
-slot_item_magic_difficulty             = 73
-slot_item_magic_need_cooldown          = 74
+slot_item_magic_difficulty             = slot_item_intelligence_requirement
+slot_item_magic_cast_time              = 73
 
 voice    =  1
 spell    =  2
 quick_spell    =  3
+buff    =  4
 
 special_ability = 5
 special_ability_extra = 6
@@ -2379,13 +2403,25 @@ slot_item_num_for_necro           = 73
 
 #======special item begin======
 slot_item_special = 82 
-slot_item_add_attribute_id = 83 
-slot_item_add_skill_id = 84 
-slot_item_add_proficiency_id = 85
-slot_item_add_attribute_value = 86 
-slot_item_add_skill_value = 87 
-slot_item_add_proficiency_value = 88
+slot_item_skill_need_attribute_id = 83 
+slot_item_skill_need_skill_id = 84 
+slot_item_skill_need_proficiency_id = 85
+slot_item_skill_need_attribute_value = 86 
+slot_item_skill_need_skill_value = 87 
+slot_item_skill_need_proficiency_value = 88
+slot_item_skill_need_join_guild = 89
 #======special item end====== 
+join_mine_guild  =  1
+join_mage_guild =  2
+join_orc_guild =  3
+join_hunt_guild =  4
+join_necro_guild =  5
+join_demon_guild =  6
+join_thief_guild =  7
+join_order_guild =  8
+join_elf_guild =  9
+
+
 
 #slot_item_unique                    = 89
 #slot_item_needs_two_hands	       = 90
@@ -2728,8 +2764,11 @@ multishot = "itm_skill_multishot"
 dragon_blade = "itm_skill_dragon_blade_slash"
 swift_strike = "itm_skill_swift_strike"
 deflect = "itm_skill_deflect"
-shadow_blade = "itm_skill_shadow_blade"
+omnislash = "itm_skill_omnislash"
+oneshot = "itm_skill_oneshot"
+autoshot = "itm_skill_autoshot"
 
+bash_oneshot = "itm_bash_oneshot"
 bash_shadow_blade = "itm_bash_shadow_blade"
 bash_rush = "itm_bash_rush"
 bash_cleave = "itm_bash_cleave"
@@ -2741,15 +2780,13 @@ bash_flame_burst = "itm_bash_flame_burst"
 bash_forst_ring = "itm_bash_forst_ring"
 bash_grasp = "itm_bash_grasp"
 bash_summon_undead = "itm_bash_summon_undead"
-bash_smite_evil = "itm_bash_smite_evil"
-bash_smite_undead = "itm_bash_smite_undead"
-bash_smite_orc = "itm_bash_smite_orc"
-bash_head_hunted = "itm_bash_head_hunted"
-bash_smite_outsider = "itm_bash_smite_outsider"
+
 bash_swift_strike = "itm_bash_swift_strike"
 bash_sidearm_1 = "itm_bash_sidearm_1"
 bash_shield_bash = "itm_bash_shield_bash"
 bash_kick = "itm_bash_kick"
+bash_heal = "itm_bash_heal"
+bash_mass_heal = "itm_bash_mass_heal"
 
 
 
@@ -2855,10 +2892,6 @@ slot_party_pref_formations   = slot_town_arena_melee_2_team_size #83
 slot_party_pref_bodyguard    = slot_town_arena_melee_3_num_teams #84
 slot_party_pref_bc_continue  = slot_town_arena_melee_3_team_size #85
 slot_party_pref_bc_charge_ko = slot_town_arena_melee_cur_tier    #86
-
-slot_party_pref_riding_ai = slot_town_melee_fights_chance		#87
-slot_party_pref_combat_ai = slot_town_volunteer_troop_type  	#88
-
 slot_party_gk_order          = 108
 slot_party_gk_order_hold_over_there = slot_party_gk_order #for party #2 at the moment
 
@@ -2893,23 +2926,23 @@ keys_list = [
               ("$key_camera_right", key_right),
               ("$key_camera_zoom_plus",key_numpad_plus),     #Num + to zoom in
               ("$key_camera_zoom_min",key_numpad_minus),     #Num - to zoom out
-              ("$key_camera_next",key_left_mouse_button),    #right key to jump to next bot
-              ("$key_camera_prev",key_right_mouse_button),   #left key to jump to prev bot
+              ("$key_camera_next",key_z),    #right key to jump to next bot
+              ("$key_camera_prev",key_x),   #left key to jump to prev bot
               ("$key_camera_toggle",key_end),                #END button to toggle camera mode
               ("$key_order_7", key_f7),
               ("$key_order_8", key_f8),
               ("$key_order_9", key_f9),
               ("$key_order_10", key_f10),
-              ("$key_special_0", key_left_control), #Pike Bracingkey_left_alt
+              ("$key_special_0", key_v), #Pike Bracingkey_left_alt
               ("$key_special_1", key_h), #Whistle for Horse 			 
-              ("$key_special_2", key_t),
-              ("$key_special_3", key_left_alt), 
-              ("$key_special_4", key_v),
-              ("$key_special_5", key_b),
+              ("$key_special_2", key_q),
+              ("$key_special_3", key_left_control), 
+              ("$key_special_4", key_left_alt),
+              ("$key_special_5", key_right_mouse_button),
               
-              ("$key_special_6", key_n),
-              ("$key_special_7", key_y),
-              ("$key_special_8", key_u),
+              ("$key_special_6", key_b),
+              ("$key_special_7", key_mouse_scroll_up),
+              ("$key_special_8", key_mouse_scroll_down),
               
               
 			]
@@ -2988,6 +3021,8 @@ game_mode_chaos      = 4
 game_mode_invasion   = 5
 game_mode_0808       = 6
 
+custom_caravan_masters_begin = "trp_caravan_master_01"
+custom_caravan_masters_end = "trp_caravan_masters_end"
 
 
 first_names_begin = "str_first_name_1"

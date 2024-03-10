@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from header_common import *
 from header_parties import *
 from ID_troops import *

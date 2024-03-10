@@ -1,4 +1,4 @@
-set path=C:\Python26;%PATH%
+set path=C:\Python27;%PATH%
 @echo off
 @del Process_Log.txt
 echo Getting Header Files .........

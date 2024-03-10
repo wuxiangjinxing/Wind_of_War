@@ -30,12 +30,17 @@ tracks = [
   ("bogus", "cant_find_this.ogg", 0, 0),
   ("Mainmenu_1", "Mainmenu.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
   ("Mainmenu_2", "main_menu.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
-  ("Mainmenu_3", "MainMenuWoG.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
+  ("Mainmenu_3", "Blood_and_Wine.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
+  ("Mainmenu_4", "Dragonborn.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
+  ("Mainmenu_5", "Geralt_of_Rivia.mp3", mtf_module_track|mtf_sit_main_title|mtf_start_immediately, 0),
 
   ("fight_music_1", "Combat01.mp3",  mtf_sit_siege|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
   ("fight_music_2", "Combat02.mp3",  mtf_sit_arena|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
   ("fight_music_3", "Combat03.mp3",  mtf_sit_siege|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
   ("fight_music_4", "Combat04.mp3",  mtf_sit_arena|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
+  
+
+
 
   ("ambushed_by_neutral", "Combat06.mp3", mtf_sit_ambushed|mtf_sit_siege|mtf_module_track, mtf_sit_fight|mtf_sit_multiplayer_fight),
   ("ambushed_by_khergit", "Battle_Stronghold1.mp3", mtf_culture_3|mtf_sit_ambushed|mtf_sit_siege|mtf_module_track, mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_culture_all),
@@ -49,7 +54,7 @@ tracks = [
   ("arena_1", "Combat05.mp3", mtf_sit_arena|mtf_module_track, 0),
   #("arena_2", "Combat02.mp3", mtf_looping|mtf_sit_arena|mtf_module_track, 0),
   ("armorer", "armorer.ogg", mtf_sit_travel, 0),
-  ("bandit_fight","Combat05.mp3", mtf_module_track|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed, 0),
+  ("bandit_fight","Cloak_and_Dagger.mp3", mtf_module_track|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed, 0),
 
   #("calm_night_1", "calm_night_2.ogg", mtf_sit_night, mtf_sit_town|mtf_sit_tavern|mtf_sit_travel),
   ("calm_night_1", "AITheme0.mp3", mtf_sit_night|mtf_module_track, mtf_sit_town|mtf_sit_tavern|mtf_sit_travel),
@@ -74,6 +79,9 @@ tracks = [
 ## CC
 
   ("fight_1", "First_Battle.mp3", mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
+  ("fight_11", "The_Song_of_the_Sword_Dancer.mp3", mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
+  
+  
   ("fight_2", "Sword_and_Faith.mp3", mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
   ("fight_3", "Crusade.mp3", mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, 0),
   ("fight_as_khergit", "Battle_Stronghold2.mp3", mtf_culture_3|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
@@ -83,6 +91,9 @@ tracks = [
   ("fight_as_rhodok", "Battle_Undead1.mp3", mtf_culture_5|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
   ("fight_as_swadian", "Battle_Haven2.mp3", mtf_culture_1|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_module_track, mtf_culture_all),
 
+
+  ("fight_as_rhodok2", "The_Night_of_Long_Fangs.mp3", mtf_culture_5|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
+  ("fight_as_vaegir2", "Silver_for_Monsters.mp3", mtf_culture_2|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
   ("fight_as_vaegir", "Battle_Fortress2.mp3", mtf_culture_2|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
   ("fight_as_sarranid", "Battle_Inferno2.mp3", mtf_culture_6|mtf_sit_fight|mtf_sit_multiplayer_fight|mtf_sit_ambushed|mtf_module_track, mtf_culture_all),
   
@@ -109,8 +120,10 @@ tracks = [
   ("travel_music_6", "Dove_in_the_Sky.mp3",  mtf_sit_town|mtf_sit_travel|mtf_sit_night|mtf_module_track, 0),
   ("travel_music_7", "Handful_of_Sorrow.mp3",  mtf_sit_town|mtf_sit_travel|mtf_module_track, mtf_sit_tavern|mtf_sit_night),
   ("travel_music_8", "minstrelosity.mp3",  mtf_sit_town|mtf_sit_travel|mtf_module_track, mtf_sit_tavern),
+  ("travel_music_9", "The_Hunter_Path.mp3",  mtf_sit_town|mtf_sit_travel|mtf_module_track, mtf_sit_tavern),
+  ("travel_music_10", "Kaer_Morhen.mp3",  mtf_sit_town|mtf_sit_travel|mtf_module_track, mtf_sit_tavern),
+  ("travel_music_11", "A_Story.mp3",  mtf_sit_town|mtf_sit_travel|mtf_module_track, mtf_sit_tavern),
   
-
   
   ("retreat", "Retreat_Battle.mp3", mtf_persist_until_finished|mtf_sit_killed|mtf_module_track, 0),
   ("retreat_2", "Surrende_Battle.mp3", mtf_persist_until_finished|mtf_sit_killed|mtf_module_track, 0),
@@ -127,15 +140,17 @@ tracks = [
   ("town_khergit", "StrongHold.mp3", mtf_module_track|mtf_culture_3|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("town_nord", "Rampart.mp3", mtf_module_track|mtf_culture_4|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("town_rhodok", "necroTown.mp3", mtf_module_track|mtf_culture_5|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
-  ("town_swadian", "CstleTown.mp3", mtf_module_track|mtf_culture_1|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
+  ("town_swadian", "Mandragora.mp3", mtf_module_track|mtf_culture_1|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("town_vaegir", "TowerTown.mp3", mtf_module_track|mtf_culture_2|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
+  ("town_vaegir_2", "Merchants_of_Novigrad.mp3", mtf_module_track|mtf_culture_2|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("town_sarranid", "InfernoTown.mp3", mtf_module_track|mtf_culture_6|mtf_sit_town|mtf_sit_travel, mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
+
 
 
   ("travel_khergit", "Dirt.mp3", mtf_module_track|mtf_culture_3|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_neutral", "Grass.mp3", mtf_module_track|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night),
-  ("travel_nord",    "travel_nord.ogg",    mtf_module_track|mtf_culture_4|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
-  ("travel_rhodok",  "Rough.mp3",  mtf_module_track|mtf_culture_5|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
+  ("travel_nord",    "The_Fields_of_Ard_Skellig.ogg",    mtf_module_track|mtf_culture_4|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
+  ("travel_rhodok",  "The_Hunter_Path.mp3",  mtf_module_track|mtf_culture_5|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_swadian", "GoodTheme.mp3", mtf_module_track|mtf_culture_1|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_vaegir",  "Snow.mp3",  mtf_module_track|mtf_culture_2|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_sarranid", "Sand.mp3",          mtf_module_track|mtf_culture_6|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
@@ -143,7 +158,7 @@ tracks = [
   ("travel_rhodok2",  "death.mp3",  mtf_module_track|mtf_culture_5|mtf_sit_town|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_swadian2", "life.mp3", mtf_module_track|mtf_culture_1|mtf_sit_town|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
   ("travel_nord2", "nature.mp3", mtf_module_track|mtf_culture_4|mtf_sit_town|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
-
+  ("travel_vaegir2",  "Kaer_Morhen.mp3",  mtf_module_track|mtf_culture_2|mtf_sit_travel, mtf_sit_town|mtf_sit_tavern|mtf_sit_night|mtf_culture_all),
 
 
   ("uncertain_homestead", "uncertain_homestead.ogg", mtf_sit_travel, mtf_sit_town|mtf_sit_night|mtf_sit_tavern),

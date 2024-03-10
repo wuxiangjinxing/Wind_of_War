@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from module_constants import *
 from ID_factions import *
 from header_items import  *
@@ -5,6 +6,10 @@ from header_operations import *
 from header_troops import *
 from header_triggers import *
 from header_skills import *
+from module_items_magic_trigger import *
+from ID_scripts import *
+
+
 ####################################################################################################################
 #  Each item record contains the following fields:
 #  1) Item id: used for referencing items in other files.
@@ -46,6 +51,10 @@ imodbits_good_plate  = imodbit_sturdy|imodbit_well_made|imodbit_superb|imodbit_t
 
 imodbits_polearm = imodbit_cracked| imodbit_bent| imodbit_balanced| imodbit_deadly| imodbit_fine|imodbit_sharp|imodbit_tempered|imodbit_masterwork
 imodbits_shield  = imodbit_cracked| imodbit_battered|imodbit_thick| imodbit_reinforced| imodbit_heavy| imodbit_lordly
+
+imodbits_shield_metal  = imodbit_cracked| imodbit_rusty|imodbit_battered| imodbit_crude| imodbit_sturdy| imodbit_reinforced|imodbit_hardened| imodbit_heavy| imodbit_lordly
+
+
 imodbits_sword   = imodbit_rusty| imodbit_chipped| imodbit_balanced|imodbit_tempered| imodbit_heavy| imodbit_fine| imodbit_powerful| imodbit_sharp
 imodbits_sword_high   = imodbit_rusty| imodbit_chipped| imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp
 imodbits_axe   = imodbit_rusty| imodbit_chipped| imodbit_heavy| imodbit_fine| imodbit_tempered| imodbit_deadly| imodbit_strong
@@ -53,8 +62,8 @@ imodbits_mace   = imodbit_rusty| imodbit_chipped| imodbit_heavy| imodbit_fine| i
 imodbits_pick   = imodbit_rusty| imodbit_chipped| imodbit_heavy| imodbit_fine| imodbit_balanced| imodbit_powerful| imodbit_strong
 imodbits_bow = imodbit_cracked| imodbit_bent| imodbit_strong|imodbit_masterwork| imodbit_fine|imodbit_tempered| imodbit_deadly| imodbit_sharp
 imodbits_crossbow = imodbit_cracked| imodbit_bent| imodbit_heavy| imodbit_masterwork| imodbit_large_bag| imodbit_fine| imodbit_powerful| imodbit_deadly
-#imodbits_missile   = imodbit_bent| imodbit_large_bag| imodbit_fine| imodbit_balanced|imodbit_masterwork
-imodbits_missile   = imodbit_bent| imodbit_large_bag| imodbit_fine
+imodbits_missile   = imodbit_bent| imodbit_large_bag| imodbit_fine| imodbit_balanced|imodbit_masterwork
+#imodbits_missile   = imodbit_bent| imodbit_large_bag| imodbit_fine| imodbit_balanced
 
 imodbits_thrown   = imodbit_bent| imodbit_heavy| imodbit_balanced| imodbit_large_bag
 imodbits_thrown_minus_heavy = imodbit_bent| imodbit_heavy| imodbit_fine| imodbit_deadly| imodbit_large_bag| imodbit_strong
@@ -125,6 +134,7 @@ itp_type_half_body_armor = itp_civilian|itp_unique|itp_type_body_armor|itp_cover
 def shield_hit_points(x):
   return hit_points(x/2)
 
+none_trigger = [(ti_on_init_item, [])]
 
 ## CC
 missile_distance_trigger = [
@@ -138,32 +148,205 @@ missile_distance_trigger = [
         (copy_position,pos51,pos1),
         (call_script, "script_magic_deliver_area_damage", ":shooter_agent", 200, 5, 14),
       (try_end),
-      
-      #(neg|eq, ":weapon", "itm_drawf_musket_8barrel1"),
-      #(neg|eq, ":weapon", "itm_rat_musket_8barrel"),
-      
-      #(eq, "$g_report_shot_distance", 1),
-      #(get_player_agent_no, ":player_agent"),
-      #(try_begin),
-      #  (eq, ":shooter_agent", ":player_agent"),
-      #  (eq, ":hit_object_type", 1), # 1 = hostile agent
-      #  (agent_get_position, pos2, ":shooter_agent"),
-      #  (agent_get_horse, ":horse_agent", ":player_agent"),
-      #  (try_begin),
-      #    (gt, ":horse_agent", -1),
-      #    (position_move_z, pos2, 200),
-      #  (else_try),
-      #    (position_move_z, pos2, 150),
-      #  (try_end),
-      #  (get_distance_between_positions, ":distance", pos1, pos2),
-      #  (store_div, reg61, ":distance", 100),
-      #  (store_mod, reg62, ":distance", 100),
-      #  (val_div, reg62, 10),
-      #  (str_store_string, s1, "@{reg61}.{reg62}"),
-      #  (display_message, "@Shot distance: {s1} meters.", 0xCCCCCC),
-      #(try_end),
-      
     ])
+    ]
+  
+weapon_cleave_trigger = [
+  (ti_on_weapon_attack, 
+    [
+     (store_trigger_param_1, ":shooter"),
+     (call_script,"script_cf_weapon_cleave",":shooter", 0),
+    ])
+    ]
+       
+       
+fire_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+              
+frost_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+       
+curse_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_curse_enchantment"),
+        (particle_system_add_new, "psys_curse_enchantment_sparks"),
+        (set_current_color, 181, 30, 113),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+
+poison_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment"),
+        (particle_system_add_new, "psys_poison_enchantment_2"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+
+vampire_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_vampire_enchantment"),
+        (particle_system_add_new, "psys_vampire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+
+holy_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+
+fire_mace_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment_mace"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks_mace"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+       
+frost_mace_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment_mace"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+       
+poison_mace_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_2_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks_mace"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+       
+curse_mace_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_curse_enchantment_mace"),
+        (particle_system_add_new, "psys_curse_enchantment_sparks_mace"),
+        (set_current_color, 181, 30, 113),
+        (add_point_light, 10, 30),
+    ]),
+    ]
+       
+holy_mace_enchantment = [
+    (ti_on_init_item, [
+        (store_trigger_param_1, ":agent"),
+        (gt, ":agent", -1),
+        (agent_get_wielded_item, ":weapon", ":agent", 0),
+        (gt, ":weapon", 0),
+        (item_get_weapon_length, ":length", ":weapon"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment_mace"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
     ]
        
 shield_broken_trigger_2 = [
@@ -273,6 +456,24 @@ shield_hit_trigger = [
           (this_or_next|eq, ":missile_id","itm_cartridges_sissofbattle_flame"),
           (eq, ":missile_id","itm_cartridges_sissofbattle_flame_2"),
           (val_mul, ":dest_damage", 100),
+        (try_end),
+        (try_begin),
+          (call_script, "script_cf_agent_has_skill", ":defender_agent", "itm_perk_two_hand_2"),
+          (item_get_type, ":item_type", ":weapon_id"),
+          (eq, ":item_type", itp_type_two_handed_wpn),
+          (val_mul, ":dest_damage", 150),
+          (val_div, ":dest_damage", 100),
+        (else_try),
+          (call_script, "script_cf_agent_has_skill", ":defender_agent", "itm_perk_polearm_5"),
+          (item_get_type, ":item_type", ":weapon_id"),
+          (eq, ":item_type", itp_type_polearm),
+          (val_mul, ":dest_damage", 200),
+          (val_div, ":dest_damage", 100),
+        (else_try),
+          (call_script, "script_cf_agent_has_skill", ":defender_agent", "itm_perk_thrown_3"),
+          (item_get_type, ":item_type", ":weapon_id"),
+          (eq, ":item_type", itp_type_thrown),
+          (val_mul, ":dest_damage", 1000),
         (try_end),
       
         (get_player_agent_no, ":player_agent"),
@@ -428,7 +629,6 @@ powergun_trigger = [
         (eq, ":weapon", "itm_hand_cannon_2"),
         (call_script, "script_magic_deliver_area_damage", ":shooter", 250, 9, 0),     
         (assign,":max_damage",4),
-	  (else_try),
         (eq, ":weapon", "itm_hand_cannon_3"),
         (call_script, "script_magic_deliver_area_damage", ":shooter", 300, 8, 0),   
         (assign,":max_damage",6),
@@ -664,7 +864,7 @@ cast_magic_Arcane_Orb = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt, ":weapon", 0),
+      
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
       
@@ -718,1126 +918,6 @@ cast_magic_Arcane_Orb = [
         
         
         (assign,":max_damage",":damage_add"),
-      (try_end),
-    ])]
-
-cast_magic_black_hold_long = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-                                
-      (try_begin),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (store_div,":damage",":power", 4),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",2),
-      (try_end),
-              
-        (assign,":victim",-1),        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-      (try_begin),
-        (get_player_agent_no,":player"),
-        (eq,":shooter",":player"),
-        (eq, "$skill_mask_start", 1),
-        (key_is_down, key_left_shift),
-        (assign,":victim",-2),
-      (try_end),
-        
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 400),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        (copy_position,pos4,pos5),
-        (try_for_range,":posz",0,":damage"),
-          (try_begin),
-            (store_add,":max_damage",":posz",1),
-            (ge,":max_damage",":damage"),
-            (val_add,":max_damage",1),
-            (val_mul,":max_damage",500),
-            (position_move_z,pos4,":max_damage"),
-            (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_arcane_orb", 0),
-          (try_end),
-          (val_mul,":posz",500),
-          (position_move_z,pos4,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_black_hold_2", 0),
-        (try_end),
-    ])]
-    
-
-
-cast_magic_black_hold = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      
-
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 25),
-      
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-              
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",50),
-        (store_random_in_range, ":randon_damage", 40, 61),
-        (store_mul,":range_add",":power", 100),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-            
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,300),
-      (particle_system_burst, "psys_black_hold", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (agent_get_horse, ":target_horse", ":agent"),
-        (try_begin),
-          (gt, ":target_horse", 0),
-          (agent_set_position, ":target_horse", pos5),
-          (agent_set_animation, ":target_horse", "anim_horse_rear"),
-        (else_try),
-          (agent_set_position, ":agent", pos5),
-        (try_end),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", thunder, ":power", ":power"),
-        (assign,":max_damage",":damage_add"),
-      (try_end),
-    ])]
-   
-   
-cast_magic_Frost_cloud = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-                                
-      (try_begin),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (store_div,":damage",":power", 3),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",2),
-      (try_end),
-              
-        (assign,":victim",-1),        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-      (try_begin),
-        (get_player_agent_no,":player"),
-        (eq,":shooter",":player"),
-        (eq, "$skill_mask_start", 1),
-        (key_is_down, key_left_shift),
-        (assign,":victim",-2),
-      (try_end),
-        
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 400),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        (copy_position,pos4,pos5),
-        (copy_position,pos4,pos5),
-        (try_for_range,":posz",0,":damage"),
-          (store_random_in_range, ":posx", -2,3),
-          (store_random_in_range, ":posy", -2,3),
-          (val_mul,":posx",20),
-          (val_mul,":posy",20),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_plague_staff_1"),
-        (val_mul,":posx",5),
-        (val_mul,":posy",5),
-      (try_end),
-          (val_mul,":posz",500),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_frost_cloud_dummy", 0),
-        (try_end),
-    ])]
-    
-cast_magic_Frost_cloudr = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-           
-      (assign, ":cost_stamina", 15),
-
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 30),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 3),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (val_mul,":max_damage",2),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-      
-      
-        (particle_system_burst, "psys_Ice_Storm", pos5, 10),
-
-      
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (store_div,":half_damage",":max_damage",2),
-        (store_random_in_range, ":damage", ":half_damage",":max_damage"),
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", freeze, ":spec_power", ":power"),
-      (try_end),
-    ])]
-    
-   
-   
-
-cast_magic_deep_freeze = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      
-
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 30),
-      
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 2),
-      (try_end),
-              
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",100),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 100),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-            
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (val_mul,":max_damage",2),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-            
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Ice_Storm", pos5, 10),
-      (else_try),  
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Ice_Storm", pos5, 5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", freeze, ":power", ":power"),
-        (assign,":max_damage",":damage_add"),
-        
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (store_agent_hit_points, ":inflicted_agent_hp", ":agent", 0),
-        (store_mul,":dead_power",":power", 5),
-        (ge, ":dead_power", ":inflicted_agent_hp"),
-        (agent_set_hit_points,":agent",0,0),
-        (agent_deliver_damage_to_agent, ":shooter", ":agent", 100),
-      (try_end),
-        
-        
-      (try_end),
-    ])]
-
-    
-cast_magic_frozen_orb = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-          
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-        (assign, ":cost_stamina", 15),
-      (try_end),
-      
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",100),
-        (store_random_in_range, ":randon_damage", 50, 151),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":add_missile",":power", 3),
-        (val_add,":add_missile",5),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-        (val_mul,":add_missile",2),
-      (try_end),
-      
-      (position_get_distance_to_ground_level, ":distance", pos5),
-      (try_begin),
-        (lt, ":distance", 0),
-        (position_set_z_to_ground_level, pos5),
-        (position_move_z, pos5, 200),
-      (try_end),                
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Ice_Storm", pos5, 50),
-      (else_try),  
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Ice_Storm", pos5, 5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", freeze, ":power", ":power"),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-          (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", freeze, ":power", ":power"),
-        (try_end),
-        (assign,":max_damage",":damage_add"),
-      (try_end),
-      
-      (position_move_z, pos5, 200),
-      (play_sound_at_position, "snd_cannon_shot", pos5),          
-      (try_for_range, ":unused", 0, ":add_missile"),
-        (copy_position, pos2, pos5),
-        (store_random_in_range, ":x_offset", 1, 61),#Random Rotation of X
-        (position_rotate_x, pos2, ":x_offset"),    
-        (store_random_in_range, ":y_offset", 1, 361),#Random Rotation of Y
-        (position_rotate_y, pos2, ":y_offset"),    
-        (store_random_in_range, ":z_offset", 1, 361),#Random Rotation of Z
-        (position_rotate_z, pos2, ":z_offset"),   
-        (set_fixed_point_multiplier,10),
-        (add_missile, ":shooter", pos2, 100, ":weapon", 0, "itm_magic_ice_ray_dummy", 0),
-      (try_end),    
-    ])]
-    
-cast_magic_blizzard = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      (assign,":damage",0),
-      
-      (try_begin),
-        (store_mul,":damage",":power", 4),
-        (val_add,":damage",5),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (val_add,":range",":range_add"),
-      (try_end),
-      
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-      
-        (try_for_range,":unused",0,":damage"),
-          (assign, ":cost_stamina", 2),
-          (try_begin),
-            (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-            (ge, ":stamina", ":cost_stamina"),
-            (val_sub, ":stamina", ":cost_stamina"),
-            (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-          (else_try),
-            (assign, ":power", 1),
-          (try_end),
-          (copy_position,pos4,pos5),
-          (store_random_in_range, ":posx", -15,16),
-          (store_random_in_range, ":posy", -15,16),
-          (store_random_in_range, ":posz", 30,70),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (val_mul,":posz",100),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          #(position_move_z,pos5,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_ice_ray_dummy", 0),
-          (try_begin),
-            (eq, "$g_weapon_fire_particle", 0),
-            (gt,":damage",0),
-            (particle_system_burst, "psys_Ice_Storm", pos4, 5),
-          (else_try),  
-            (gt,":damage",0),
-            (particle_system_burst, "psys_Ice_Storm", pos4, 1),
-          (try_end),
-          (try_for_agents,":possable_agent"),
-            (gt,":damage",0),
-            (gt,":power",0),
-            (agent_is_alive,":possable_agent"),
-            (this_or_next|agent_is_ally,":shooter"),
-            (agent_is_ally,":possable_agent"),
-            (this_or_next|neg|agent_is_ally,":possable_agent"),
-            (neg|agent_is_ally,":shooter"),
-
-            (agent_get_position,pos3,":possable_agent"),
-            (get_distance_between_positions,":dist",pos4,pos3),
-            (le,":dist",250),
-            (assign,":agent",":possable_agent"),
-            (val_add,":power",-1),
-            (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", 200, freeze, ":power", 5),
-          (try_end),
-        (try_end),
-    ])]
-    
-cast_magic_ice_ray_dummy = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      
-      (assign,":damage",0),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 1),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (assign,":cost_stamina",0),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",150),
-        (assign,":damage",50),
-        (store_mul,":damage_add",":power", 50),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":range_add",":power", 10),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-      
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Freezing_Trail", pos5, 15),
-      (else_try),  
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Freezing_Trail", pos5, 3),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", freeze, ":power", 5),
-      (else_try),  
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", ice, ":power", 5),
-      (try_end),
-        
-      (try_end),
-    ])]
-
-    
-cast_magic_ice_ray = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 15),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_warlock_staff_1"),
-        (val_add,":power",1),
-      (else_try),
-        (eq, ":weapon", "itm_thunder_staff_1"),
-        (val_add,":power",2),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",100),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 20),
-        (store_mul,":damage_add",":power", 100),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-      
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,200),
-      (particle_system_burst, "psys_frost_nails", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", ice, ":power", ":power"),
-        
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", freeze, ":power", 5),
-      (else_try),  
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", ice, ":power", 5),
-        (assign,":max_damage",50),
-      (try_end),
-        
-      (try_end),
-    ])]
-
-cast_magic_DEADLY_COLD = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 40),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",100),
-        (store_mul,":range_add",":power", 50),
-        (store_mul,":damage_add",":power", 150),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":dest_damage",":power", 100),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-
-      (copy_position,pos6,pos5),
-      (particle_system_burst, "psys_Freezing_Trail", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", ice, ":power", ":power"),
-        
-        (agent_get_troop_id, ":inflicted_troop", ":agent"),
-        (store_skill_level, ":defence", skl_magic_defence, ":inflicted_troop"),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_3"),
-          (val_add,":defence",-3),
-        (try_end),
-        (le,":defence",8),
-        (troop_get_slot, ":inflicted_troop_max_hp", ":inflicted_troop", slot_troop_max_hp),
-            
-        (store_random_in_range, ":random_no", 0, ":inflicted_troop_max_hp"),
-        (store_agent_hit_points, ":inflicted_agent_hp", ":agent", 1),
-            
-        (this_or_next|ge,":random_no", ":inflicted_agent_hp"),
-        (ge, ":dest_damage", ":inflicted_troop_max_hp"),
-        (agent_set_hit_points,":agent",0,0),
-        (agent_deliver_damage_to_agent, ":shooter", ":agent", 100),
-      (try_end),
-    ])]
-
-cast_magic_Dispel_Magic = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",100),
-        (store_mul,":range_add",":power", 50),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-      
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-      
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,200),
-      (particle_system_burst, "psys_frost_nails", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (agent_get_slot, ":special", ":agent", slot_agent_special_ability_affect_type),
-        (assign, ":continue", 0),
-        (try_begin),
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),      
-          (this_or_next|eq,":special", divine_strength),
-          (this_or_next|eq,":special", haste),
-          (this_or_next|eq,":special", regeneration),
-          (this_or_next|eq,":special", haste_reload),
-          (this_or_next|eq,":special", berserk),
-          (this_or_next|eq,":special", battlecry),
-          (this_or_next|eq,":special", inspire),
-          (agent_slot_ge, ":agent", slot_agent_spawned, 1), 
-          (assign, ":continue", 1),
-        (else_try),
-          (this_or_next|agent_is_ally,":shooter"),
-          (neg|agent_is_ally,":agent"),
-          (this_or_next|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-          (this_or_next|eq,":special", weakness),
-          (this_or_next|eq,":special", slow),
-          (this_or_next|eq,":special", mummy_curse),
-          (this_or_next|eq,":special", entangle),
-          (this_or_next|eq,":special", warcry),
-          (this_or_next|eq,":special", grasp),
-          (this_or_next|eq,":special", fright_aura),
-          (agent_slot_ge, ":agent", slot_agent_special_damage_time, 1), 
-          (assign, ":continue", 2),
-        (try_end),
-        (ge, ":continue", 1),
-        
-        (agent_get_slot, ":special", ":agent", slot_agent_special_ability_affect_type),
-        (try_begin),
-          (eq, ":continue", 1),
-          (agent_set_slot, ":agent", slot_agent_special_ability_affect_type, 0),
-          (agent_set_slot, ":agent", slot_agent_special_ability_affect_time, 0),
-        (else_try),
-          (eq, ":continue", 2),
-          (neg|agent_slot_eq, ":agent", slot_agent_is_running_away, 0),
-          (agent_stop_running_away, ":agent"),
-          (agent_clear_scripted_mode,":agent"),
-          (agent_set_slot, ":agent",  slot_agent_is_running_away, 0),
-          (agent_set_slot, ":agent", slot_agent_special_ability_affect_type, 0),
-          (agent_set_slot, ":agent", slot_agent_special_ability_affect_time, 0),
-          (agent_set_slot, ":agent", slot_agent_special_damage_type, 0),
-          (agent_set_slot, ":agent", slot_agent_special_damage_power, 0),
-          (agent_set_slot, ":agent", slot_agent_special_damage_time, 0),
-        (try_end),   
-        (agent_play_sound, ":agent", "snd_spell_dispel"),
-        (try_begin),
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),      
-          (agent_slot_ge, ":agent", slot_agent_spawned, 1), 
-          (agent_fade_out, ":agent"),
-        (try_end),      
-      (try_end),
-    ])]
-
-
-cast_magic_LightningBolt = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 15),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",100),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 20),
-        (store_mul,":damage_add",":power", 60),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-      
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-          (val_add,":max_range",":range_add"),
-          (val_add,":max_range",":damage_add"),
-        (try_end),
-      
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,150),
-        (particle_system_burst, "psys_spark_explosion_small", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-          (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", thunder, ":power", ":power"),
-        (else_try),
-          (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", thunder, ":power", ":power"),
-          (assign,":max_damage",100),
-        (try_end),
-      (try_end),
-    ])]
-
-cast_magic_teleport = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-            
-      (assign, ":cost_stamina", 15),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",100),
-        #(assign,":damage",60),
-        (assign,":damage",30),
-        (store_random_in_range, ":randon_damage", 25, 36),
-        (store_mul,":range_add",":power", 20),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (val_add,":damage",":damage_add"),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_bishop_staff"),
-        (store_mul,":damage_add",":power", 10),
-        (val_add,":damage",":damage_add"),
-      (else_try),
-        (eq, ":weapon", "itm_bishop_staff_2"),
-        (store_mul,":damage_add",":power", 20),
-        (val_add,":damage",":damage_add"),
-      (try_end),
-      
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (copy_position, pos4, pos3),
-        
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        
-        (assign,":agent",":possable_agent"),
-      (try_begin),
-        (agent_is_human, ":agent"),
-        (agent_is_active, ":agent"),
-        (agent_is_alive, ":agent"),
-        (agent_set_animation, ":agent", "anim_power_jump", 0),
-      (try_end),
-        (val_add,":power",-1),
-        
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", power_jump, ":power", ":power"),
-        (agent_set_slot, ":agent", slot_agent_special_damage_type, power_jump),
-        (agent_set_slot, ":agent", slot_agent_special_damage_power, ":power"),
-        (agent_set_slot, ":agent", slot_agent_special_damage_time, ":power"),
-      (try_end),
-    ])]
-
-
-cast_magic_sun_ray = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-
-      (assign, ":cost_stamina", 10),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign, ":cost_stamina", 0),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-
-      (try_begin),
-        (eq, ":weapon", "itm_bishop_staff"),
-        (val_add,":power",3),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast"),
-        (val_add,":power",3),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast_2"),
-        (val_add,":power",4),
-      (else_try),
-        (eq, ":weapon", "itm_bishop_staff_2"),
-        (val_add,":power",5),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",100),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 50),
-        (store_mul,":damage_add",":power", 70),
-        (val_add,":max_range",":range_add"),
-        (store_add,":damage",":damage_add"),
-      (try_end),
-      
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Burning_Trail_holy", pos5, 15),
-      (else_try),  
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Burning_Trail_holy", pos5, 1),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", holy_fire, ":power", 5),
-        (assign,":damage",50),
       (try_end),
     ])]
 
@@ -1900,7 +980,7 @@ holy_weapon_trigger = [
         (this_or_next|eq, ":agent_gender", tf_undead),
         (eq, ":agent_gender", tf_vampire),
         
-        #(this_or_next|is_between, ":inflicted_troop", "trp_skeleton","trp_taiga_bandit"),
+        #(this_or_next|is_between, ":inflicted_troop", "trp_skeleton_spearman","trp_taiga_bandit"),
         #(this_or_next|is_between, ":inflicted_troop", "trp_mummy_1","trp_undead_human"),
         #(this_or_next|is_between, ":inflicted_troop", "trp_lich_1","trp_minotaur_1"),
         #(eq, ":inflicted_troop", "trp_vampire_assassin"),
@@ -1937,6 +1017,11 @@ dragon_weapon_trigger = [
           (eq, ":troop", "trp_lava_dragon"),
           (assign,":power",5),
         (else_try),
+          (eq,1,0),
+          (agent_get_wielded_item, ":weapon", ":shooter", 0),
+          (eq, ":weapon", "itm_flamer_melee"),
+          (assign,":power",1),
+        (else_try),
           (agent_get_wielded_item, ":weapon", ":shooter", 0),
           (eq, ":weapon", "itm_dragon_knight_lance"),
           (assign,":power",3),
@@ -1960,35 +1045,6 @@ dragon_weapon_trigger = [
         (else_try),
           (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
         (try_end),
-        
-        
-       # (agent_get_position, pos1, ":shooter"),
-       # (agent_get_position, pos10, ":shooter"),
-       # (position_move_z, pos1, 100),
-       # (position_move_y, pos1, 60),
-       # (position_rotate_z, pos1, 80),
-       # (store_random_in_range, ":var_1", 0, 41),
-
-       # (position_rotate_z, pos1, ":var_1"),
-       # (particle_system_burst, "psys_fire_smierc", pos1, 5),
-       # (position_move_y, pos10, -60),
-       # (multiplayer_is_server),
-       # (try_for_agents, ":possable_agent"),
-       #   (this_or_next|agent_is_ally,":shooter"),
-       #   (agent_is_ally,":possable_agent"),
-       #   (this_or_next|neg|agent_is_ally,":possable_agent"),
-       #   (neg|agent_is_ally,":shooter"),
-       #   (agent_is_alive, ":possable_agent"),
-       #   (agent_get_position, pos2, ":possable_agent"),
-       #   (get_distance_between_positions, ":var_3", pos1, pos2),
-       #   (neg|gt, ":var_3", 500),
-       #   (get_distance_between_positions, ":var_4", pos10, pos2),
-       #   (ge, ":var_4", ":var_3"),
-       #   (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":possable_agent", ":damage", ":damage_type", ":power", 5),
-       # (try_end),
-        
-        
-        
     ])]
 
 
@@ -2011,7 +1067,8 @@ thunder_weapon_trigger = [
         (store_mul,":damage_add",":power", ":damage"),
       (try_end),
       
-      (particle_system_burst, "psys_thunder", pos51, 1),
+      (store_random_in_range, ":thunder", "psys_thunder", "psys_small_thunder"),
+      (particle_system_burst, ":thunder", pos51, 1),
       (play_sound_at_position, "snd_thunder_hit", pos51),
       (try_for_agents,":possable_agent"),
         (gt,":damage_add",0),
@@ -2053,7 +1110,8 @@ thunder_weapon_trigger_2 = [
         (store_mul,":damage_add",":power", ":damage"),
       (try_end),
       
-      (particle_system_burst, "psys_thunder", pos51, 1),
+      (store_random_in_range, ":thunder", "psys_thunder", "psys_small_thunder"),
+      (particle_system_burst, ":thunder", pos51, 1),
       (play_sound_at_position, "snd_thunder_hit", pos51),
       (try_for_agents,":possable_agent"),
         (gt,":damage_add",0),
@@ -2078,257 +1136,8 @@ mjolnir_trigger = [
 ])]   
 
   
-gungnir_trigger = [(ti_on_weapon_attack,[(store_trigger_param_1, ":shooter"),(agent_set_ammo,":shooter","itm_throwing_gungnir",2)])]     
-cast_magic_column_of_fire = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      #(item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 30),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign, ":cost_stamina", 20),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_bishop_staff"),
-        (val_add,":power",3),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast"),
-        (val_add,":power",3),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast_2"),
-        (val_add,":power",4),
-      (else_try),
-        (eq, ":weapon", "itm_bishop_staff_2"),
-        (val_add,":power",5),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",100),
-        (assign,":damage",100),
-        (store_mul,":range_add",":power", 100),
-        (val_add,":max_range",":range_add"),
-        (store_mul,":damage_add",":power", 50),
-        (store_add,":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 3),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_bishop_staff"),
-        (val_add,":max_range",50),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast"),
-        (val_add,":max_range",80),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast_2"),
-        (val_add,":max_range",110),
-      (else_try),
-        (eq, ":weapon", "itm_bishop_staff_2"),
-        (val_add,":max_range",110),
-      (try_end),
-      
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (try_begin),
-            (eq, ":player",":shooter"),
-            (agent_get_slot, ":target", ":player", slot_agent_player_target),
-          (else_try),
-            (agent_ai_get_look_target, ":target", ":shooter"),
-          (try_end),
-          (gt,":target",0),
-          (agent_is_alive,":target"),
-          (neg|eq, ":player",":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-      
-      (try_begin),
-        (gt,":damage",0),
-        (copy_position, pos40, pos5),
-        (position_move_z, pos40, 400),
-        (particle_system_burst, "psys_fright_aura2", pos40, 1),
-        #(particle_system_burst, "psys_Freezing_Trail", pos5, 35),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", holy_fire, ":spec_power", ":power"),
-      (try_end),
-      (position_get_distance_to_ground_level, ":distance", pos5),
-      (try_begin),
-        (lt, ":distance", 0),
-        (position_set_z_to_ground_level, pos5),
-        (position_move_z, pos5, 200),
-      (try_end),                
-    (try_begin),
-      (this_or_next|eq,":weapon","itm_grey_knight_staff"),
-      (this_or_next|eq,":weapon","itm_dawnbreaker_1"),
-      (this_or_next|eq,":weapon","itm_bishop_staff"),
-      (this_or_next|eq,":weapon","itm_war_clerics_warhammer_cast"),
-      (this_or_next|eq,":weapon","itm_war_clerics_warhammer_cast_2"),
-      (eq,":weapon","itm_bishop_staff_2"),      
-      (store_mul,":damage",":power", 10),
-
-      (play_sound_at_position, "snd_cannon_shot", pos5),  
-        (position_move_z, pos5, 500),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 35),
-        (particle_system_burst, "psys_explosive_explosion_sparks_b", pos5, 35),
-      (try_for_range, ":unused", 0, ":damage"),
-        (copy_position, pos2, pos5),
-        (store_random_in_range, ":x_offset", 1, 361),#Random Rotation of X
-        (position_rotate_x, pos2, ":x_offset"),    
-        (store_random_in_range, ":y_offset", 1, 361),#Random Rotation of Y
-        (position_rotate_y, pos2, ":y_offset"),    
-        (store_random_in_range, ":z_offset", 1, 361),#Random Rotation of Z
-        (position_rotate_z, pos2, ":z_offset"),   
-        (set_fixed_point_multiplier,10),
-        (add_missile, ":shooter", pos2, 1000, ":weapon", 0, "itm_magic_sun_ray_dummy", 0),
-      (try_end),    
-    (try_end),    
-    ])]
-    
-cast_magic_Entangling = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",50),
-        (store_mul,":range_add",":power", 50),
-        (val_add,":max_range",":range_add"),
-        (store_mul,":spec_time",":power", 5),
-      (try_end),
-              
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-
-
-        (try_for_agents,":possable_agent"),
-          (agent_is_active,":possable_agent"),
-          (agent_is_alive,":possable_agent"),   
-          (agent_get_position,pos6,":possable_agent"),
-          (get_distance_between_positions,":dist",pos5,pos6),
-          (lt,":dist",":max_range"),            	
-          (try_begin),
-            (neg|agent_is_human, ":possable_agent"),#stop if not human
-            (agent_get_rider,":rider_agent",":possable_agent"),
-            (assign, ":continue", 0),
-            (try_begin),
-              (gt,":rider_agent",-1),
-              (agent_is_ally, ":rider_agent"),
-              (neg|agent_is_ally, ":shooter"),
-              (assign, ":continue", 1),
-            (else_try),
-              (gt,":rider_agent",-1),
-              (neg|agent_is_ally, ":rider_agent"),
-              (agent_is_ally, ":shooter"),
-              (assign, ":continue", 1),
-            (else_try),
-              (le,":rider_agent",-1),
-              (assign, ":continue", 1),
-            (try_end),
-            (eq, ":continue", 1),
-            (agent_get_rider,":rider_agent",":possable_agent"),
-            (try_begin),
-              (gt,":rider_agent",-1),
-              (agent_set_animation, ":rider_agent", "anim_bash_knocked"),  
-              (agent_set_slot, ":rider_agent", slot_agent_special_ability_affect_type, entangle),
-              (agent_set_slot, ":rider_agent", slot_agent_special_ability_affect_time, ":spec_time"),
-              (agent_set_hit_points,":possable_agent",0,0),
-              (agent_deliver_damage_to_agent,":shooter",":possable_agent"),
-            (else_try),
-              (le,":rider_agent",-1),
-              (agent_set_hit_points,":possable_agent",0,0),
-              (agent_deliver_damage_to_agent,":shooter",":possable_agent"),
-            (try_end),
-          (else_try),
-            (assign, ":continue", 0),
-            (try_begin),
-              (agent_is_ally, ":possable_agent"),
-              (neg|agent_is_ally, ":shooter"),
-              (assign, ":continue", 1),
-            (else_try),
-              (neg|agent_is_ally, ":possable_agent"),
-              (agent_is_ally, ":shooter"),
-              (assign, ":continue", 1),
-            (try_end),
-            (eq, ":continue", 1),
-            (agent_is_human, ":possable_agent"),
-            (position_move_z, pos62, 200),
-            (particle_system_burst,"psys_stun_effect",pos62,1),
-            (agent_set_animation, ":possable_agent", "anim_bash_knocked"),  
-            (agent_set_slot, ":possable_agent", slot_agent_special_ability_affect_type, entangle),
-            (agent_set_slot, ":possable_agent", slot_agent_special_ability_affect_time, ":spec_time"),
-        (try_end),
-    ])]
-
+gungnir_trigger = [(ti_on_weapon_attack,[(store_trigger_param_1, ":shooter"),(agent_set_ammo,":shooter","itm_throwing_gungnir",2)])]  
+   
 cast_magic_web = [
   (ti_on_missile_hit, 
     [
@@ -2417,94 +1226,6 @@ cast_magic_web = [
         (try_end),
     ])]
 
-   
-    
-cast_magic_Pyroblast = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 33),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign, ":cost_stamina", 20),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",200),
-
-        (store_mul,":range_add",":power", 50),
-        (store_mul,":damage_add",":power", 100),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_div,":spec_power",":power", 2),
-        (val_add,":spec_power",1),
-        (store_div,":spec_time",":power", 3),
-        (val_add,":spec_time",2),
-      (try_end),
-         
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-              
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,150),
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,50),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 35),
-        (particle_system_burst, "psys_incediary_cloud", pos5, 35),
-      (else_try),  
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,5),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 5),
-        (particle_system_burst, "psys_incediary_cloud", pos5, 5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-          (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", severe_burn, ":spec_power", ":spec_time"),        
-        (try_end),
-        
-        
-        (val_add,":spec_time",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", severe_burn, ":spec_power", ":spec_time"),        
-      (try_end),
-    ])]
-
 cast_magic_demon_arrow = [
   (ti_on_missile_hit, 
     [
@@ -2540,369 +1261,6 @@ cast_magic_demon_arrow = [
         (call_script, "script_magic_deliver_area_damage", ":shooter", ":max_damage", ":max_range", 15),
       (try_end),
       
-    ])]
-
-cast_magic_fire_ball = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (this_or_next|eq,":weapon","itm_ebony_bow"),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (eq,":weapon","itm_ebony_bow"),
-        (assign, ":cost_stamina", 0),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_warlock_staff_1"),
-        (val_add,":power",1),
-      (else_try),
-        (eq, ":weapon", "itm_thunder_staff_1"),
-        (val_add,":power",1),
-      (else_try),
-        (eq, ":weapon", "itm_pit_lord_sword"),
-        (val_add,":power",3),
-      (else_try),
-        (eq, ":weapon", "itm_balor_sword"),
-        (val_add,":power",2),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",300),
-        (assign,":damage",200),
-        (store_random_in_range, ":randon_damage", 50, 75),
-        (store_mul,":range_add",":power", 60),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 2),
-      (try_end),
-       
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,150),
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,50),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 35),
-        (particle_system_burst, "psys_explosive_explosion_sparks_b", pos5, 35),
-      (else_try),  
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,5),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 5),
-        (particle_system_burst, "psys_explosive_explosion_sparks_b", pos5, 5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", burn, ":spec_power", ":power"),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-          (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", burn, ":spec_power", ":power"),
-        (try_end),
-        
-        #(call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", ice, 1, 15),
-      (try_end),
-    ])]
-
-cast_magic_fire_ball_2 = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-          
-      (assign, ":cost_stamina", 10),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      
-      (try_begin),
-        (assign,":max_range",300),
-        (assign,":damage",150),
-        (store_mul,":range_add",":power", 50),
-        (store_mul,":damage_add",":power", 60),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 2),
-
-        (store_mul,":add_missile",":power", 1),
-        (val_add,":add_missile",1),
-      (try_end),
-      
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-          (val_mul,":add_missile",2),
-        (try_end),
-        
-      (position_get_distance_to_ground_level, ":distance", pos5),
-      (try_begin),
-        (lt, ":distance", 0),
-        (position_set_z_to_ground_level, pos5),
-        (position_move_z, pos5, 200),
-      (try_end),                
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,50),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 35),
-        (particle_system_burst, "psys_explosive_explosion_sparks_b", pos5, 35),
-      (else_try),  
-        (gt,":damage",0),
-        (gt,":power",0),
-        (particle_system_burst, "psys_flame_explosion",pos5,5),
-        (particle_system_burst, "psys_explosive_explosion_sparks_a", pos5, 5),
-        (particle_system_burst, "psys_explosive_explosion_sparks_b", pos5, 5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", burn, ":spec_power", ":power"),
-      (try_end),
-      
-      
-      (play_sound_at_position, "snd_cannon_shot", pos5),          
-      (position_move_z, pos5, 150),
-      (try_for_range, ":unused", 0, ":add_missile"),
-        (copy_position, pos2, pos5),
-        (store_random_in_range, ":x_offset", 1, 361),#Random Rotation of X
-        (position_rotate_x, pos2, ":x_offset"),    
-        (store_random_in_range, ":y_offset", 1, 361),#Random Rotation of Y
-        (position_rotate_y, pos2, ":y_offset"),    
-        (store_random_in_range, ":z_offset", -10, 11),#Random Rotation of Z
-        (position_rotate_z, pos2, ":z_offset"),   
-        (set_fixed_point_multiplier,10),
-        (add_missile, ":shooter", pos2, 80, ":weapon", 0, "itm_magic_poison_dummy", 0),
-      (try_end),    
-    ])]
-    
-    
-cast_magic_fire_ball_3 = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      
-      #(this_or_next|item_has_property,":weapon",itp_type_crossbow),
-      #(item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-         
-      (assign, ":cost_stamina", 10),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_nilfurs_boast"),
-        (assign, ":cost_stamina", 3),
-      (try_end),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-          (assign, ":cost_stamina", 3),
-        (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",300),
-        (assign,":damage",100),
-        (store_mul,":range_add",":power", 30),
-        (store_mul,":damage_add",":power", 50),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-      
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (val_add,":max_damage",":damage_add"),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-      
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (gt,":power",0),
-         (particle_system_burst,"psys_bomb_fire_1",pos5,35),
-         (particle_system_burst,"psys_Burning_Trail",pos5,50),
-      (else_try),  
-        (gt,":damage",0),
-        (gt,":power",0),
-         (particle_system_burst,"psys_bomb_fire_1",pos5,5),
-         (particle_system_burst,"psys_Burning_Trail",pos5,5),
-      (try_end),
-            
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", burn, ":power", 10),
-         (try_begin),
-           (neg|agent_is_human,":agent"),
-           (agent_set_animation,":agent","anim_horse_rear"), 
-           (agent_play_sound,":agent","snd_metal_hit_high_armor_high_damage"),
-           (agent_deliver_damage_to_agent,":shooter",":agent"),
-         (try_end),
-      (try_end),
-    ])]
-
-
-cast_magic_lightning = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-            
-      (assign, ":cost_stamina", 10),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",120),
-        (assign,":damage",100),
-        (store_random_in_range, ":randon_damage", 25, 101),
-        (store_mul,":range_add",":power", 30),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-      (try_end),
-      
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (try_begin),
-            (eq, ":player",":shooter"),
-            (agent_get_slot, ":target", ":player", slot_agent_player_target),
-          (else_try),
-            (agent_ai_get_look_target, ":target", ":shooter"),
-          (try_end),
-          (gt,":target",0),
-          (agent_is_alive,":target"),
-          (neg|eq, ":player",":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-      
-      
-      #(position_move_z,pos5,100),
-      (try_begin),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_thunder", pos5, 1),
-        (play_sound_at_position, "snd_thunder_hit", pos5),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", thunder, ":power", 15),
-        #(agent_set_slot, ":agent", slot_agent_special_damage_type, poison),
-        #(agent_set_slot, ":agent", slot_agent_special_damage_time, 15),
-      (try_end),
-
     ])]
 
 cast_magic_poison = [
@@ -2993,878 +1351,6 @@ cast_magic_poison = [
       (try_end),
     ])]
 
-cast_magic_Petrification = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-           
-      (assign, ":cost_stamina", 30),
-
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",100),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 50),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 3),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_8"),
-        (val_add,":max_damage",":damage_add"),
-        (val_add,":max_range",":range_add"),
-        (val_mul,":spec_power",":power", 2),
-      (try_end),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-        (val_add,":max_damage",":damage_add"),
-        (val_add,":max_range",":range_add"),
-        (val_mul,":spec_power",":power", 2),
-      (try_end),
-      
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-      
-        (particle_system_burst, "psys_death_cloud", pos5, 10),
-        (agent_play_sound,":shooter","snd_death_cld"),
-      
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (store_div,":half_damage",":max_damage",2),
-        (store_random_in_range, ":damage", ":half_damage",":max_damage"),
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", power_poison, ":power", ":spec_power"),
-      (try_end),
-    ])]
-    
-
-cast_magic_lightningball = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",300),
-        (assign,":damage",90),
-        (store_random_in_range, ":randon_damage", 10, 51),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", ":randon_damage"),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 2),
-      (try_end),
-      
-      (try_begin),
-        (this_or_next|eq, ":shooter_troop", "trp_knight_9_20"),
-        (agent_has_item_equipped,":shooter","itm_magic_book_2"),
-        (val_add,":max_range",":range_add"),
-        (val_mul,":spec_power",":power", 2),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":shooter_troop", "trp_knight_9_20"),
-        (val_mul,":max_damage",":power", 4),
-      (try_end),
-      
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-      
-      (copy_position,pos6,pos5),
-      (position_move_z,pos6,300),
-      (particle_system_burst, "psys_spark_explosion_small", pos6, 5),
-      (try_for_agents,":possable_agent"),
-        (gt,":damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", thunder, ":spec_power", ":power"),
-        #(call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", ice, 1, 15),
-      (try_end),
-    ])]
-
-cast_magic_lightning_burst = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-                                
-      (try_begin),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (store_div,":damage",":power", 3),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",1),
-      (try_end),
-     
-      (try_begin),
-        (eq, ":shooter_troop", "trp_knight_9_20"),
-        (val_add,":damage", 3),
-      (try_end),
-              
-        (assign,":victim",-1),        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 400),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-        (try_begin),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        (copy_position,pos4,pos5),
-        (try_for_range,":posz",0,":damage"),
-          (store_random_in_range, ":posx", -2,3),
-          (store_random_in_range, ":posy", -2,3),
-          (val_mul,":posx",20),
-          (val_mul,":posy",20),
-          (val_mul,":posz",500),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_lightningball", 0),
-        (try_end),
-    ])]
-    
-
-    
-cast_magic_death_cloud = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-                                
-      (try_begin),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (store_div,":damage",":power", 3),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",2),
-      (try_end),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_plague_staff_1"),
-        (val_mul,":damage",2),
-      (try_end),
-              
-        (assign,":victim",-1),        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-        
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 400),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        (copy_position,pos4,pos5),
-        (try_for_range,":posz",0,":damage"),
-          (store_random_in_range, ":posx", -2,3),
-          (store_random_in_range, ":posy", -2,3),
-          (val_mul,":posx",20),
-          (val_mul,":posy",20),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_plague_staff_1"),
-        (val_mul,":posx",5),
-        (val_mul,":posy",5),
-      (try_end),
-          (val_mul,":posz",500),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_death_cloud_dummy", 0),
-        (try_end),
-    ])]
-    
-cast_magic_death_cloud_2 = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-           
-      (assign, ":cost_stamina", 15),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_plague_staff_1"),
-        (assign, ":cost_stamina", 5),
-      (try_end),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_8"),
-        (assign, ":cost_stamina", 5),
-      (try_end),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-        (assign, ":cost_stamina", 5),
-      (try_end),
-      
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 30),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 3),
-      (try_end),
-      
-        (particle_system_burst, "psys_death_cloud", pos5, 10),
-        (agent_play_sound,":shooter","snd_death_cld"),
-      
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (store_div,":half_damage",":max_damage",2),
-        (store_random_in_range, ":damage", ":half_damage",":max_damage"),
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_8"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", power_poison, ":spec_power", ":power"),
-      (else_try),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", poison, ":spec_power", ":power"),
-      (try_end),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-          (store_agent_hit_points, ":inflicted_agent_hp", ":agent", 0),
-          (store_mul,":dead_power",":power", 5),
-          (ge, ":dead_power", ":inflicted_agent_hp"),
-          (agent_set_hit_points,":agent",0,0),
-          (agent_deliver_damage_to_agent, ":shooter", ":agent", 100),
-        (try_end),
-        
-      (try_end),
-    ])]
-    
-cast_magic_incediary_cloud = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      (assign,":damage",0),
-      
-      
-      (try_begin),
-        (eq, ":weapon", "itm_pit_lord_sword"),
-        (val_add,":power",3),
-      (try_end),
-      
-      (try_begin),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (store_div,":damage",":power", 3),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",1),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (val_mul,":damage",2),
-      (try_end),
-        
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-        
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 400),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-        
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        (copy_position,pos4,pos5),
-        (try_for_range,":posz",0,":damage"),
-          (store_random_in_range, ":posx", -2,3),
-          (store_random_in_range, ":posy", -2,3),
-          (val_mul,":posx",20),
-          (val_mul,":posy",20),
-          (val_mul,":posz",500),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_incediary_cloud_dummy", 0),
-        (try_end),
-    ])]
-    
-cast_magic_incediary_cloud_2 = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 20),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign, ":cost_stamina", 10),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_pit_lord_sword"),
-        (val_add,":power",3),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",50),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 40),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_div,":spec_power",":power", 2),
-        (val_add,":spec_power",1),
-        (store_div,":spec_time",":power", 3),
-        (val_add,":spec_time",2),
-      (try_end),
-
-
-      (particle_system_burst, "psys_incediary_cloud", pos5, 10),
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-
-        #(agent_set_slot, ":agent", slot_agent_special_damage_type, severe_burn),
-        #(agent_set_slot, ":agent", slot_agent_special_damage_time, 3),
-        
-        (store_div,":half_damage",":max_damage",2),
-        (store_random_in_range, ":damage", ":half_damage",":max_damage"),
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", severe_burn, ":spec_power", ":spec_time"),
-      (try_end),
-    ])]
-        
-cast_magic_apocalypse = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      (assign,":damage",0),
-      
-      (try_begin),
-        (store_mul,":damage",":power", 6),
-        (val_add,":damage",5),
-        (assign,":range",100),
-        (store_mul,":range_add",":power", 15),
-        (val_add,":range",":range_add"),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (val_mul, ":damage", 4),
-        (val_add,":range",":range_add"),
-      (try_end),
-      
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-      
-        (try_for_range,":unused",0,":damage"),
-          (assign, ":cost_stamina", 3),
-          (try_begin),
-            (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-            (ge, ":stamina", ":cost_stamina"),
-            (val_sub, ":stamina", ":cost_stamina"),
-            (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-          (else_try),
-            (assign, ":power", 1),
-          (try_end),
-          (copy_position,pos4,pos5),
-          (store_random_in_range, ":posx", -25,26),
-          (store_random_in_range, ":posy", -25,26),
-          (store_random_in_range, ":posz", 30,70),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (val_mul,":posz",100),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          #(position_move_z,pos5,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_fire_ray_dummy", 0),
-          (try_begin),
-            (eq, "$g_weapon_fire_particle", 0),
-            (gt,":damage",0),
-            (particle_system_burst, "psys_incediary_cloud", pos4, 5),
-          (else_try),  
-            (gt,":damage",0),
-            (particle_system_burst, "psys_incediary_cloud", pos4, 1),
-          (try_end),
-          (try_for_agents,":possable_agent"),
-            (gt,":damage",0),
-            (gt,":power",0),
-            (agent_is_alive,":possable_agent"),
-            (this_or_next|agent_is_ally,":shooter"),
-            (agent_is_ally,":possable_agent"),
-            (this_or_next|neg|agent_is_ally,":possable_agent"),
-            (neg|agent_is_ally,":shooter"),
-
-            (agent_get_position,pos3,":possable_agent"),
-            (get_distance_between_positions,":dist",pos4,pos3),
-            (le,":dist",250),
-            (assign,":agent",":possable_agent"),
-            (val_add,":power",-1),
-            (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", 200, severe_burn, ":power", 5),
-          (try_end),
-        (try_end),
-    ])]
-cast_magic_fire_ray_dummy = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      
-      (assign,":damage",0),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 1),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign, ":cost_stamina", 0),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (assign,":max_range",150),
-        (assign,":damage",50),
-        (store_mul,":damage_add",":power", 50),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":range_add",":power", 20),
-        (val_add,":max_range",":range_add"),
-      (try_end),
-      
-      (try_begin),
-        (eq, "$g_weapon_fire_particle", 0),
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Burning_Trail", pos5, 15),
-      (else_try),  
-        (gt,":damage",0),
-        (particle_system_burst, "psys_Burning_Trail", pos5, 3),
-      (try_end),
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (gt,":power",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        
-        (val_add,":power",-1),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":max_damage", burn, ":power", 5),
-      (try_end),
-    ])]
-        
-sldequiver_fire_trigger = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-
-
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",90),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 50),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_div,":spec_power",":power", 2),
-        (val_add,":spec_power",1),
-      (try_end),
-
-      #(agent_get_wielded_item, ":weapon", ":shooter", 0),
-         (particle_system_burst,"psys_arrows_fire_big",pos5,10),
-         (particle_system_burst, "psys_incediary_cloud", pos5, 5),
-      
-      (try_for_agents,":possable_agent"),
-         (gt,":max_damage",0),
-         (agent_is_alive,":possable_agent"),
-         (this_or_next|agent_is_ally,":shooter"),
-         (agent_is_ally,":possable_agent"),
-         (this_or_next|neg|agent_is_ally,":possable_agent"),
-         (neg|agent_is_ally,":shooter"),			      
-
-         (agent_get_position,pos3,":possable_agent"),
-         (get_distance_between_positions,":dist",pos5,pos3),
-         (neg|position_is_behind_position,pos5,pos3),
-         (le,":dist",":max_range"),
-         (assign,":agent",":possable_agent"),
-
-         (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", severe_burn, ":spec_power", ":power"),
-
-         (try_begin),
-           (neg|agent_is_human,":agent"),
-           (agent_set_animation,":agent","anim_horse_rear"), 
-           (agent_play_sound,":agent","snd_metal_hit_high_armor_high_damage"),
-           (agent_deliver_damage_to_agent,":shooter",":agent"),
-         (try_end),
-        
-      (try_end),
-    ]),
-    (ti_on_init_item, 
-      [
-        (set_position_delta, 0, 100, 0),
-        (particle_system_add_new, "psys_torch_fire"),
-        (particle_system_add_new, "psys_torch_smoke"),
-        (set_current_color, 150, 130, 70),
-        (add_point_light, 10, 30),
-      ]),
-]
-    
-cast_magic_armageddon = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      (assign,":damage",0),
-      
-      (assign, ":cost_stamina", 60),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_nilfurs_boast"),
-        (assign, ":cost_stamina", 20),
-      (try_end),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (assign,":cost_stamina",30),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (try_begin),
-        (store_div,":spec_power",":power", 2),
-        (val_add,":damage",":spec_power"),
-        (val_add,":damage",1),
-      (try_end),
-            
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_7"),
-        (val_add,":damage",":spec_power"),
-      (try_end),
-      
-        (copy_position, pos51, pos5),
-        (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", "trp_huge_inferno", 1),
-        
-        (store_mul,":damage_2",":damage", -1),
-        (val_add,":damage_2",1),
-        (try_for_range,":unused",0,":damage"),
-          (copy_position,pos4,pos5),
-          (store_random_in_range, ":posx", ":damage_2",":damage"),
-          (store_random_in_range, ":posy", ":damage_2",":damage"),
-          (store_random_in_range, ":posz", 10,100),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (val_mul,":posz",200),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          #(position_move_z,pos5,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_armageddon_dummy", 0),
-        (try_end),
-      
-      
-    ])]
-    
 cast_magic_armageddon_2 = [
   (ti_on_missile_hit, 
     [
@@ -4041,117 +1527,6 @@ cast_magic_meteor_shower = [
         (try_end),
     ])]
     
-cast_magic_heaven_fist = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-      (assign,":damage",0),
-      
-      (try_begin),
-        (eq, ":weapon", "itm_bishop_staff"),
-        (val_add,":power",2),
-      (else_try),
-        (eq, ":weapon", "itm_bishop_staff_2"),
-        (val_add,":power",3),
-      (try_end),
-      
-      (try_begin),
-        (assign,":range",100),
-        (assign,":damage",3),
-        (store_mul,":range_add",":power", 30),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",":power"),
-        (val_div,":damage",3),
-        (val_add,":damage",1),
-      (try_end),
-
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_4"),
-        (val_add,":range",":range_add"),
-        (val_add,":damage",2),
-      (try_end),
-
-      (try_begin),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast"),
-        (assign,":damage",1),
-      (else_try),
-        (eq, ":weapon", "itm_war_clerics_warhammer_cast_2"),
-        (assign,":damage",1),
-      (try_end),
-
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (try_begin),
-            (eq, ":player",":shooter"),
-            (agent_get_slot, ":target", ":player", slot_agent_player_target),
-          (else_try),
-            (agent_ai_get_look_target, ":target", ":shooter"),
-          (try_end),
-          (gt,":target",0),
-          (agent_is_alive,":target"),
-          (neg|eq, ":player",":target"),
-          (assign,":victim",":target"),
-        (try_end),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
-
-        (try_for_agents,":agent"),
-          (agent_is_alive,":agent"),
-          (agent_is_human,":agent"),
-          (eq,":victim",-1),
-          
-          (this_or_next|agent_is_ally,":shooter"),
-          (agent_is_ally,":agent"),
-          (this_or_next|neg|agent_is_ally,":agent"),
-          (neg|agent_is_ally,":shooter"),
-                              
-          (agent_get_position, pos2, ":agent"),
-          (get_distance_between_positions,":distance",pos2,pos5),
-          (le,":distance",":range"),
-          (call_script, "script_agent_get_num_companion_nearby", ":agent", 700),
-          (assign, ":num_enemies", reg0),
-          (this_or_next|le, ":num_enemies", 1),
-          (ge, ":num_enemies", 6),
-          (assign,":victim",":agent"),
-        (try_end),
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        
-        (position_move_z,pos5,500),
-        (try_for_range,":posz",0,":damage"),
-          (copy_position,pos4,pos5),
-          (store_random_in_range, ":posx", -10,11),
-          (store_random_in_range, ":posy", -10,11),
-          (val_mul,":posx",5),
-          (val_mul,":posy",5),
-          (val_mul,":posz",100),
-          (position_move_x,pos4,":posx"),
-          (position_move_y,pos4,":posy"),
-          (position_move_z,pos4,":posz"),
-          (position_move_z,pos5,":posz"),
-          (add_missile, ":shooter", pos4, 0, ":weapon", 0, "itm_magic_heaven_fist_dummy", 0),
-        (try_end),
-    ])]
-    
 cast_magic_heaven_fist_2 = [
   (ti_on_missile_hit, 
     [
@@ -4271,31 +1646,23 @@ natalyas_mark = [
       (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
       (assign,":damage",0),
       
-      (assign, ":cost_stamina", 10),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_natalya_slayer"),
-        (assign, ":cost_stamina", 0),
-      (try_end),
-      
-      
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
+    #  (assign, ":cost_stamina", 10),
+    #  (try_begin),
+    #    (agent_has_item_equipped,":shooter","itm_natalya_slayer"),
+    #    (assign, ":cost_stamina", 0),
+    #  (try_end),
       
       (try_begin),
         (agent_has_item_equipped,":shooter","itm_nilfurs_boast"),
         (val_mul,":power",2),
       (try_end),
       
-        (assign,":damage",3),
-        (val_add,":damage",":power"),
-      
-      
+           
+      (assign,":damage",3),
+      (val_add,":damage",":power"),
+      (assign,":max_range",500),
+      (store_mul,":range_add",":power", 100),
+      (val_add,":max_range",":range_add"),
       (position_get_distance_to_ground_level, ":distance", pos51),
       (try_begin),
         (lt, ":distance", 0),
@@ -4303,427 +1670,51 @@ natalyas_mark = [
         (position_move_z, pos51, 200),
       (try_end),                
         
-        (assign,":victim",-1),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (neq, ":player",":shooter"),
-          (store_trigger_param_2, ":hit_object_type"),
-          (neg|eq, ":hit_object_type", 1), # 1 = hostile agent
-          (agent_ai_get_look_target, ":target", ":shooter"),
-          (gt,":target",0),
-          (neg|eq, ":shooter",":player"),
-          (agent_is_alive,":target"),
-          (assign,":victim",":target"),
+        (set_fixed_point_multiplier, 1),
+        (assign, ":max", 0),
+        (try_for_agents, ":agent_no"),
+          (gt,":agent_no",":max"),
+          (assign, ":max", ":agent_no"),
         (try_end),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (assign,":victim",-2),
-        (try_end),
+        
+        
+        (try_for_range,":unused", 0, ":damage"),
+            (try_for_range, ":possable_agent", 0,":max"),
+            (try_begin),
+                (ge,":damage",0),
+              (else_try),
+                (assign, ":max", 0),
+            (try_end),
+            (set_fixed_point_multiplier, 1),
+            (agent_is_active, ":possable_agent"), 
+            (copy_position, pos5, pos51),
+            (agent_is_alive,":possable_agent"),
+            (agent_is_human,":possable_agent"),
+            (this_or_next|agent_is_ally,":shooter"),
+            (agent_is_ally,":possable_agent"),
+            (this_or_next|neg|agent_is_ally,":possable_agent"),
+            (neg|agent_is_ally,":shooter"),
 
-        (try_begin),
-          (eq,":victim",-2),
-          (copy_position, pos5, pos43),
-        (else_try),
-          (ge,":victim",0),
-          (agent_get_position, pos5, ":victim"),
-        (try_end),
-        
-        (store_mul,":damage_2",":damage", -1),
-        (val_add,":damage_2",1),
-        
-        (try_for_range, ":posz", 0, ":damage"),
-          (copy_position, pos52, pos51),
-          (assign, ":cost_stamina", 10),
-          (try_begin),
-            (agent_has_item_equipped,":shooter","itm_natalya_slayer"),
-            (assign, ":cost_stamina", 5),
+            (agent_get_position,pos3,":possable_agent"),
+            (get_distance_between_positions,":dist",pos5,pos3),
+            (le,":dist",":max_range"),
+            
+            (store_random_in_range, ":posx", -6000,6000),
+            (store_random_in_range, ":posy", -6000,6000),
+            (store_random_in_range, ":posz", -600,1600),
+            (val_mul,":posz",2),
+            (position_move_z, pos5, 1800),
+            (position_move_x,pos5,":posx"),
+            (position_move_y,pos5,":posy"),
+            (position_move_z,pos5,":posz"),
+            (call_script, "script_point_missile_position", pos5, pos3, 30),
+            (add_missile, ":shooter", pos5, 30, ":weapon", 0, "itm_magic_meteor_shower_dummy", 0),
+            (val_sub, ":damage", 1),
           (try_end),
-          (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-          (ge, ":stamina", ":cost_stamina"),
-          (val_sub, ":stamina", ":cost_stamina"),
-          (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-        
-          (store_random_in_range, ":posx", ":damage_2",":damage"),
-          (store_random_in_range, ":posy", ":damage_2",":damage"),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (val_mul,":posz",100),
-          (position_move_x,pos52,":posx"),
-          (position_move_y,pos52,":posy"),
-          (position_move_z,pos52,":posz"),
-          (position_move_z,pos51,":posz"),
-          (set_fixed_point_multiplier,1),
-          (add_missile, ":shooter", pos52, 0, ":weapon", 0, "itm_magic_meteor_shower_dummy", 0),
-        (try_end), 
-    ])]
-    
-cast_magic_summon_blade = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":number",10),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      (val_add,":power",1),
-        (val_mul,":number",2),
-        (store_mul,":number_2",":number", -1),
-        (val_add,":number_2",1),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-        
-        (try_for_range,":unused",0,":power"),
-          (copy_position,pos51,pos5),
-          (store_random_in_range, ":posx", ":number_2",":number"),
-          (store_random_in_range, ":posy", ":number_2",":number"),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (position_move_x,pos51,":posx"),
-          (position_move_y,pos51,":posy"),
-          (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-          (ge, ":stamina", 5),
-          (val_sub, ":stamina", 5),
-          (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-          (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", "trp_mercenaries_end", 1),
         (try_end),
     ])]
-    
-cast_magic_summon_Zombie_Lord = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":number",10),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      (val_add,":power",1),
-        (val_mul,":number",2),
-        (store_mul,":number_2",":number", -1),
-        (val_add,":number_2",1),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-        
-        (try_for_range,":unused",0,":power"),
-          (copy_position,pos51,pos5),
-          (store_random_in_range, ":posx", ":number_2",":number"),
-          (store_random_in_range, ":posy", ":number_2",":number"),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (position_move_x,pos51,":posx"),
-          (position_move_y,pos51,":posy"),
-          (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-          (ge, ":stamina", 5),
-          (val_sub, ":stamina", 5),
-          (try_begin),
-            (eq, ":shooter_troop", "trp_lich_dragon"),
-            (val_add, ":stamina", 5),
-          (try_end),
-          (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-          (store_random_in_range, ":r", 0, 3),
-          (assign,":number",1),
-          (try_begin),
-            (eq, ":r", 0),
-            (store_random_in_range, ":spawn_troop_id", "trp_zombie_1", "trp_skeleton"),
-          (else_try),
-            (store_random_in_range, ":spawn_troop_id", "trp_draugr_1", "trp_mummy_2_1"),
-          (try_end),
-          (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", 1),
-        (try_end),
-    ])]
-    
-cast_magic_summon_Soulhunter = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":number",10),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-      
-      (val_add,":power",1),
-      (val_mul,":number",2),
-      (store_mul,":number_2",":number", -1),
-      (val_add,":number_2",1),
-        (try_for_range,":unused",0,":power"),
-          (copy_position,pos51,pos5),
-          (store_random_in_range, ":posx", ":number_2",":number"),
-          (store_random_in_range, ":posy", ":number_2",":number"),
-          (val_mul,":posx",50),
-          (val_mul,":posy",50),
-          (position_move_x,pos51,":posx"),
-          (position_move_y,pos51,":posy"),
-          (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-          (ge, ":stamina", 5),
-          (val_sub, ":stamina", 5),
-          (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-          (store_random_in_range, ":r", 0, 2),
-          (assign,":number",1),
-          (try_begin),
-            (eq, ":r", 0),
-            (assign, ":spawn_troop_id", "trp_ghost"),
-          (else_try),
-            (assign, ":spawn_troop_id", "trp_wight"),
-          (try_end),
-          (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", 1),
-        (try_end),
-      (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", "trp_wraith", 1),
-    ])]
-    
-    
-cast_magic_summon_undead = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":spawn_troop_id",0),
-      (assign,":number",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 33),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (store_character_level,":troop_level",":shooter_troop"),
-      (val_mul,":power",5),
-      (val_add,":power",":troop_level"),
-      (try_begin),
-        (ge, ":power", 60),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",3),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_draugr_lord"),
-          (assign,":number",2),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_wight"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_dullahan"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 45),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_draugr_lord"),
-          (assign,":number",1),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_wight"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_dullahan"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 30),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_dullahan"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_skeleton_lord"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_draugr_3"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 15),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_draugr_2"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_skeleton_warrior"),
-          (assign,":number",1),
-        (else_try),
-          (assign,":spawn_troop_id","trp_zombie_2"),
-        (try_end),
-      (else_try),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-          (try_begin),
-            (ge, ":r", 8),
-            (assign,":spawn_troop_id","trp_draugr_1"),
-          (else_try),
-            (ge, ":r", 5),
-            (assign,":spawn_troop_id","trp_se_billman_1"),
-          (else_try),
-            (assign,":spawn_troop_id","trp_zombie_1"),
-          (try_end),
-      (try_end),
-      
-      (try_begin),
-        (eq, ":shooter_troop", "trp_mummy_3"),
-        (assign,":spawn_troop_id","trp_mummy_2"),
-        (assign,":number",2),
-      (else_try),
-        (eq, ":shooter_troop", "trp_adventurer_troop_15"),
-        (assign,":spawn_troop_id","trp_demon_8"),
-        (assign,":number",2),
-      (else_try),
-        (eq, ":shooter_troop", "trp_adventurer_troop_1"),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_wight"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_ghost"),
-          (assign,":number",4),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_polish_which_1"),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_air_elemental"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_ghost"),
-          (assign,":number",2),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_polish_which_2"),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 5),
-          (assign,":spawn_troop_id","trp_demon_4"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_wight"),
-          (assign,":number",2),
-        (try_end),
-      (else_try),
-        (this_or_next|eq,":weapon","itm_dragonpriest_staff_1"),
-        (this_or_next|eq, ":shooter_troop", "trp_lich_3"),
-        (eq, ":shooter_troop", "trp_knight_10_14"),
-        (assign,":spawn_troop_id","trp_draugr_lord"),
-        (assign,":number",2),
-      (else_try),
-        (eq, ":shooter_troop", "trp_mummy_4"),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 9),
-          (assign,":spawn_troop_id","trp_werewolf_1_a"),
-          (assign,":number",1),
-        (else_try),
-          (ge, ":r", 7),
-          (assign,":spawn_troop_id","trp_werewolf_1"),
-        (else_try),
-          (ge, ":r", 5),
-          (assign,":spawn_troop_id","trp_mummy_2_1"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_mummy_2"),
-        (try_end),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_mummy_4"),
-        (else_try),
-          (ge, ":r", 5),
-          (assign,":spawn_troop_id","trp_werewolf_1_a"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_mummy_3"),
-        (try_end),
-      (else_try),
-        (agent_has_item_equipped,":shooter","itm_magic_book_6"),
-        (store_random_in_range, ":ran", 0, 8),
-        (assign,":number",1),
-        (try_begin),
-          (eq,":ran",0),
-          (assign,":spawn_troop_id","trp_lich_2"),
-        (else_try),  
-          (eq,":ran",1),
-          (assign,":spawn_troop_id","trp_ghost_dragon"),
-        (else_try),  
-          (eq,":ran",2),
-          (assign,":spawn_troop_id","trp_lich_dragon"),
-        (else_try),  
-          (eq,":ran",3),
-          (assign,":spawn_troop_id","trp_wraith"),
-        (else_try),  
-          (eq,":ran",4),
-          (assign,":spawn_troop_id","trp_death"),
-        (else_try),  
-          (eq,":ran",5),
-          (assign,":spawn_troop_id","trp_bone_dragon"),
-          (assign,":number",2),
-        (else_try),  
-          (eq,":ran",6),
-          (assign,":spawn_troop_id","trp_draugr_lord"),
-        (else_try),  
-          (eq,":ran",7),
-          (assign,":spawn_troop_id","trp_mummy_3"),
-        (try_end),  
-      (try_end),
-      
-      
-      (gt,":spawn_troop_id",0),
-      (gt,":number",0),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-        
-        (copy_position, pos51, pos5),
-        (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", ":number"),
-    ])]
-    
+ 
+ 
 goblin_summon = [
   (ti_on_missile_hit, 
     [
@@ -4756,422 +1747,7 @@ goblin_summon = [
     ])]
     
     
-cast_magic_summon_neutral = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (assign,":spawn_troop_id",0),
-      (assign,":number",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 33),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-            
-      (store_character_level,":troop_level",":shooter_troop"),
-      (val_mul,":power",5),
-      (val_add,":power",":troop_level"),
-      (try_begin),
-        (ge, ":power", 60),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_fire_elemental_3"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_earth_elemental_3"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_water_elemental_3"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_golem_4"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 40),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_gargoyle"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_earth_elemental_2"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_fire_elemental_2"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_water_elemental_2"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 20),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_air_elemental_2"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_water_elemental"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_mercenaries_end"),
-          (assign,":number",2),
-        (else_try),
-          (assign,":spawn_troop_id","trp_golem_3"),
-        (try_end),
-      (else_try),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (eq, ":r", 1),
-          (assign,":spawn_troop_id","trp_air_elemental"),
-        (else_try),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_golem_1"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_firefly"),
-          (assign,":number",2),
-        (else_try),
-          (assign,":spawn_troop_id","trp_dragonfly"),
-          (assign,":number",2),
-        (try_end),
-      (try_end),
-      
-      (try_begin),
-        (eq,"$background_answer_2",cb2_apprentice),
-        (eq,"$background_answer_3",cb3_craftsman),
-        (lt, ":power", 40),
-        (assign,":spawn_troop_id","trp_golem_3"),
-        (assign,":number",1),
-      (else_try),
-        (lt, ":power", 20),
-        (eq,"$background_answer_3",cb3_craftsman),
-        (assign,":spawn_troop_id","trp_golem_1"),
-        (assign,":number",1),
-      (try_end),
-            
-      (try_begin),
-        (eq, ":shooter_troop", "trp_grandelf_mage_1"),
-        (store_random_in_range, ":r", 0, 10),
-        (try_begin),
-          (assign, ":spawn_troop_id","trp_earth_elemental_3"),
-          (assign,":number",2),
-        (else_try),
-          (assign, ":spawn_troop_id","trp_earth_elemental_2"),
-          (assign,":number",2),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_grandelf_mage_2"),
-        (store_random_in_range, ":r", 0, 10),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign, ":spawn_troop_id","trp_ent_1"),
-          (assign,":number",1),
-        (else_try),
-          (assign, ":spawn_troop_id","trp_pixie"),
-          (assign,":number",2),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_woodelf_druid_2"),
-        (store_random_in_range, ":r", 0, 10),
-        (try_begin),
-          (ge, ":r", 9),
-          (store_random_in_range, ":spawn_troop_id","trp_red_dragon","trp_werewolf_1"),
-          (assign,":number",1),
-        (else_try),
-          (ge, ":r", 4),
-          (assign, ":spawn_troop_id","trp_ent_2"),
-          (assign,":number",1),
-        (else_try),
-          (store_random_in_range, ":spawn_troop_id","trp_air_elemental_2","trp_air_elemental_3"),
-          (assign,":number",2),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_woodelf_druid_1"),
-        (store_random_in_range, ":r", 0, 10),
-        (try_begin),
-          (ge, ":r", 6),
-          (assign, ":spawn_troop_id","trp_ent_2"),
-          (assign,":number",1),
-        (else_try),
-          (ge, ":r", 4),
-          (store_random_in_range, ":spawn_troop_id","trp_air_elemental","trp_air_elemental_2"),
-          (assign,":number",2),
-        (else_try),
-          (assign, ":spawn_troop_id","trp_dryad"),
-          (assign,":number",3),
-        (try_end),
-      (else_try),
-        (eq, ":shooter_troop", "trp_human_magic_2"),
-        (assign,":spawn_troop_id","trp_golem_1"),
-        (assign,":number",2),
-      (else_try),
-        (eq, ":shooter_troop", "trp_human_magic_3"),
-        (assign,":spawn_troop_id","trp_golem_3"),
-        (assign,":number",2),
-      (else_try),
-        (eq, ":shooter_troop", "trp_human_magic_4"),
-        (assign,":spawn_troop_id","trp_we_recruit"),
-        (assign,":number",1),
-      (try_end),
-      
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_5"),
-        (store_random_in_range, ":r", 0, 4),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 3),
-          (assign,":spawn_troop_id","trp_fire_elemental_3"),
-        (else_try),
-          (ge, ":r", 2),
-          (assign,":spawn_troop_id","trp_earth_elemental_3"),
-        (else_try),
-          (ge, ":r", 1),
-          (assign,":spawn_troop_id","trp_water_elemental_3"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_air_elemental_3"),
-          (assign,":number",3),
-        (try_end),
-      (try_end),
-      
-      (gt,":spawn_troop_id",0),
-      (gt,":number",0),
-        
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-        
-        (copy_position, pos51, pos5),
-        (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", ":number"),
-    ])]
-    
-cast_magic_summon_demon = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_necromancy, ":shooter_troop"),
-      
-      (assign, ":cost_stamina", 50),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      
-      (assign,":spawn_troop_id",0),
-      (assign,":number",0),
-      (store_character_level,":troop_level",":shooter_troop"),
-      (val_mul,":power",5),
-      (val_add,":power",":troop_level"),
-      (try_begin),
-        (ge, ":power", 60),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",1),
-        (try_begin),
-          (ge, ":r", 9),
-          (assign,":spawn_troop_id","trp_demon_6"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_demon_8"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_demon_5"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_demon_human_5_2"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 45),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_werewolf_1_a"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_demon_4_2"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_huge_inferno"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_demon_4"),
-        (try_end),
-      (else_try),
-        (ge, ":power", 30),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 8),
-          (assign,":spawn_troop_id","trp_demon_human_4"),
-        (else_try),
-          (ge, ":r", 6),
-          (assign,":spawn_troop_id","trp_demon_4"),
-        (else_try),
-          (ge, ":r", 4),
-          (assign,":spawn_troop_id","trp_demon_3"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_inferno"),
-        (try_end),
-      (else_try),
-        (store_random_in_range, ":r", 0, 10),
-        (assign,":number",2),
-        (try_begin),
-          (ge, ":r", 7),
-          (assign,":spawn_troop_id","trp_demon_2"),
-        (else_try),
-          (ge, ":r", 3),
-          (assign,":spawn_troop_id","trp_demon_1_2"),
-        (else_try),
-          (assign,":spawn_troop_id","trp_demon_1"),
-        (try_end),
-      (try_end),
-     
-        (try_begin),
-          (eq, ":weapon", "itm_pit_lord_sword"),
-          (store_random_in_range, ":r", 0, 10),
-          (assign,":number",2),
-          (try_begin),
-            (ge, ":r", 9),
-            (assign,":spawn_troop_id","trp_demon_6"),
-          (else_try),
-            (ge, ":r", 6),
-            (assign,":spawn_troop_id","trp_demon_8"),
-          (else_try),
-            (ge, ":r", 4),
-            (assign,":spawn_troop_id","trp_demon_5"),
-          (else_try),
-            (assign,":spawn_troop_id","trp_demon_human_5_2"),
-          (try_end),
-        (else_try),
-          (eq, ":weapon", "itm_balor_sword"),
-          (store_random_in_range, ":r", 0, 10),
-          (assign,":number",2),
-          (try_begin),
-            (ge, ":r", 8),
-            (assign,":spawn_troop_id","trp_demon_4_2"),
-          (else_try),
-            (ge, ":r", 6),
-            (assign,":spawn_troop_id","trp_werewolf_1_a"),
-          (else_try),
-            (ge, ":r", 4),
-            (assign,":spawn_troop_id","trp_huge_inferno"),
-          (else_try),
-            (assign,":spawn_troop_id","trp_demon_4"),
-          (try_end),
-        (else_try),
-          (eq, ":weapon", "itm_mark_chaos_1"),
-          (store_random_in_range, ":r", 0, 10),
-          (assign,":number",1),
-          
-          (try_begin),
-            (ge, ":r", 8),
-            (assign,":spawn_troop_id","trp_demon_4_2"),
-          (else_try),
-            (ge, ":r", 6),
-            (assign,":spawn_troop_id","trp_werewolf_1_a"),
-          (else_try),
-            (ge, ":r", 4),
-            (assign,":spawn_troop_id","trp_huge_inferno"),
-          (else_try),
-            (assign,":spawn_troop_id","trp_demon_4"),
-          (try_end),
-        (else_try),
-          (eq, ":weapon", "itm_shaman_staff_1"),
-          (assign,":spawn_troop_id","trp_fire_elemental"),
-          (assign,":number",2),
-        (else_try),
-          (eq, ":weapon", "itm_sorcerer_staff_1"),
-          (store_random_in_range, ":r", 0, 10),
-          (try_begin),
-            (ge, ":r", 8),
-            (assign,":spawn_troop_id","trp_demon_4"),
-            (assign,":number",1),
-          (else_try),
-            (ge, ":r", 6),
-            (assign,":spawn_troop_id","trp_demon_3"),
-            (assign,":number",1),
-          (else_try),
-            (ge, ":r", 3),
-            (assign,":spawn_troop_id","trp_demon_1_2"),
-            (assign,":number",2),
-          (else_try),
-            (assign,":spawn_troop_id","trp_demon_1"),
-            (assign,":number",2),
-          (try_end),
-        (else_try),
-          (eq, ":weapon", "itm_demon_staff_1"),
-          (store_random_in_range, ":r", 0, 10),
-          (try_begin),
-            (eq, ":r", 9),
-            (assign,":spawn_troop_id","trp_demon_4_2"),
-            (assign,":number",1),
-          (else_try),
-            (eq, ":r", 8),
-            (assign,":spawn_troop_id","trp_werewolf_1_a"),
-            (assign,":number",1),
-          (else_try),
-            (ge, ":r", 6),
-            (assign,":spawn_troop_id","trp_demon_4"),
-            (assign,":number",1),
-          (else_try),
-            (ge, ":r", 4),
-            (assign,":spawn_troop_id","trp_demon_3"),
-            (assign,":number",2),
-          (else_try),
-            (ge, ":r", 2),
-            (assign,":spawn_troop_id","trp_demon_2"),
-            (assign,":number",2),
-          (else_try),
-            (assign,":spawn_troop_id","trp_demon_1_2"),
-            (assign,":number",3),
-          (try_end),
-          
-        (try_end),
-        
-        
-      (gt,":spawn_troop_id",0),
-      (gt,":number",0),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_magic_book_7"),
-        (gt,":spawn_troop_id",0),
-        (val_add,":number",2),
-      (try_end),
-        (try_begin),
-          (get_player_agent_no,":player"),
-          (eq,":shooter",":player"),
-          (eq, "$skill_mask_start", 1),
-          (key_is_down, key_left_shift),
-          (copy_position, pos5, pos43),
-        (try_end),
-      
-        (copy_position, pos51, pos5),
-        (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", ":number"),
-    ])]
-    
+
 cast_magic_basic_curse = [
   (ti_on_missile_hit, 
     [
@@ -5261,130 +1837,6 @@ cast_magic_curse = [
           (assign,":max_damage",100),
         (try_end),
     ])]
-   
-cast_magic_soul_Leech = [
-  (ti_on_missile_hit, 
-    [
-      (store_trigger_param_1, ":shooter"),
-      (copy_position,pos5,pos1),
-      (copy_position,pos51,pos1),
-      (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt,":weapon",0),
-      
-      (assign,":max_damage",0),
-      (item_has_property, ":weapon", itp_is_magic_staff),
-      (agent_get_troop_id, ":shooter_troop", ":shooter"),
-      (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
-           
-      (assign, ":cost_stamina", 25),
-      (try_begin),
-        (agent_has_item_equipped,":shooter","itm_plague_staff_1"),
-        (assign, ":cost_stamina", 5),
-      (try_end),
-      (try_begin),
-        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
-        (ge, ":stamina", ":cost_stamina"),
-        (val_sub, ":stamina", ":cost_stamina"),
-        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
-      (else_try),
-        (assign, ":power", 0),
-      (try_end),
-      (assign, ":num_hit", 1),
-      (try_begin),
-        (assign,":max_range",200),
-        (assign,":damage",50),
-        (assign,":heal",50),
-        (store_mul,":range_add",":power", 40),
-        (store_mul,":damage_add",":power", 30),
-        (val_add,":max_range",":range_add"),
-        (store_add,":max_damage",":damage",":damage_add"),
-        (store_mul,":spec_power",":power", 3),
-        (val_add,":heal",":damage_add"),
-      (try_end),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_8"),
-          (val_add,":max_range",":range_add"),
-        (try_end),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-          (val_add,":max_range",":range_add"),
-        (try_end),
-      
-        (particle_system_burst, "psys_death_cloud_blue", pos5, 10),
-        (agent_play_sound,":shooter","snd_death_cld"),
-        (store_div,":half_damage",":max_damage",2),
-      (try_for_agents,":possable_agent"),
-        (gt,":max_damage",0),
-        (agent_is_alive,":possable_agent"),
-        (this_or_next|agent_is_ally,":shooter"),
-        (agent_is_ally,":possable_agent"),
-        (this_or_next|neg|agent_is_ally,":possable_agent"),
-        (neg|agent_is_ally,":shooter"),
-
-        (agent_get_position,pos3,":possable_agent"),
-        (get_distance_between_positions,":dist",pos5,pos3),
-        (le,":dist",":max_range"),
-        (assign,":agent",":possable_agent"),
-        (store_random_in_range, ":damage", ":half_damage",":max_damage"),
-        #(agent_deliver_damage_to_agent,":shooter",":agent", ":damage"),
-        (call_script, "script_magic_deliver_damage_to_agent", ":shooter", ":agent", ":damage", curse, ":spec_power", ":power"),
-        (val_add, ":num_hit", 1),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_9"),
-          (store_agent_hit_points, ":inflicted_agent_hp", ":agent", 0),
-          (store_mul,":dead_power",":power", 5),
-          (ge, ":dead_power", ":inflicted_agent_hp"),
-          (agent_set_hit_points,":agent",0,0),
-          (agent_deliver_damage_to_agent, ":shooter", ":agent", 100),
-        (try_end),
-        (try_begin),
-          (agent_has_item_equipped,":shooter","itm_magic_book_8"),
-          (store_agent_hit_points, ":hp", ":agent"),
-          (le, ":hp", 5),
-          (store_random_in_range, ":r", 0, 2),
-          (try_begin),
-            (eq, ":r", 0),
-            (store_random_in_range, ":spawn_troop_id", "trp_zombie_1", "trp_skeleton"),
-          (else_try),
-            (store_random_in_range, ":spawn_troop_id", "trp_draugr_1", "trp_mummy_2_1"),
-          (try_end),
-          (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", 1),
-        (try_end),
-        
-      (try_end),
-        
-      (store_agent_hit_points, ":hp", ":shooter"),
-      (store_mul,":spec_power",":num_hit", 25),
-      (val_add, ":hp", 50),
-      (val_add, ":hp", ":spec_power"),
-      (agent_set_hit_points, ":shooter", ":hp"),
-        
-      (agent_get_position,pos6,":shooter"),
-      (try_for_agents,":possable_agent"),
-          (gt,":num_hit",0),
-          (agent_is_alive,":possable_agent"),
-
-          (this_or_next|agent_is_ally,":shooter"),
-          (neg|agent_is_ally,":possable_agent"),
-          (this_or_next|agent_is_ally,":possable_agent"),
-          (neg|agent_is_ally,":shooter"),
-
-
-          (agent_get_position,pos3,":possable_agent"),
-          (get_distance_between_positions,":dist",pos6,pos3),
-          (le,":dist",":max_range"),
-          (assign,":agent",":possable_agent"),
-          (val_add, ":num_hit", -1),
-          (store_agent_hit_points, ":hp", ":agent"),
-          (val_add, ":hp", ":heal"),
-          (agent_set_hit_points, ":agent", ":hp"),
-          (position_move_z,pos3,100),
-          (particle_system_burst, "psys_heal_effect", pos3, 30), 
-      (try_end),
-      
-      
-    ])]
-    
    
 
 cast_magic_Slow = [
@@ -5530,8 +1982,6 @@ cast_magic_weakness = [
         (try_end),
     ])]
    
-
-
 cast_magic_heal = [
   (ti_on_missile_hit, 
     [
@@ -5577,13 +2027,17 @@ cast_magic_heal = [
         (try_end),
     ])]
    
+   
+   
+   
+   
 magic_cast_trigger = [
   (ti_on_weapon_attack, 
     [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos51,pos1),
       (play_sound,"snd_spell_cast"),
-      (call_script, "script_cf_magic_cast_trigger", ":shooter"),
+      (call_script, "script_cf_magic_cast_trigger", ":shooter",-1),
     ])]
 
 magic_bow_trigger = [
@@ -5775,6 +2229,7 @@ musket_trigger = [
       (store_trigger_param_1, ":shooter"),
       (assign,":cur_ammo_id","itm_cartridges"),#as default
       (assign,":item_slot_num",4),
+      (assign,":no_fire_particle",0),
       (try_for_range,":cur_item_slot",0,":item_slot_num"),
         (agent_get_item_slot, ":item_no", ":shooter", ":cur_item_slot"),
         (gt,":item_no",-1),
@@ -5795,6 +2250,41 @@ musket_trigger = [
       (try_end),  
       (play_sound,"snd_release_musket"),
       
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_6"),
+        (assign,":item_slot_num",4),
+        (assign,":cur_weapon_slot",-1),
+        (agent_get_wielded_item, ":weapon", ":shooter", 0),
+        (try_for_range,":cur_item_slot",0,":item_slot_num"),
+          (eq,":cur_weapon_slot",-1),
+          (agent_get_item_slot, ":item_no", ":shooter", ":cur_item_slot"),
+          (eq,":item_no",":weapon"),
+          (assign,":cur_weapon_slot",":cur_item_slot"),
+          (assign,":item_slot_num", 0),
+        (try_end),
+        (agent_get_item_cur_ammo, ":cur_ammo", ":shooter",":cur_weapon_slot"),
+        
+      #  (agent_get_wielded_item, ":weapon", ":shooter", 0),
+      #  (agent_get_ammo, ":cur_ammo", ":shooter", 1),
+      #  (assign,reg61,":cur_ammo"),
+      #  (display_message,"@{reg61}"),
+        (le, ":cur_ammo", 0),
+        (agent_set_ammo,":shooter",":weapon",1),
+      (try_end),  
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_5"),
+        (assign, ":cost_stamina", 10),
+        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
+        (ge, ":stamina", 50),
+        (val_sub, ":stamina", ":cost_stamina"),
+        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
+        (call_script, "script_cf_agent_aimshot", ":shooter",1,":cur_ammo_id"),
+      (try_end),  
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_4"),
+        (assign,":no_fire_particle",1),
+      (try_end),  
+      (eq,":no_fire_particle",0),
       (try_begin),
         (eq, "$g_weapon_fire_particle", 0),
         (position_move_x,pos1,0),
@@ -5823,6 +2313,7 @@ pistol_trigger = [
       (store_trigger_param_1, ":shooter"),
       (assign,":cur_ammo_id","itm_cartridges"),#as default
       (assign,":item_slot_num",4),
+      (assign,":no_fire_particle",0),
       (try_for_range,":cur_item_slot",0,":item_slot_num"),
         (agent_get_item_slot, ":item_no", ":shooter", ":cur_item_slot"),
         (gt,":item_no",-1),
@@ -5836,7 +2327,9 @@ pistol_trigger = [
       
       (try_begin),
         (agent_get_wielded_item, ":weapon", ":shooter", 0),
+                          
         (eq,":weapon","itm_zlmg"),
+        (assign,":no_fire_particle",1),
         (agent_get_horse,":horse",":shooter"),
         (agent_get_look_position,pos3,":shooter"),
         (agent_get_position,pos4,":shooter"),
@@ -5863,7 +2356,42 @@ pistol_trigger = [
         (call_script, "script_musket_damage_agent_1151", ":shooter"), 
       (try_end),  
       (play_sound,"snd_release_musket_medium"),
-      
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_6"),
+        (assign,":item_slot_num",4),
+        (assign,":cur_weapon_slot",-1),
+        (agent_get_wielded_item, ":weapon", ":shooter", 0),
+        (try_for_range,":cur_item_slot",0,":item_slot_num"),
+          (eq,":cur_weapon_slot",-1),
+          (agent_get_item_slot, ":item_no", ":shooter", ":cur_item_slot"),
+          (eq,":item_no",":weapon"),
+          (assign,":cur_weapon_slot",":cur_item_slot"),
+          (assign,":item_slot_num", 0),
+        (try_end),
+        (agent_get_item_cur_ammo, ":cur_ammo", ":shooter",":cur_weapon_slot"),
+        
+      #  (agent_get_wielded_item, ":weapon", ":shooter", 0),
+      #  (agent_get_ammo, ":cur_ammo", ":shooter", 1),
+      #  (assign,reg61,":cur_ammo"),
+      #  (display_message,"@{reg61}"),
+        (le, ":cur_ammo", 0),
+        (agent_set_ammo,":shooter",":weapon",1),
+      (try_end),        
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_5"),
+        (assign, ":cost_stamina", 10),
+        (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
+        (ge, ":stamina", 50),
+        (val_sub, ":stamina", ":cost_stamina"),
+        (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
+        (call_script, "script_cf_agent_aimshot", ":shooter",1,":cur_ammo_id"),
+      (try_end),  
+
+      (try_begin),
+        (call_script, "script_cf_agent_has_skill", ":shooter", "itm_perk_musket_4"),
+        (assign,":no_fire_particle",1),
+      (try_end),  
+      (eq,":no_fire_particle",0),
       (try_begin),
         (eq, "$g_weapon_fire_particle", 0),
         (position_move_x,pos1,27),
@@ -6116,20 +2644,19 @@ missile_force_trigger = [
     [
       (store_trigger_param_1, ":shooter"),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-	  (gt, ":weapon", 0),
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
       (agent_get_troop_id, ":shooter_troop", ":shooter"),
       (store_skill_level, ":power", skl_magic_power, ":shooter_troop"),
       
-      #(try_begin),
-      (assign,":max_range",200),
-      (assign,":damage",50),
-      (store_mul,":range_add",":power", 50),
-      (store_mul,":damage_add",":power", 20),
-      (val_add,":max_range",":range_add"),
-      (store_add,":max_damage",":damage",":damage_add"),
-      #(try_end),
+      (try_begin),
+        (assign,":max_range",200),
+        (assign,":damage",50),
+        (store_mul,":range_add",":power", 25),
+        (store_mul,":damage_add",":power", 20),
+        (val_add,":max_range",":range_add"),
+        (store_add,":max_damage",":damage",":damage_add"),
+      (try_end),
      
      (try_begin),
         (gt,":max_damage",0),
@@ -6157,6 +2684,7 @@ missile_force_trigger = [
           (position_move_z, pos30, 200),
           (particle_system_burst, "psys_stun_effect", pos30, 1),
         (else_try),
+           (neg|agent_is_human,":agent"),
           (agent_set_animation, ":agent", "anim_horse_rear"),
         (try_end),
 
@@ -6173,7 +2701,7 @@ missile_freezing_trigger = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-      (gt, ":weapon", 0),
+      
       (assign,":damage",0),
       (item_has_property, ":weapon", itp_is_magic_staff),
 
@@ -6335,7 +2863,6 @@ missile_fire_2_trigger = [
       (store_trigger_param_1, ":shooter"),
       (copy_position,pos5,pos1),
       (agent_get_wielded_item, ":weapon", ":shooter", 0),
-	  (gt, ":weapon", 0),
       (assign,":damage",0),
 
       (item_has_property, ":weapon", itp_is_magic_staff),
@@ -6661,9 +3188,9 @@ items = [
 
 ["grim_raider_armor_2", "Grim Raider_Armor", [("DELFbody2_combined",0)], itp_civilian|itp_type_body_armor|itp_covers_legs|itp_replaces_shoes, 0, 20000, weight(20)|abundance(100)|head_armor(20)|body_armor(90)|leg_armor(80)|difficulty(20), imodbits_good_plate ,[], [fac_beast]],
 ["mistress_armor", "Mistress_armor", [("DELFbody1_combined",0)], itp_civilian|itp_type_body_armor|itp_covers_legs|itp_replaces_shoes, 0, 24000, weight(28)|abundance(100)|head_armor(20)|body_armor(100)|leg_armor(90)|difficulty(20), imodbits_good_plate ,[], [fac_beast]],
-["drow_shield", "drow_shield", [("drow_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2156, weight(2)|shield_width(50)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield, [], [fac_beast] ],
-["drow_round_shield", "drow_round_shield", [("drow_round_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, 0, 1685, weight(1)|shield_width(40)|shield_height(40)|abundance(10)|hit_points(700)|body_armor(30)|spd_rtng(96), imodbits_shield , [], [fac_beast]],
-["drow_shield_rider", "drow_shield", [("sh_snake", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 4000, weight(2)|shield_width(30)|shield_height(60)|abundance(10)|hit_points(800)|body_armor(40)|spd_rtng(92), imodbits_shield , [], [fac_beast]],
+["drow_shield", "drow_shield", [("drow_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2156, weight(2)|shield_width(50)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield_metal, [], [fac_beast] ],
+["drow_round_shield", "drow_round_shield", [("drow_round_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, 0, 1685, weight(1)|shield_width(40)|shield_height(40)|abundance(10)|hit_points(700)|body_armor(30)|spd_rtng(96), imodbits_shield_metal , [], [fac_beast]],
+["drow_shield_rider", "drow_shield", [("sh_snake", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 4000, weight(2)|shield_width(30)|shield_height(60)|abundance(10)|hit_points(800)|body_armor(40)|spd_rtng(92), imodbits_shield_metal , [], [fac_beast]],
 
 ["drow_crossbow", "Crossbow", [("drow_crossbow",0)], itp_merchandise|itp_type_crossbow|itp_primary|itp_is_magic_staff, itcf_shoot_pistol|itcf_reload_pistol, 1200, weight(3)|spd_rtng(50)|shoot_speed(100)|thrust_damage(65,pierce)|max_ammo(6), imodbits_crossbow , [], [fac_beast]],
 
@@ -6802,8 +3329,8 @@ items = [
 ["vaegir_charger","Charger", [("mongols_charger3",0)], itp_merchandise|itp_type_horse, 0, 2511,abundance(40)|hit_points(170)|body_armor(60)|difficulty(5)|horse_speed(47)|horse_maneuver(49)|horse_charge(40)|horse_scale(100),imodbits_horse_armor, [], ee_faction],
 ["vaegir_charger_2","Charger", [("lamellar_charger_b",0)], itp_merchandise|itp_type_horse, 0, 2511,abundance(40)|hit_points(170)|body_armor(60)|difficulty(5)|horse_speed(47)|horse_maneuver(49)|horse_charge(40)|horse_scale(100),imodbits_horse_armor, [], ee_faction],
 
-["warhorse_steppe","Steppe Charger", [("easterling_warhorse01",0)], itp_merchandise|itp_type_horse, 0, 2000,abundance(45)|hit_points(175)|body_armor(60)|difficulty(4)|horse_speed(40)|horse_maneuver(50)|horse_charge(28)|horse_scale(112),imodbits_horse_armor, [], ee_faction],
-["khergit_charger", "khergit Charger", [("easterling_warhorse01",0)], itp_type_horse|itp_merchandise, 0, 1850, abundance(45)|hit_points(180)|body_armor(60)|difficulty(4)|horse_speed(43)|horse_maneuver(44)|horse_charge(35)|horse_scale(110), imodbits_horse_armor , [], tatar_faction],
+["warhorse_steppe","Steppe Charger", [("rhunhorseheav1",0)], itp_merchandise|itp_type_horse, 0, 2000,abundance(45)|hit_points(175)|body_armor(60)|difficulty(4)|horse_speed(40)|horse_maneuver(50)|horse_charge(28)|horse_scale(112),imodbits_horse_armor, [], ee_faction],
+["khergit_charger", "khergit Charger", [("rhunhorseheav2",0)], itp_type_horse|itp_merchandise, 0, 1850, abundance(45)|hit_points(180)|body_armor(60)|difficulty(4)|horse_speed(43)|horse_maneuver(44)|horse_charge(35)|horse_scale(110), imodbits_horse_armor , [], tatar_faction],
 ["khergit_war_horse", "khergit war horse", [("dragonhorse",0)], itp_type_horse|itp_merchandise, 0, 2500, abundance(45)|hit_points(220)|body_armor(60)|difficulty(5)|horse_speed(43)|horse_maneuver(44)|horse_charge(35)|horse_scale(110), imodbits_horse_armor , [], tatar_faction],
 
 ["lamellar_warhorse","War Horse", [("3lamellar_charger",0)], itp_merchandise|itp_type_horse, 0, 1824,abundance(50)|hit_points(170)|body_armor(30)|difficulty(4)|horse_speed(42)|horse_maneuver(52)|horse_charge(20)|horse_scale(110),imodbits_horse_armor , [], arab_factions],
@@ -6955,7 +3482,98 @@ items = [
 
 
 ["woodelf_arrows_freezing", "Woodelf_Arrows", [("stahlrimarrow", 0), ("guangjian_fly2", ixmesh_flying_ammo), ("stahlrimarrow_quiver", ixmesh_carry),("stahlrimarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back_right, 10000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(38, pierce)|max_ammo(25), imodbits_missile,missile_freezing_trigger+missile_distance_trigger, [fac_elf, fac_forest_ranger, fac_scotland] ],
-["sldequiver", "sldequiver", [("arrow",0),("huojian_fly",ixmesh_flying_ammo),("sldequiver",ixmesh_carry),("sldequiver", ixmesh_inventory)], itp_type_arrows|itp_can_penetrate_shield|itp_penalty_with_shield|itp_is_magic_staff, itcf_carry_quiver_back, 50000, weight(3)|abundance(160)|weapon_length(95)|thrust_damage(40,pierce)|max_ammo(1000), imodbits_missile,cast_magic_demon_arrow+missile_distance_trigger, [fac_kingdom_4,fac_kingdom_10]],
+
+["stahlrim_arrow_ice_ray","stahlrim_arrow", [("stahlrimarrow",0),("guangjian_fly2",ixmesh_flying_ammo),("stahlrimarrow_quiver", ixmesh_carry),("stahlrimarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back_right, 
+ 6000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(20)|thrust_damage(54,pierce),
+ imodbits_missile,cast_magic_ice_ray+missile_distance_trigger, [fac_elf, fac_forest_ranger, fac_scotland],
+],
+["stahlrim_arrow_deadly_cold","stahlrim_arrow", [("stahlrimarrow",0),("guangjian_fly2",ixmesh_flying_ammo),("stahlrimarrow_quiver", ixmesh_carry),("stahlrimarrow_quiver", ixmesh_inventory)], itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back_right, 
+ 15000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(10)|thrust_damage(54,pierce),
+ imodbits_missile,cast_magic_DEADLY_COLD+missile_distance_trigger, [fac_elf, fac_forest_ranger, fac_scotland],
+],
+["stahlrim_arrow_frozen_orb","stahlrim_arrow", [("stahlrimarrow",0),("guangjian_fly2",ixmesh_flying_ammo),("stahlrimarrow_quiver", ixmesh_carry),("stahlrimarrow_quiver", ixmesh_inventory)], itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back_right, 
+ 50000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(5)|thrust_damage(54,pierce),
+ imodbits_missile,cast_magic_frozen_orb+missile_distance_trigger, [fac_elf, fac_forest_ranger, fac_scotland],
+],
+
+["ebony_arrow_fire_ray","ebony_arrow", [("ebonyarrow",0),("guangjian_fly3",ixmesh_flying_ammo),("ebonyarrow_quiver", ixmesh_carry),("ebonyarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 5000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(20)|thrust_damage(60,pierce),
+ imodbits_missile,cast_magic_fire_ray+missile_distance_trigger, 
+ [fac_elf, fac_kingdom_5, fac_kingdom_7, fac_kingdom_3, fac_kingdom_10, fac_kingdom_8],],
+["ebony_arrow_fireball","ebony_arrow", [("ebonyarrow",0),("guangjian_fly3",ixmesh_flying_ammo),("ebonyarrow_quiver", ixmesh_carry),("ebonyarrow_quiver", ixmesh_inventory)], itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 15000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(10)|thrust_damage(60,pierce),
+ imodbits_missile,cast_magic_fire_ball+missile_distance_trigger, 
+ [fac_elf, fac_kingdom_5, fac_kingdom_7, fac_kingdom_3, fac_kingdom_10, fac_kingdom_8],],
+["ebony_arrow_pyroblast","ebony_arrow", [("ebonyarrow",0),("fireball",ixmesh_flying_ammo),("ebonyarrow_quiver", ixmesh_carry),("ebonyarrow_quiver", ixmesh_inventory)], itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 25000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(6)|thrust_damage(60,pierce),
+ imodbits_missile,cast_magic_Pyroblast+missile_distance_trigger, 
+ [fac_elf, fac_kingdom_5, fac_kingdom_7, fac_kingdom_3, fac_kingdom_10, fac_kingdom_8],],
+["ebony_arrow_fireball_2","ebony_arrow", [("ebonyarrow",0),("fireball",ixmesh_flying_ammo),("ebonyarrow_quiver", ixmesh_carry),("ebonyarrow_quiver", ixmesh_inventory)], itp_can_penetrate_shield|itp_extra_penetration|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 50000,weight(5)|abundance(5)|weapon_length(91)|max_ammo(6)|thrust_damage(60,pierce),
+ imodbits_missile,cast_magic_fire_ball_2+missile_distance_trigger, 
+ [fac_elf, fac_kingdom_5, fac_kingdom_7, fac_kingdom_3, fac_kingdom_10, fac_kingdom_8],],
+
+
+["woodelf_arrows_amber_spear", "Woodelf_Arrows", [("mirkwood_arrow", 0), ("amberspear", ixmesh_flying_ammo), ("mirkwood_quiver_new", ixmesh_carry),("mirkwood_quiver_new", ixmesh_inventory)], itp_merchandise|itp_type_arrows, itcf_carry_quiver_back, 
+ 5000, weight(1)|weapon_length(91)|abundance(10)|thrust_damage(30, pierce)|max_ammo(30), imodbits_missile,cast_magic_amber_spear+missile_distance_trigger, [fac_elf, fac_forest_ranger] ],
+["woodelf_arrows_bray_scream", "Woodelf_Arrows", [("mirkwood_arrow", 0), ("amber_bolt", ixmesh_flying_ammo), ("mirkwood_quiver_new", ixmesh_carry),("mirkwood_quiver_new", ixmesh_inventory)], itp_merchandise|itp_type_arrows, itcf_carry_quiver_back, 
+ 12000, weight(1)|weapon_length(91)|abundance(10)|thrust_damage(30, pierce)|max_ammo(30), imodbits_missile,cast_magic_bray_scream+missile_distance_trigger, [fac_elf, fac_forest_ranger] ],
+
+["glass_arrow_entangling","Glass Arrows", [("glassarrow",0),("plague_bolt",ixmesh_flying_ammo),("glassarrow_quiver", ixmesh_carry),("glassarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 5000,weight(1.5)|abundance(20)|weapon_length(90)|thrust_damage(36,pierce)|max_ammo(15),
+ imodbits_missile,cast_magic_Entangling+missile_distance_trigger, [fac_elf, fac_kingdom_4,fac_culture_4],
+ ],
+["glass_arrow_poison","Glass Arrows", [("glassarrow",0),("plague_bolt",ixmesh_flying_ammo),("glassarrow_quiver", ixmesh_carry),("glassarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 5000,weight(1.5)|abundance(20)|weapon_length(90)|thrust_damage(36,pierce)|max_ammo(20),
+ imodbits_missile,cast_magic_poison+missile_distance_trigger, [fac_elf, fac_kingdom_4,fac_culture_4],
+ ],
+["glass_arrow_paralysis_cloud","Glass Arrows", [("glassarrow",0),("plague_bolt",ixmesh_flying_ammo),("glassarrow_quiver", ixmesh_carry),("glassarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
+ 12000,weight(1.5)|abundance(20)|weapon_length(90)|thrust_damage(36,pierce)|max_ammo(5),
+ imodbits_missile,cast_magic_Petrification+missile_distance_trigger, [fac_elf, fac_kingdom_4,fac_culture_4],
+ ],
+
+["elven_arrows_burning_gaze", "Elven_Arrows", [("elvenarrow", 0), ("high_flare", ixmesh_flying_ammo), ("elvenarrow_quiver", ixmesh_carry),("elvenarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 2000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(30), 
+ imodbits_missile ,cast_magic_burning_gaze+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+["elven_arrows_blinding_light", "Elven_Arrows", [("elvenarrow", 0), ("high_flare", ixmesh_flying_ammo), ("elvenarrow_quiver", ixmesh_carry),("elvenarrow_quiver", ixmesh_inventory)], itp_merchandise|itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 12000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(20), 
+ imodbits_missile ,cast_magic_blinding_light+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+["elven_arrows_net_of_amyntok", "Elven_Arrows", [("elvenarrow", 0), ("high_flare", ixmesh_flying_ammo), ("elvenarrow_quiver", ixmesh_carry),("elvenarrow_quiver", ixmesh_inventory)], itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 50000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(10), imodbits_missile ,cast_magic_net_of_amyntok+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+["elven_arrows_arcane_unforging", "Elven_Arrows", [("elvenarrow", 0), ("high_flare", ixmesh_flying_ammo), ("elvenarrow_quiver", ixmesh_carry),("elvenarrow_quiver", ixmesh_inventory)], itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 50000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(10), 
+ imodbits_missile ,cast_magic_arcane_unforging+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+
+
+["elven_arrows_wind_blast", "Elven_Arrows", [("white_elf_arrow", 0), ("magic_wind_blast", ixmesh_flying_ammo), ("lothlorien_quiver", ixmesh_carry),("lothlorien_quiver", ixmesh_inventory)], itp_merchandise|itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 2000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(20), 
+ imodbits_missile ,cast_magic_wind_blast+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+["elven_arrows_lightning", "Elven_Arrows", [("white_elf_arrow", 0), ("white_elf_arrow_flying", ixmesh_flying_ammo), ("lothlorien_quiver", ixmesh_carry),("lothlorien_quiver", ixmesh_inventory)], itp_merchandise|itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 15000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(20), 
+ imodbits_missile ,cast_magic_lightning+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+["elven_arrows_soul_quench", "Elven_Arrows", [("white_elf_arrow", 0), ("high_flare", ixmesh_flying_ammo), ("lothlorien_quiver", ixmesh_carry),("lothlorien_quiver", ixmesh_inventory)], itp_merchandise|itp_is_magic_staff|itp_type_arrows, itcf_carry_quiver_back, 
+ 5000, weight(3)|weapon_length(91)|abundance(10)|thrust_damage(36, pierce)|max_ammo(20), 
+ imodbits_missile ,cast_magic_soul_quench+missile_distance_trigger, [fac_elf, fac_forest_ranger]],
+
+["undead_arrow_spirit_leech","Nordhero Arrows", [("nordheroarrow",0),("death_bolt",ixmesh_flying_ammo),("nordheroarrow_quiver", ixmesh_carry),("nordheroarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_merchandise, itcf_carry_quiver_back_right, 
+ 3500,weight(2.5)|abundance(70)|weapon_length(95)|thrust_damage(36,cut)|max_ammo(20),
+ imodbits_missile,cast_magic_spirit_leech+missile_distance_trigger, [fac_kingdom_5, fac_kingdom_10],
+ ],
+["undead_arrow_gaze_of_nagash","Nordhero Arrows", [("nordheroarrow",0),("death_bolt",ixmesh_flying_ammo),("nordheroarrow_quiver", ixmesh_carry),("nordheroarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_merchandise, itcf_carry_quiver_back_right, 
+ 25000,weight(2.5)|abundance(70)|weapon_length(95)|thrust_damage(36,cut)|max_ammo(10),
+ imodbits_missile,cast_magic_gaze_of_nagash+missile_distance_trigger, [fac_kingdom_5, fac_kingdom_10],
+ ],
+["undead_arrow_summon_undead","Nordhero Arrows", [("nordheroarrow",0),("flying_nordheroarrow",ixmesh_flying_ammo),("nordheroarrow_quiver", ixmesh_carry),("nordheroarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_merchandise, itcf_carry_quiver_back_right, 
+ 10000,weight(2.5)|abundance(70)|weapon_length(95)|thrust_damage(36,cut)|max_ammo(20),
+ imodbits_missile,cast_magic_summon_undead_weak+missile_distance_trigger, [fac_kingdom_5, fac_kingdom_10],
+ ],
+
+
+
+
+
+
+["sldequiver", "sldequiver", [("arrow",0),("huojian_fly",ixmesh_flying_ammo),("sldequiver",ixmesh_carry),("sldequiver", ixmesh_inventory)], itp_type_arrows|itp_can_penetrate_shield|itp_penalty_with_shield|itp_is_magic_staff|itp_unique, itcf_carry_quiver_back, 50000, weight(3)|abundance(160)|weapon_length(95)|thrust_damage(40,pierce)|max_ammo(1000), imodbits_missile,cast_magic_demon_arrow+missile_distance_trigger, [fac_kingdom_4,fac_kingdom_10]],
 ["demon_arrow","flame arrow", [("ebonyarrow",0),("guangjian_fly3",ixmesh_flying_ammo),("ebonyarrow_quiver",ixmesh_carry),("ebonyarrow_quiver", ixmesh_inventory)], itp_type_arrows|itp_is_magic_staff, itcf_carry_quiver_back, 
  15000,weight(1.5)|weapon_length(91)|max_ammo(20)|thrust_damage(60,pierce),
  imodbits_missile,cast_magic_demon_arrow+missile_distance_trigger, bow_factions],
@@ -6972,6 +3590,19 @@ items = [
   210, weight(2.5)|abundance(20)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(20), 
   imodbits_missile,missile_distance_trigger , crossbow_factions
   ], 
+  
+  ["bolt_shadow_bolt","Shadow Bolt", [("bolt",0),("magic_shadow_bolt",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_merchandise|itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 
+  5000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(30),imodbits_missile,cast_magic_shadow_bolt+missile_distance_trigger],
+  ["bolt_doom_bolt","doom Bolt", [("bolt",0),("magic_doom_bolt",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_unique|itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 
+  20000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(10),imodbits_missile,cast_magic_doom_bolt+missile_distance_trigger],
+
+  ["bolt_burning_gaze","Shems_Burning_Gaze", [("bolt",0),("laser_bolt_orange",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_merchandise|itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 
+  5000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(30),imodbits_missile,cast_magic_burning_gaze+missile_distance_trigger],
+  ["bolt_blinding_light","Blinding_Light", [("bolt",0),("laser_bolt_orange",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_merchandise|itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 
+  20000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(15),imodbits_missile,cast_magic_blinding_light+missile_distance_trigger],
+  
+  ["bolt_fire_ball","Blinding_Light", [("bolt",0),("guangjian_fly3",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_merchandise|itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 
+  15000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(15),imodbits_missile,cast_magic_fire_ball_3+missile_distance_trigger],
   
  ["cartridges", "Cartridges", [("cartridge_a",0),("huojian_fly2",ixmesh_flying_ammo),("bag_ppb1",ixmesh_carry),("cartridge", ixmesh_inventory)], itp_type_bullets|itp_default_ammo|itp_merchandise|itp_covers_legs, itcf_carry_bow_back,
   150, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(60,cut)|max_ammo(30),
@@ -7193,7 +3824,7 @@ items = [
 #NEW:
 ["rawhide_coat", "Rawhide Coat", [("thick_coat_a",0)], itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 100,cloth_tier_1,imodbits_cloth , [], [fac_kingdom_8,fac_kingdom_5]],
 #NEW: was lthr_armor_a
-["leather_armor", "Leather Armor", [("tattered_leather_armor_a",0)], itp_type_body_armor|itp_covers_legs  ,0, 100,cloth_tier_1,imodbits_cloth , [], [fac_kingdom_1,fac_kingdom_5]],
+["leather_armor", "Leather Armor", [("ranger_leather_armor",0)], itp_type_body_armor|itp_covers_legs  ,0, 100,cloth_tier_1,imodbits_cloth , [], [fac_kingdom_1,fac_kingdom_5]],
 ["fur_coat", "Fur Coat", [("fur_coat",0)], itp_type_body_armor|itp_covers_legs|itp_civilian,0, 100,cloth_tier_1,imodbits_cloth],
 
 
@@ -7600,7 +4231,61 @@ items = [
 
 ["vaegir_elite_armor", "Vaegir Elite Armor", [("drz_elite_lamellar_armor",0)], merc_body_armor|itp_civilian ,0, 9216,lamellar_armor_tier_4,imodbits_armor, [], ee_faction],
 
+
+["rhun_cloth", "Easterling_Cloth", [("east_simple", 0)], merc_body_armor|itp_civilian, 0, 300,cloth_tier_2,imodbits_cloth, [], tatar_faction],
+
+["rhun_armor_a", "Rhun_Tunic", [("east_armor_light2", 0)], merc_body_armor|itp_civilian, 0, 1722,cloth_tier_4,imodbits_cloth, [], tatar_faction],
+#["rhun_armor_b", "Rhun_Tunic", [("east_armor_light3", 0)], merc_body_armor|itp_civilian, 0, 1722,cloth_tier_4,imodbits_cloth, [], tatar_faction],
+#["rhun_armor_d", "Rhun_Tunic", [("east_armor_light1", 0)], merc_body_armor|itp_civilian, 0, 1722,cloth_tier_4,imodbits_cloth, [], tatar_faction],
+
+["rhun_armor_g", "Rhun_Scale_Armor", [("east_armor_dragon1", 0)], merc_body_armor, 0, 9216,lamellar_armor_tier_4,imodbits_armor, [], tatar_faction], 
+["rhun_armor_h", "Rhun_Plate_Armor", [("east_armor_dragon2", 0)], merc_body_armor, 0, 9416,full_plate_armor_tier_2e,imodbits_plate, [], tatar_faction],
+
+["rhun_armor_j", "Rhun_Medium_Battlewear", [("east_medium2", 0)], merc_body_armor, 0, 6360,lamellar_armor_tier_2,imodbits_armor , [], tatar_faction],
+#["rhun_armor_m", "Rhun_Medium_Battlewear", [("east_medium3", 0)], merc_body_armor, 0, 6360,lamellar_armor_tier_2,imodbits_armor , [], tatar_faction], 
+#["rhun_armor_n", "Rhun_Medium_Battlewear", [("east_medium1", 0)], merc_body_armor, 0, 6360,lamellar_armor_tier_2,imodbits_armor , [], tatar_faction], 
+
+["rhun_armor_o", "Balchoth_Armor", [("east_armor_balchoth", 0)], merc_body_armor, 0, 7876,lamellar_armor_tier_3,imodbits_armor, [], tatar_faction],
+
+["rhun_armor_p", "Rhun_Cataphract_Armor", [("east_cataphract", 0)], merc_body_armor, 0, 10868,full_plate_armor_tier_3,imodbits_plate, [], tatar_faction],
+["rhun_armor_k", "Rhun_Noble_Armor", [("east_general", 0)], merc_body_armor, 0, 12769,full_plate_armor_tier_4,imodbits_plate , [], tatar_faction], 
+["loke_khan_armor", "Loke-Khan_Armor", [("east_khan", 0)], merc_body_armor, 0, 18000, weight(3)|abundance(20)|head_armor(0)|body_armor(85)|leg_armor(45)|difficulty(18), imodbits_good_plate , [], tatar_faction],  
+
+["rhun_shoes", "Easterling_Boots", [("east_boots",0)], itp_merchandise| itp_type_foot_armor|itp_civilian| itp_attach_armature ,0, 
+ 1008 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(14)|difficulty(0) ,imodbits_cloth , 
+ [], tatar_faction],
+["rhun_boots_balchoth", "Balchoth_Boots", [("east_boots_balchoth",0)], itp_merchandise| itp_type_foot_armor|itp_civilian| itp_attach_armature ,0, 
+ 1728 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(24)|difficulty(0) ,imodbits_cloth , 
+ [], tatar_faction],
+["rhun_greaves", "Rhun_Greaves", [("east_greaves",0)], itp_merchandise| itp_type_foot_armor|itp_civilian| itp_attach_armature ,0, 
+ 2520 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(35)|difficulty(0) ,imodbits_cloth , 
+ [], tatar_faction],
+
+["rhun_helm_a", "Rhun_Loke-Gamp_Helm", [("east_helm_loke_gamp", 0)], itp_type_head_armor|itp_merchandise, 0, 750, weight(2.5)|abundance(100)|difficulty(0)|head_armor(55), imodbits_armor , [], tatar_faction],
+["rhun_helm_b", "Rhun_Loke-Flag_Helm", [("east_helm_loke_flag", 0)], itp_type_head_armor|itp_merchandise, 0, 750, weight(2.5)|abundance(100)|difficulty(0)|head_armor(55), imodbits_armor , [], tatar_faction],
+["rhun_helm_c", "Rhun_Loke-Nar_Helm", [("east_helm_loke_nar", 0)], itp_type_head_armor|itp_merchandise, 0, 700, weight(3.0)|abundance(100)|difficulty(0)|head_armor(50), imodbits_armor , [], tatar_faction],
+["rhun_helm_e", "Balchoth_Helm", [("east_helm_balchoth", 0)], itp_type_head_armor|itp_merchandise, 0, 750, weight(2.5)|abundance(100)|difficulty(0)|head_armor(55), imodbits_armor , [], tatar_faction],
+["rhun_helm_i", "Rhun_Loke-Innas_Helm", [("east_helm_loke_innas", 0)], itp_type_head_armor|itp_merchandise, 0, 800, weight(3.0)|abundance(100)|difficulty(0)|head_armor(60), imodbits_armor , [], tatar_faction],
+
+["rhun_helm_k", "Easterling_Hat", [("east_hat", 0)], itp_type_head_armor|itp_merchandise, 0, 500, weight(2.0)|abundance(100)|difficulty(0)|head_armor(20), imodbits_cloth , [], tatar_faction],
+["rhun_helm_l", "Easterling_Cavalry_Helm", [("east_helm1", 0)], itp_type_head_armor|itp_merchandise, 0, 600, weight(2.5)|abundance(100)|difficulty(0)|head_armor(40), imodbits_cloth , [], tatar_faction],
+["rhun_helm_m", "Easterling_Infantry_Helm", [("east_helm2", 0)], itp_type_head_armor|itp_merchandise, 0, 600, weight(2.5)|abundance(100)|difficulty(0)|head_armor(40), imodbits_cloth , [], tatar_faction],
+
+["rhun_helm_n", "Rhun_Noble_Helm", [("east_helm_lord", 0)], itp_type_head_armor, 0, 1500, weight(3.5)|abundance(100)|difficulty(0)|head_armor(7), imodbits_armor , [], tatar_faction],
+["loke_khan_helm", "Loke-Khan_Helmet", [("east_helm_khan", 0)], itp_type_head_armor|itp_unique, 0, 1500, weight(3.5)|abundance(100)|difficulty(0)|head_armor(8), imodbits_armor , [], tatar_faction],
+
+
+["rhun_infantry_shield", "Run_Infantry_Shield", [("east_shield2", 0)], itp_type_shield|itp_merchandise|itp_wooden_parry, itcf_carry_board_shield, 630, weight(2.5)|abundance(100)|difficulty(0)|shield_hit_points(480)|body_armor(64)|spd_rtng(82)|shield_width(43)|shield_height(100), imodbits_shield , [], tatar_faction],
+["rhun_dragon_cavalry_shield", "Dragon_Cavalry_Shield", [("east_shield_dragon_cav", 0)], itp_type_shield|itp_merchandise|itp_wooden_parry, itcf_carry_board_shield, 1260, weight(2.5)|abundance(100)|difficulty(0)|shield_hit_points(480)|body_armor(80)|spd_rtng(90)|shield_width(80), imodbits_shield_metal , [], tatar_faction],
+["rhun_dragon_shield", "Dragon_Heavy_Shield", [("east_shield_dragon", 0)], itp_type_shield|itp_merchandise|itp_wooden_parry, itcf_carry_board_shield, 1110, weight(3.5)|abundance(9)|difficulty(0)|shield_hit_points(480)|body_armor(66)|spd_rtng(78)|shield_width(43)|shield_height(100), imodbits_shield_metal , [], tatar_faction],
+
+
+
+
 ["sarranid_elite_armor", "Sarranid Elite Armor", [("tunic_armor_a",0)], merc_body_armor|itp_civilian ,0, 9216,lamellar_armor_tier_4,imodbits_armor, [], arab_factions],
+
+
+
 
 #["studded_leather_coat_2", "Studded Leather Coat", [("leather_armor_padded1",0)], merc_body_armor ,0, 2704,mail_armor_tier_2,imodbits_armor , [], arab_factions],
 
@@ -7721,7 +4406,7 @@ items = [
 ["nomad_cap", "Nomad Cap", [("nomad_cap_a_new",0)],  itp_type_head_armor|itp_civilian  ,0, 6 , weight(0.75)|abundance(100)|head_armor(15)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
 ["nomad_cap_b", "Nomad Cap", [("nomad_cap_b_new",0)],  itp_type_head_armor|itp_civilian  ,0, 6 , weight(0.75)|abundance(100)|head_armor(15)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth],
 ["steppe_cap", "Steppe Cap", [("steppe_cap_a_new",0)],  itp_type_head_armor|itp_civilian ,0, 14 , weight(1)|abundance(100)|head_armor(16)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
-["padded_coif", "Padded Coif", [("padded_coif_a_new",0)],  itp_type_head_armor   ,0, 6 , weight(1)|abundance(100)|head_armor(16)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
+["padded_coif", "Padded Coif", [("ranger_hood_brown",0)],  itp_type_head_armor   ,0, 6 , weight(1)|abundance(100)|head_armor(16)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
 ["woolen_cap", "Woolen Cap", [("woolen_cap_new",0)],  itp_type_head_armor|itp_civilian ,0, 2 , weight(1)|abundance(100)|head_armor(9)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
 ["felt_hat", "Felt Hat", [("felt_hat_a_new",0)],  itp_type_head_armor|itp_civilian,0, 4 , weight(1)|abundance(100)|head_armor(12)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth ],
 #["felt_hat_b", "Felt Hat", [("felt_hat_b_newc",0)],  itp_type_head_armor|itp_civilian,0, 4 , weight(1)|abundance(100)|head_armor(8)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth],
@@ -8357,29 +5042,82 @@ items = [
 ["bastard_sword_f", "german_bastard_sword", [("Sword_Empire_H_01", 0), ("Sword_Empire_H_Scabbard", ixmesh_carry)], itp_type_two_handed_wpn|itp_merchandise|itp_primary, itc_bastardsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,
  1387 , weight(1.75)|difficulty(10)|spd_rtng(96)| weapon_length(106)|swing_damage(30 , pierce)| thrust_damage(33 ,  pierce),imodbits_sword_high, [], [fac_kingdom_13,fac_kingdom_7,fac_kingdom_2,fac_kingdom_10,fac_kingdom_1]],
 
-["bastard_sword_c", "Heavy Bastard Sword", [("holy_sword",0)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration, itc_bastardsword, 50000 , weight(2.25)|difficulty(15)|spd_rtng(105)| weapon_length(145)|swing_damage(45 , pierce)| thrust_damage(50 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,holy_weapon_trigger, [fac_kingdom_1]],
+["bastard_sword_c", "Heavy Bastard Sword", [("holy_sword",0), ("holy_sword", ixmesh_carry)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_bastardsword, 50000 , weight(2.25)|difficulty(15)|spd_rtng(105)| weapon_length(145)|swing_damage(45 , pierce)| thrust_damage(50 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,holy_weapon_trigger+[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_bastard_sword_c"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_kingdom_1]],
 ["bastard_sword_d", "Heavy Bastard Sword", [("sword_repent",0),("sword_repent_scab", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary, itc_bastardsword|itcf_carry_sword_back|itcf_show_holster_when_drawn, 5540 , weight(2.25)|difficulty(15)|spd_rtng(100)| weapon_length(113)|swing_damage(48 , cut)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_kingdom_5,fac_kingdom_13]],
 
 
-["skycutter", "Skycutter", [("skycutter",0)], itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_longsword|itcf_carry_sword_back, 20000 , weight(2.0)|difficulty(9)|spd_rtng(101)| weapon_length(125)|swing_damage(45, pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high],
+["skycutter", "Skycutter", [("skycutter",0), ("skycutter", ixmesh_carry)], itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_longsword|itcf_carry_sword_back, 20000 , weight(2.0)|difficulty(9)|spd_rtng(101)| weapon_length(125)|swing_damage(45, pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_skycutter"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
-["bastard_sword_d_fire", "Heavy Bastard Sword", [("sword_blind",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_unique, itc_bastardsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 30000 , weight(2.25)|difficulty(10)|spd_rtng(100)| weapon_length(120)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [(ti_on_init_item, [
-(try_begin),
-(eq, "$g_weapon_fire_particle", 0),
-(set_current_color,600,510,400),(set_position_delta,0,50,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
-(particle_system_add_new, "psys_items_fire_white"),(add_point_light, 10, 30),
-(try_end),
-])]],
+["bastard_sword_d_fire", "Heavy Bastard Sword", [("sword_blind",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_unique, itc_bastardsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 30000 , weight(2.25)|difficulty(10)|spd_rtng(100)| weapon_length(120)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_bastard_sword_d_fire"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 ["sword_claymore_01",         "Claymore", [("lowlander_sword",0)], itp_type_two_handed_wpn|itp_merchandise|itp_two_handed|itp_primary|itp_can_penetrate_shield, itc_claymore,4000 , weight(6)|difficulty(19)|spd_rtng(92)| weapon_length(132)|swing_damage(46 , cut)| thrust_damage(29 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_kingdom_4]],
 ["sword_claymore_02",         "Claymore", [("scottish_claymore",0)], itp_type_two_handed_wpn|itp_merchandise|itp_two_handed|itp_primary|itp_can_penetrate_shield, itc_claymore,4500 , weight(6)|difficulty(19)|spd_rtng(89)| weapon_length(139)|swing_damage(48 , cut)| thrust_damage(22 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_kingdom_4]],
 
 
 
-["scottish_claymore",         "scottish_claymore", [("ssdj23",0)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration, itc_bastardsword|itcf_carry_sword_back, 50000 , weight(2.5)|difficulty(18)|spd_rtng(100)| weapon_length(150)|swing_damage(46 , pierce)| thrust_damage(50 ,  pierce),imodbits_sword_high , dragon_weapon_trigger, [fac_kingdom_8]],
+["scottish_claymore",         "scottish_claymore", [("ssdj23",0), ("ssdj23", ixmesh_carry)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_bastardsword|itcf_carry_sword_back, 50000 , weight(2.5)|difficulty(18)|spd_rtng(100)| weapon_length(150)|swing_damage(46 , pierce)| thrust_damage(50 ,  pierce),imodbits_sword_high , [
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (assign,":power",4),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])]+[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_scottish_claymore"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_kingdom_8]],
 
 
 ["sword_two_handed_c", "Great Sword", [("lui_greatswordc",0)], itp_crush_through|itp_type_polearm|itp_two_handed|itp_primary|itp_cant_use_on_horseback|itp_can_penetrate_shield|itp_next_item_as_melee, itc_zweihander, 1743, weight(2.75)|difficulty(12)|spd_rtng(85)|weapon_length(135)|swing_damage(45,cut)|thrust_damage(30,pierce), imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_kingdom_7]],
@@ -8395,8 +5133,30 @@ items = [
 ["one_handed_battle_axe_b", "One Handed Battle Axe", [("one_handed_battle_axe_b",0)], itp_type_one_handed_wpn|itp_merchandise| itp_primary|itp_secondary|itp_bonus_against_shield|itp_extra_penetration|itp_wooden_parry, itc_scimitar|itcf_carry_axe_left_hip, 332 , weight(1.75)|difficulty(9)|spd_rtng(81)| weapon_length(61)|swing_damage(33 , pierce)| thrust_damage(0 ,  pierce),imodbits_axe, [], ne_faction],
 ["one_handed_battle_axe_c", "One Handed Battle Axe", [("one_handed_battle_axe_c",0)], itp_type_one_handed_wpn|itp_merchandise|itp_wooden_parry|itp_primary|itp_secondary|itp_bonus_against_shield|itp_extra_penetration, itc_scimitar|itcf_carry_axe_left_hip, 550, weight(2.0)|difficulty(9)|spd_rtng(80)|weapon_length(60)|swing_damage(34,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork , [], ne_faction],
 ["knightaxe", "knightaxe", [("euro_axe_01",0)], itp_type_one_handed_wpn|itp_merchandise|itp_wooden_parry|itp_primary|itp_secondary|itp_bonus_against_shield|itp_extra_penetration, itc_scimitar|itcf_carry_axe_left_hip, 477, weight(2.5)|difficulty(12)|spd_rtng(82)|weapon_length(90)|swing_damage(35,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork , [], ne_faction],
-["burning_axe", "The Burning Axe of Sankis", [("two_handed_dwarf_axe_1", 0)], itp_type_one_handed_wpn|itp_unique|itp_wooden_parry|itp_primary|itp_bonus_against_shield, itc_scimitar|itcf_carry_axe_left_hip, 20000, weight(4)|abundance(100)|difficulty(9)|weapon_length(107)|spd_rtng(90)|swing_damage(45, pierce)|thrust_damage(0, pierce), imodbits_axe, []], 
-["slaughter_axe", "Axe of Slaughter", [("orc_dualbattleaxe",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_unique|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi|itcf_carry_axe_left_hip, 20000 , weight(18)|difficulty(12)|spd_rtng(90) | weapon_length(125)|swing_damage(50 , pierce) | thrust_damage(0 ,  pierce),imodbits_pick ],
+["burning_axe", "The Burning Axe of Sankis", [("two_handed_dwarf_axe_1", 0), ("two_handed_dwarf_axe_1", ixmesh_carry)], itp_type_one_handed_wpn|itp_unique|itp_wooden_parry|itp_primary|itp_bonus_against_shield, itc_scimitar|itcf_carry_axe_left_hip, 20000, weight(4)|abundance(100)|difficulty(9)|weapon_length(107)|spd_rtng(90)|swing_damage(45, pierce)|thrust_damage(0, pierce), imodbits_axe, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_burning_axe"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment_mace"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks_mace"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]], 
+["slaughter_axe", "Axe of Slaughter", [("orc_dualbattleaxe",0), ("orc_dualbattleaxe", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_unique|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi|itcf_carry_axe_left_hip, 20000 , weight(18)|difficulty(12)|spd_rtng(90) | weapon_length(125)|swing_damage(50 , pierce) | thrust_damage(0 ,  pierce),imodbits_pick , [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_slaughter_axe"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_curse_enchantment_mace"),
+        (particle_system_add_new, "psys_curse_enchantment_sparks_mace"),
+        (set_current_color, 181, 30, 113),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 ["dwarf_spanner", "Dwarven_Runic_Spanner", [("dw_spanner", 0)], itp_type_two_handed_wpn|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield, itc_nodachi|itcf_carry_axe_back, 825, weight(9.)|abundance(100)|difficulty(12)|weapon_length(99)|spd_rtng(90)|swing_damage(38, blunt)|thrust_damage(0, pierce), imodbits_axe, [], [fac_kingdom_10]], 
   
@@ -8428,8 +5188,30 @@ items = [
 
 ["greataxe_adjudgment", "Great_Axe:Adjudgment", [("greataxe_adjudgment",0)], itp_type_two_handed_wpn|itp_primary|itp_two_handed|itp_bonus_against_shield|itp_extra_penetration|itp_wooden_parry|itp_unbalanced, itc_nodachi|itcf_carry_axe_back, 2000 , weight(7)|difficulty(15)|spd_rtng(88)| weapon_length(122)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_axe|imodbit_masterwork ],
 
-["long_axe_d", "Great Long Axe", [("greataxe_adjudgment",0)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_next_item_as_melee|itp_can_penetrate_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration|itp_unique, itc_long_axe|itcf_carry_axe_back, 30000, weight(4)|difficulty(10)|spd_rtng(86)|weapon_length(120)|swing_damage(57,cut)|thrust_damage(34,pierce), imodbits_axe|imodbit_masterwork],
-["long_axe_d_alt",      "Great Long Axe", [("greataxe_adjudgment",0)], itp_type_two_handed_wpn| itp_two_handed|itp_primary|itp_bonus_against_shield|itp_wooden_parry|itp_unbalanced|itp_can_penetrate_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration|itp_unique, itc_nodachi|itcf_carry_axe_back, 30000 , weight(4)|difficulty(10)|spd_rtng(86)| weapon_length(120)|swing_damage(57 , cut)| thrust_damage(0 ,  pierce),imodbits_axe ],
+["long_axe_d", "Great Long Axe", [("greataxe_adjudgment",0), ("greataxe_adjudgment", ixmesh_carry)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_next_item_as_melee|itp_can_penetrate_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration|itp_unique, itc_long_axe|itcf_carry_axe_back, 30000, weight(4)|difficulty(10)|spd_rtng(86)|weapon_length(120)|swing_damage(57,cut)|thrust_damage(34,pierce), imodbits_axe|imodbit_masterwork,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_long_axe_d"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment_mace"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
+["long_axe_d_alt",      "Great Long Axe", [("greataxe_adjudgment",0), ("greataxe_adjudgment", ixmesh_carry)], itp_type_two_handed_wpn| itp_two_handed|itp_primary|itp_bonus_against_shield|itp_wooden_parry|itp_unbalanced|itp_can_penetrate_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration|itp_unique, itc_nodachi|itcf_carry_axe_back, 30000 , weight(4)|difficulty(10)|spd_rtng(86)| weapon_length(120)|swing_damage(57 , cut)| thrust_damage(0 ,  pierce),imodbits_axe ,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_long_axe_d_alt"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment_mace"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
 ["chaos_axe", "Chaos Axe", [("lod_WAoRChaosAxeC",0),("lod_WAoRChaosAxeC", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_secondary|itp_bonus_against_shield|itp_extra_penetration|itp_unique,  itc_scimitar|itcf_carry_axe_left_hip,  50000, weight(2.0)|difficulty(9)|spd_rtng(95)|weapon_length(85)|swing_damage(45,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork ,[(ti_on_init_item, [
@@ -8457,7 +5239,19 @@ items = [
 
 ["hafted_blade_c", "Hafted Blade", [("lui_khegitnagita",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_penalty_with_shield, itc_cutting_spear|itcf_carry_spear, 10000, weight(3.25)|difficulty(15)|spd_rtng(85)|weapon_length(187)|swing_damage(59,pierce)|thrust_damage(23,pierce), imodbits_polearm|imodbit_masterwork, [], tatar_faction],
 
-["serpent_sword", "Serpent Sword", [("SerpentSword",0),("SerpentSword", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_can_penetrate_shield|itp_unique, itc_claymore,50000 , weight(2.5)|difficulty(12)|spd_rtng(110)| weapon_length(140)|swing_damage(45 , pierce)| thrust_damage(28 ,  pierce),imodbit_balanced|imodbit_masterwork, ],
+["serpent_sword", "Serpent Sword", [("SerpentSword",0),("SerpentSword", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_can_penetrate_shield|itp_unique, itc_claymore,50000 , weight(2.5)|difficulty(12)|spd_rtng(110)| weapon_length(140)|swing_damage(45 , pierce)| thrust_damage(28 ,  pierce),imodbit_balanced|imodbit_masterwork, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_serpent_sword"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment"),
+        (particle_system_add_new, "psys_poison_enchantment_2"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 ["natalya_slayer", "Natalya's Slayer", [("quick_crossbow",0)], itp_unique|itp_type_crossbow|itp_primary|itp_is_magic_staff, itcf_shoot_crossbow, 20000, weight(3)|spd_rtng(50)|shoot_speed(100)|thrust_damage(65,pierce)|max_ammo(6), imodbits_crossbow , [], [fac_beast]],
 
 
@@ -8482,62 +5276,114 @@ items = [
 ["nilfurs_boast", "Nilfur's Boast", [("twilight_boots",0)],  itp_unique|itp_type_foot_armor| itp_attach_armature,0, 
  20000 , weight(2.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(40)|difficulty(12) ,imodbits_plate ],
 
-["vanguard_shield", "Vanguard_shield", [("Black_d",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  50000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(150)|difficulty(5),imodbits_shield],
+["vanguard_shield", "Vanguard_shield", [("Black_d",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  50000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(150)|difficulty(5),imodbits_shield_metal],
 
-["akarats_awakening","Akarat's Awakening",[("denethor_shield",0)],itp_unique|itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,50000,weight(2.5)|hit_points(20000)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield, Akarat_hit_trigger, []],
-["hellskull", "Hellskull", [("Shield_Khorne", 0)], itp_unique|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 20000, weight(4.)|abundance(100)|difficulty(0)|hit_points(20000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield, Hellskull_hit_trigger, []], 
-["freeze_shield", "Freeze of Deflection", [("glass_shield",0)], itp_unique|itp_type_shield, itcf_carry_round_shield,  20000 , weight(1)|difficulty(5)|shield_hit_points(20000)|body_armor(90)|spd_rtng(120)|shield_width(50)|shield_height(60),imodbits_shield , freeze_shield_hit_trigger, [fac_elf, fac_kingdom_4,fac_forest_ranger]],
-["dragon_shield_2", "Dragon Shield", [("fix_EOS_knight_shield",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  20000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60)|difficulty(6),imodbits_shield , dragon_shield_2_hit_trigger, []],
+["akarats_awakening","Akarat's Awakening",[("denethor_shield",0)],itp_unique|itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,50000,weight(2.5)|hit_points(20000)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield_metal, Akarat_hit_trigger, ],
+["hellskull", "Hellskull", [("Shield_Khorne", 0)], itp_unique|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 20000, weight(4.)|abundance(100)|difficulty(0)|hit_points(20000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield_metal, Hellskull_hit_trigger, ], 
+["freeze_shield", "Freeze of Deflection", [("glass_shield",0)], itp_unique|itp_type_shield, itcf_carry_round_shield,  20000 , weight(1)|difficulty(5)|shield_hit_points(20000)|body_armor(90)|spd_rtng(120)|shield_width(50)|shield_height(60),imodbits_shield_metal , freeze_shield_hit_trigger, [fac_elf, fac_kingdom_4,fac_forest_ranger]],
+["dragon_shield_2", "Dragon Shield", [("fix_EOS_knight_shield",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  20000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60)|difficulty(6),imodbits_shield_metal , dragon_shield_2_hit_trigger, ],
 
-["tynan_dagger", "Tynan's Dagger", [("fix_copy_sword17_a",0)], itp_type_shield|itp_unique|itp_force_attach_left_hand, 0, 20000 , weight(1)|hit_points(5000)|body_armor(100)|spd_rtng(150)|shield_width(50)|shield_height(100)|difficulty(3),imodbits_shield,tynan_dagger_trigger ],
-["frostfang", "Frost fang", [("Frostfang",0),("Frostfang_scab", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_unique, itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 30000 , weight(1.5)|difficulty(9)|spd_rtng(96)| weapon_length(105)|swing_damage(40 , pierce)| thrust_damage(25 ,  pierce),imodbits_sword_high , [(ti_on_init_item, [
-(try_begin),
-(eq, "$g_weapon_fire_particle", 0),
-(set_position_delta,0,50,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
-(particle_system_add_new, "psys_frostfang_snowflake"),
-(particle_system_add_new, "psys_frostfang_smoke"),
-(try_end),
-])]],
+["tynan_dagger", "Tynan's Dagger", [("fix_copy_sword17_a",0)], itp_type_shield|itp_unique|itp_force_attach_left_hand, 0, 20000 , weight(1)|hit_points(5000)|body_armor(100)|spd_rtng(150)|shield_width(50)|shield_height(100)|difficulty(3),imodbits_shield_metal,tynan_dagger_trigger ],
+["frostfang", "Frost fang", [("Frostfang",0),("Frostfang_scab", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_unique, itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 30000 , weight(1.5)|difficulty(9)|spd_rtng(96)| weapon_length(105)|swing_damage(40 , pierce)| thrust_damage(25 ,  pierce),imodbits_sword_high , [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_frostfang"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 ["kwan_dao", "Kwan Dao", [("wushuang_weapon_qinlongdao",0)], itp_type_polearm|itp_unique|itp_wooden_parry|itp_two_handed|itp_primary|itp_penalty_with_shield, itc_guandao|itcf_carry_spear, 20000, weight(2.75)|difficulty(12)|spd_rtng(100)|weapon_length(170)|swing_damage(50,pierce)|thrust_damage(20,pierce), imodbits_polearm|imodbit_masterwork, [], tatar_faction],
-["avalon_halberd", "Avalon_Halberd", [("glassHalberd",0)], itp_unique|itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_extra_penetration|itp_couchable|itp_crush_through|itp_bonus_against_shield, itc_guandao, 20000, weight(2.5)|difficulty(20)|spd_rtng(120)|weapon_length(180)|swing_damage(50,pierce)|thrust_damage(50,pierce), imodbits_polearm|imodbit_masterwork , [], [fac_forest_ranger,fac_kingdom_4,fac_culture_4]],
+["avalon_halberd", "Avalon_Halberd", [("glassHalberd",0), ("glassHalberd", ixmesh_carry)], itp_unique|itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_extra_penetration|itp_couchable|itp_crush_through|itp_bonus_against_shield, itc_guandao, 20000, weight(2.5)|difficulty(20)|spd_rtng(120)|weapon_length(180)|swing_damage(50,pierce)|thrust_damage(50,pierce), imodbits_polearm|imodbit_masterwork , [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_avalon_halberd"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_2_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks_mace"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_forest_ranger,fac_kingdom_4,fac_culture_4]],
 
-["golem_crusher", "Golem Crusher", [("stahlrimwarhammer",0)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_unique|itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear,20000 , weight(9)|difficulty(12)|spd_rtng(100)| weapon_length(70)|swing_damage(80 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace],
+["golem_crusher", "Golem Crusher", [("stahlrimwarhammer",0), ("stahlrimwarhammer", ixmesh_carry)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_unique|itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear,20000 , weight(9)|difficulty(12)|spd_rtng(100)| weapon_length(100)|swing_damage(80 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_golem_crusher"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment_mace"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
-["blinding_sand", "Blinding Sand", [("ygrayne",0)], itp_type_one_handed_wpn|itp_unique|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_scimitar|itcf_carry_sword_left_hip, 20000 , weight(1.75)|difficulty(12)|spd_rtng(115)| weapon_length(115)|swing_damage(45 , pierce),imodbits_sword_high ],
-["soul_stealer", "Soul Stealer", [("ebony_longsword",0)], itp_unique|itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_extra_penetration|itp_can_penetrate_shield, itc_longsword|itcf_carry_sword_back, 20000 , weight(2)|difficulty(9)|spd_rtng(100)| weapon_length(113)|swing_damage(45 , pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, [], [fac_undeads_2,fac_beast]],
-["morrigan", "Morrigan Blade", [("Morrigan",0)], itp_type_one_handed_wpn|itp_primary|itp_unique, itc_longsword, 50000 , weight(1.5)|difficulty(12)|spd_rtng(100)| weapon_length(120)|swing_damage(40 , pierce)| thrust_damage(25 ,  pierce),imodbits_sword_high , [], ne_faction],
-["gwilith", "Gwilith", [("gwilith_1h", 0), ("gwilith_1h_sheath", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield|itp_unique|itp_next_item_as_melee, itc_scimitar|itcf_show_holster_when_drawn|itcf_carry_wakizashi, 50000, weight(2)|weapon_length(118)|difficulty(12)|spd_rtng(115)|abundance(100)|swing_damage(40, pierce), imodbits_sword_high ,[
- (ti_on_weapon_attack, 
-  [
-   (store_trigger_param_1, ":shooter"),
-   (call_script,"script_cf_agent_cleave",":shooter", 1, 0),
-  ]),
- (ti_on_init_item, 
-  [
-  (eq, "$g_weapon_fire_particle", 0),
-  (set_position_delta,0,55,0),
-  (store_trigger_param_2, ":troop_no"),
-  (troop_is_hero, ":troop_no"),
-  (particle_system_add_new, "psys_frostfang_smoke"),
- ])
-]],
-["gwilith_2", "Gwilith", [("gwilith_1h", 0), ("gwilith_1h_sheath", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_unique, itc_morningstar|itcf_show_holster_when_drawn|itcf_carry_wakizashi, 50000, weight(2)|weapon_length(140)|difficulty(12)|spd_rtng(120)|abundance(100)|swing_damage(50, pierce), imodbits_sword_high ,[
- (ti_on_weapon_attack, 
-  [
-   (store_trigger_param_1, ":shooter"),
-   (call_script,"script_cf_agent_cleave",":shooter", 1, 0),
-  ]),
- (ti_on_init_item, 
-  [
-  (eq, "$g_weapon_fire_particle", 0),
-  (set_position_delta,0,55,0),
-  (store_trigger_param_2, ":troop_no"),
-  (troop_is_hero, ":troop_no"),
-  (particle_system_add_new, "psys_frostfang_smoke"),
- ])
-]],
+["blinding_sand", "Blinding Sand", [("ygrayne",0), ("ygrayne", ixmesh_carry)], itp_type_one_handed_wpn|itp_unique|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_scimitar|itcf_carry_sword_left_hip, 20000 , weight(1.75)|difficulty(12)|spd_rtng(115)| weapon_length(115)|swing_damage(45 , pierce),imodbits_sword_high ,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_blinding_sand"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
+["soul_stealer", "Soul Stealer", [("ebony_longsword",0), ("ebony_longsword", ixmesh_carry)], itp_unique|itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_extra_penetration|itp_can_penetrate_shield, itc_longsword|itcf_carry_sword_back, 20000 , weight(2)|difficulty(9)|spd_rtng(100)| weapon_length(113)|swing_damage(45 , pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_soul_stealer"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_vampire_enchantment"),
+        (particle_system_add_new, "psys_vampire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_undeads_2,fac_beast]],
+["morrigan", "Morrigan Blade", [("Morrigan",0), ("Morrigan", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_unique, itc_longsword, 50000 , weight(1.5)|difficulty(12)|spd_rtng(100)| weapon_length(120)|swing_damage(40 , pierce)| thrust_damage(25 ,  pierce),imodbits_sword_high , [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_morrigan"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_vampire_enchantment"),
+        (particle_system_add_new, "psys_vampire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ], ne_faction],
+["gwilith", "Gwilith", [("gwilith_1h", 0), ("gwilith_1h_sheath", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield|itp_unique|itp_next_item_as_melee, itc_scimitar|itcf_show_holster_when_drawn|itcf_carry_wakizashi, 20000, weight(2)|weapon_length(118)|difficulty(12)|spd_rtng(115)|abundance(100)|swing_damage(40, pierce), imodbits_sword_high ,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_gwilith"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
+["gwilith_2", "Gwilith", [("gwilith_1h", 0), ("gwilith_1h_sheath", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_unique, itc_morningstar|itcf_show_holster_when_drawn|itcf_carry_wakizashi, 20000, weight(2)|weapon_length(140)|difficulty(12)|spd_rtng(120)|abundance(100)|swing_damage(50, pierce), imodbits_sword_high ,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_gwilith"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 ["frankenstein_head","The skull of Frankenstein",[("draugr_head",0)],itp_unique|itp_type_fullhelm,0,20000,weight(2)|head_armor(30)|difficulty(0),imodbits_plate,],
 
@@ -8562,7 +5408,7 @@ items = [
 ["amroth_sword_a","Dol_Amroth_Sword",[("DA_sword_a",0),("scab_DA_sword_a",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary|itp_crush_through,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,3000,weight(1.25)|difficulty(0)|spd_rtng(105)|weapon_length(88)|swing_damage(35,pierce)|thrust_damage(21,pierce),imodbits_sword, [], [fac_kingdom_1,fac_hospitalier_knights]],
 ["amroth_sword_b","Dol_Amroth_Knight_Sword",[("DA_sword_b",0),("scab_DA_sword_b",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_bonus_against_shield,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,4000,weight(2)|difficulty(0)|spd_rtng(99)|weapon_length(100)|swing_damage(40,pierce)|thrust_damage(26,pierce),imodbits_sword_high, [], [fac_kingdom_1,fac_hospitalier_knights]],
 ["amroth_sword_c","Dol_Amroth_Heavy_Sword",[("DA_bastard",0),("scab_DA_bastard",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_bonus_against_shield,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,7000,weight(2.25)|difficulty(0)|spd_rtng(96)|weapon_length(105)|swing_damage(45,pierce)|thrust_damage(26,pierce),imodbits_sword_high, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["gondor_ranger_sword","Gondor_Ranger_Sword",[("gondor_bastard",0),("scab_gondor_citadel",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,2550,weight(2)|difficulty(0)|spd_rtng(100)|weapon_length(105)|swing_damage(40,cut)|thrust_damage(26,pierce),imodbits_sword, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_ranger_sword","Gondor_Ranger_Sword",[("gondor_bastard",0),("scab_gondor_bastard",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,2550,weight(2)|difficulty(0)|spd_rtng(100)|weapon_length(105)|swing_damage(40,cut)|thrust_damage(26,pierce),imodbits_sword, [], [fac_kingdom_1,fac_hospitalier_knights]],
 ["gondor_citadel_sword","Gondor_Citadel_Sword",[("gondor_citadel",0),("scab_gondor_citadel",ixmesh_carry)],itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_bonus_against_shield,itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,6000,weight(1.25)|difficulty(0)|spd_rtng(100)|weapon_length(100)|swing_damage(36,pierce)|thrust_damage(30,pierce),imodbits_sword_high, [], [fac_kingdom_1,fac_hospitalier_knights]],
 
 ["longbowman_sword", "Archer's Sword", [("Sword_Empire_A_01", 0), ("Sword_Empire_A_Scabbard", ixmesh_carry)], itp_type_one_handed_wpn|itp_merchandise|itp_primary, itc_longsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,955 , weight(1.0)|difficulty(0)|spd_rtng(99)| weapon_length(88)|swing_damage(28 , cut)| thrust_damage(21 ,  pierce),imodbits_sword_high , [], euro_factions],
@@ -8612,7 +5458,7 @@ items = [
 
 ["empire_warhammer", "Warhammer", [("rrr_mace3",0)], itp_type_one_handed_wpn|itp_can_knock_down| itp_primary|itp_wooden_parry, itc_scimitar|itcf_carry_axe_left_hip, 653 , weight(2)|difficulty(10)|spd_rtng(92)| weapon_length(90)|swing_damage(40 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace],
 
-["great_mace", "Great Mace", [("war_mace_2",0)], itp_can_knock_down|itp_type_two_handed_wpn|itp_merchandise|itp_primary|itp_crush_through|itp_unbalanced, itc_morningstar|itcf_carry_axe_back, 382, weight(6)|difficulty(13)|spd_rtng(90)|weapon_length(105)|swing_damage(37,blunt)|thrust_damage(0,pierce), imodbits_mace , [], [fac_kingdom_5]],
+["great_mace", "Great Mace", [("war_mace_2",0)], itp_can_knock_down|itp_type_one_handed_wpn|itp_merchandise|itp_primary|itp_crush_through|itp_unbalanced, itc_morningstar|itcf_carry_axe_back, 382, weight(6)|difficulty(13)|spd_rtng(90)|weapon_length(105)|swing_damage(37,blunt)|thrust_damage(0,pierce), imodbits_mace , [], [fac_kingdom_5]],
 ["maul",         "Maul", [("maul_b",0)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_merchandise| itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(87)| weapon_length(69)|swing_damage(41 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_kingdom_5]],
 ["sledgehammer", "Sledgehammer", [("maul_c",0)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_merchandise|itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear,101 , weight(7)|difficulty(10)|spd_rtng(86)| weapon_length(67)|swing_damage(46, blunt)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_kingdom_5]],
 
@@ -8660,7 +5506,18 @@ items = [
 ["jousting_lance", "Jousting Lance", [("joust_of_peace",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_primary|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 2000 , weight(5)|difficulty(0)|spd_rtng(60)| weapon_length(240)|swing_damage(0 , cut)| thrust_damage(30 ,  cut)|abundance(10),imodbits_polearm , [], we_faction+se_faction+ne_faction],
 ["gothic_lance", "gothic_lance", [("lance",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_primary|itp_penalty_with_shield|itp_couchable|itp_crush_through|itp_bonus_against_shield, itc_greatlance, 3000, weight(5)|difficulty(10)|spd_rtng(80)|weapon_length(240)|swing_damage(0,cut)|thrust_damage(45,pierce)|abundance(30), imodbits_polearm , [], we_faction+se_faction+ne_faction],
 ["great_lance_dark", "Great Lance", [("KTSR220",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_primary|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 3000, weight(5)|difficulty(12)|spd_rtng(55)|weapon_length(320)|swing_damage(0,cut)|thrust_damage(40,pierce)|abundance(30), imodbits_polearm , [], we_faction+ne_faction],
-["great_lance2", "Great Lance", [("KTS444F",0)], itp_type_polearm|itp_unique|itp_primary|itp_bonus_against_shield|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 50000, weight(7)|difficulty(14)|spd_rtng(90)|weapon_length(380)|swing_damage(0,cut)|thrust_damage(100,pierce)|abundance(30), imodbits_polearm, [], ee_faction],
+["great_lance2", "Great Lance", [("KTS444F",0), ("KTS444F", ixmesh_carry)], itp_type_polearm|itp_unique|itp_primary|itp_bonus_against_shield|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 50000, weight(7)|difficulty(14)|spd_rtng(90)|weapon_length(380)|swing_damage(0,cut)|thrust_damage(100,pierce)|abundance(30), imodbits_polearm, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_great_lance2"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ], ee_faction],
 
 ["hussar_lance_short", "Great Lance", [("pol_gusar_lansa_c",0)], itp_type_polearm|itp_merchandise|itp_primary|itp_bonus_against_shield|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 3000, weight(8)|difficulty(7)|spd_rtng(60)|weapon_length(280)|swing_damage(0,cut)|thrust_damage(31,pierce)|abundance(50), imodbits_polearm, [], [fac_kingdom_8]],
 
@@ -8702,10 +5559,6 @@ items = [
 ["english_bill", "Bill", [("english_bill",0)], itp_type_polearm|itp_merchandise|itp_can_knock_down|itp_crush_through|itp_primary|itp_two_handed|itp_wooden_parry|itp_is_glaive, itc_cutting_spear, 2724 , weight(6.0)|difficulty(10)|spd_rtng(75)| weapon_length(200)|swing_damage(28 , pierce)| thrust_damage(28 ,  pierce),imodbits_axe, [], [fac_kingdom_4]], 
 
 
-
-["german_poleaxe", "german_poleaxe", [("Halberd_Medium_B_01",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_cant_use_on_horseback|itp_bonus_against_shield|itp_extra_penetration, itc_glaive|itcf_carry_spear, 3265, weight(4)|difficulty(0)|spd_rtng(78)|weapon_length(131)|swing_damage(40,pierce)|thrust_damage(35,pierce), imodbits_polearm|imodbit_masterwork, [], [fac_kingdom_10,fac_kingdom_1,fac_kingdom_4]],
-
-
 ["german_poleaxe_1", "Imperial_Helmbarte", [("Halberd_Medium_A_01", 0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_cant_use_on_horseback|itp_bonus_against_shield|itp_extra_penetration, itc_glaive|itcf_carry_spear, 1200, weight(4)|abundance(100)|difficulty(12)|weapon_length(145)|spd_rtng(67)|swing_damage(29, pierce)|thrust_damage(24, pierce), imodbits_polearm|imodbit_masterwork, [], [fac_kingdom_10,fac_kingdom_1,fac_kingdom_4]],
 ["german_poleaxe_2", "Imperial_Helmbarte", [("Halberd_Medium_C_01", 0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_cant_use_on_horseback|itp_bonus_against_shield|itp_extra_penetration, itc_glaive|itcf_carry_spear, 1680, weight(5)|abundance(100)|difficulty(12)|weapon_length(146)|spd_rtng(71)|swing_damage(31, pierce)|thrust_damage(24, pierce), imodbits_polearm|imodbit_masterwork, [], [fac_kingdom_10,fac_kingdom_1,fac_kingdom_4]],
 ["german_poleaxe_3", "Imperial_Helmbarte", [("Halberd_Medium_D_01", 0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_crush_through|itp_cant_use_on_horseback|itp_bonus_against_shield|itp_extra_penetration, itc_glaive|itcf_carry_spear, 1800, weight(5.5)|abundance(100)|difficulty(12)|weapon_length(145)|spd_rtng(66)|swing_damage(39, pierce)|thrust_damage(24, pierce), imodbits_polearm|imodbit_masterwork, [], [fac_kingdom_10,fac_kingdom_1,fac_kingdom_4]],
@@ -8719,8 +5572,6 @@ items = [
 ["long_voulge", "Long Voulge", [("two_handed_battle_long_axe_a",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_is_pike|itp_extra_penetration|itp_cant_use_on_horseback|itp_is_glaive, itc_poleaxe|itcf_carry_spear, 1959, weight(3.0)|difficulty(10)|spd_rtng(70)|weapon_length(175)|swing_damage(35,pierce)|thrust_damage(18,pierce), imodbits_axe|imodbit_masterwork, [], [fac_kingdom_1]],
 ["swiss_halberd", "swiss_halberd", [("halbert_1",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_is_pike|itp_extra_penetration|itp_cant_use_on_horseback|itp_is_glaive, itc_poleaxe, 3852, weight(5)|difficulty(0)|spd_rtng(70)|weapon_length(185)|swing_damage(33,pierce)|thrust_damage(28,pierce), imodbits_polearm|imodbit_masterwork, [], se_faction],
 
-
-["nord_poleaxe", "nord_poleaxe", [("Halberd_Heavy_D_01",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_offset_lance|itp_cant_use_on_horseback|itp_is_pike|itp_extra_penetration|itp_is_glaive, itc_cutting_spear, 3170, weight(4)|difficulty(10)|spd_rtng(65)|weapon_length(200)|swing_damage(35,pierce)|thrust_damage(31,pierce), imodbits_polearm|imodbit_masterwork, [], ne_faction],
 
 ["nord_poleaxe_1", "nord_poleaxe", [("Halberd_Heavy_A_01",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_offset_lance|itp_cant_use_on_horseback|itp_is_pike|itp_extra_penetration|itp_is_glaive, itc_poleaxe, 3170, weight(5)|difficulty(10)|spd_rtng(70)|weapon_length(183)|swing_damage(35,pierce)|thrust_damage(31,pierce), imodbits_polearm|imodbit_masterwork, [], ne_faction],
 ["nord_poleaxe_2", "nord_poleaxe", [("Halberd_Heavy_B_01",0)], itp_type_polearm|itp_merchandise|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_offset_lance|itp_cant_use_on_horseback|itp_is_pike|itp_extra_penetration|itp_is_glaive, itc_poleaxe, 3170, weight(6)|difficulty(10)|spd_rtng(70)|weapon_length(180)|swing_damage(40,pierce)|thrust_damage(31,pierce), imodbits_polearm|imodbit_masterwork, [], ne_faction],
@@ -8742,19 +5593,19 @@ items = [
 ["wooden_shield", "Wooden Shield", [("shield_round_a",0)], itp_type_shield|itp_wooden_parry, itcf_carry_round_shield,  126 , weight(2)|shield_hit_points(180)|body_armor(60)|spd_rtng(100)|shield_width(50),imodbits_shield ],
 ["nordic_shield", "Nordic Shield", [("shield_round_b",0)], itp_type_shield|itp_wooden_parry, itcf_carry_round_shield,  285 , weight(2)|shield_hit_points(220)|body_armor(60)|spd_rtng(100)|shield_width(50),imodbits_shield ],
 ["fur_covered_shield",  "Fur Covered Shield", [("shield_kite_m",0)], itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  681 , weight(3.5)|shield_hit_points(120)|body_armor(60)|spd_rtng(76)|shield_width(81),imodbits_shield],
-["steel_shield", "Steel Shield", [("shield_dragon",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(300)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield , [], [fac_kingdom_10,fac_kingdom_7]],
+["steel_shield", "Steel Shield", [("shield_dragon",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(300)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield_metal , [], [fac_kingdom_10,fac_kingdom_7]],
 
-["dec_steel_shield", "Steel Shield", [("dec_steel_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(450)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield , [], [fac_kingdom_9,fac_kingdom_3]],
+["dec_steel_shield", "Steel Shield", [("dec_steel_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(450)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield_metal , [], [fac_kingdom_9,fac_kingdom_3]],
 
 
-["plate_covered_round_shield", "Plate Covered Round Shield", [("shield_round_e",0)], itp_type_shield, itcf_carry_round_shield,  420 , weight(4)|shield_hit_points(165)|body_armor(100)|spd_rtng(90)|shield_width(40),imodbits_shield],
+["plate_covered_round_shield", "Plate Covered Round Shield", [("shield_round_e",0)], itp_type_shield, itcf_carry_round_shield,  420 , weight(4)|shield_hit_points(165)|body_armor(100)|spd_rtng(90)|shield_width(40),imodbits_shield_metal],
 ["leather_covered_round_shield", "Leather Covered Round Shield", [("shield_round_d",0)], itp_type_shield|itp_wooden_parry, itcf_carry_round_shield,  240 , weight(2.5)|shield_hit_points(155)|body_armor(76)|spd_rtng(96)|shield_width(40),imodbits_shield ],
 ["hide_covered_round_shield", "Hide Covered Round Shield", [("shield_round_f",0)], itp_type_shield|itp_wooden_parry, itcf_carry_round_shield,  120 , weight(2)|shield_hit_points(130)|body_armor(66)|spd_rtng(100)|shield_width(40),imodbits_shield],
 
 
-["shield_heater_a", "Heater Shield", [("shield_2",0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  996 , weight(4)|shield_hit_points(410)|body_armor(78)|spd_rtng(87)|shield_width(36)|shield_height(70),imodbits_shield , [], [fac_kingdom_13]],
-["shield_heater_b", "Heater Shield", [("shield_3",0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  996 , weight(4)|shield_hit_points(410)|body_armor(78)|spd_rtng(87)|shield_width(36)|shield_height(70),imodbits_shield , [], euro_factions],
-["shield_heater_c", "Heater Shield", [("shield_1",0)], itp_merchandise|itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|shield_hit_points(520)|body_armor(100)|spd_rtng(80)|shield_width(36)|shield_height(70),imodbits_shield , [], euro_factions],
+["shield_heater_a", "Heater Shield", [("shield_2",0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  996 , weight(4)|shield_hit_points(410)|body_armor(78)|spd_rtng(87)|shield_width(36)|shield_height(70),imodbits_shield_metal , [], [fac_kingdom_13]],
+["shield_heater_b", "Heater Shield", [("shield_3",0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  996 , weight(4)|shield_hit_points(410)|body_armor(78)|spd_rtng(87)|shield_width(36)|shield_height(70),imodbits_shield_metal , [], euro_factions],
+["shield_heater_c", "Heater Shield", [("shield_1",0)], itp_merchandise|itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|shield_hit_points(520)|body_armor(100)|spd_rtng(80)|shield_width(36)|shield_height(70),imodbits_shield_metal , [], euro_factions],
 
 
 #["norman_shield_1",         "Kite Shield", [("norman_shield_1",0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  118 , weight(2.5)|shield_hit_points(96)|body_armor(60)|spd_rtng(82)|shield_width(90),imodbits_shield],
@@ -8814,17 +5665,17 @@ items = [
 
 
 
-["gondor_shield_a","Gondor_Square_Shield",[("gondor_square_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise|itp_cant_use_on_horseback,itcf_carry_kite_shield,600,weight(3)|hit_points(3360)|body_armor(56)|spd_rtng(82)|shield_width(90)|shield_height(90),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["gondor_shield_b","Gondor_Kite_Shield",[("gondor_point_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield,400,weight(2.5)|hit_points(150)|body_armor(65)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["gondor_shield_c","Gondor_Tower_Shield",[("gondor_tower_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise|itp_cant_use_on_horseback,itcf_carry_kite_shield,1110,weight(3)|hit_points(210)|body_armor(70)|spd_rtng(75)|shield_width(43)|shield_height(100),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["gondor_shield_d","Gondor_Kite_Shield",[("gondorian_kite_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield, 1080,weight(2.5)|hit_points(260)|body_armor(80)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["gondor_shield_e","Gondor_Royal_Shield",[("denethor_shield",0)],itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,1200,weight(2.5)|hit_points(305)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_shield_a","Gondor_Square_Shield",[("gondor_square_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise|itp_cant_use_on_horseback,itcf_carry_kite_shield,600,weight(3)|hit_points(3360)|body_armor(56)|spd_rtng(82)|shield_width(90)|shield_height(90),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_shield_b","Gondor_Kite_Shield",[("gondor_point_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield,400,weight(2.5)|hit_points(150)|body_armor(65)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_shield_c","Gondor_Tower_Shield",[("gondor_tower_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise|itp_cant_use_on_horseback,itcf_carry_kite_shield,1110,weight(3)|hit_points(210)|body_armor(70)|spd_rtng(75)|shield_width(43)|shield_height(100),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_shield_d","Gondor_Kite_Shield",[("gondorian_kite_shield",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield, 1080,weight(2.5)|hit_points(260)|body_armor(80)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["gondor_shield_e","Gondor_Royal_Shield",[("denethor_shield",0)],itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,1200,weight(2.5)|hit_points(305)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
 
 
 
 
-["dol_shield_a","DA_shield_kite",[("DA_shield_kite",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield,1080,weight(2.5)|hit_points(160)|body_armor(80)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
-["dol_shield_b","shield_dolamroth",[("shield_dolamroth",0)],itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,1200,weight(2.5)|hit_points(2220)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["dol_shield_a","DA_shield_kite",[("DA_shield_kite",0)],itp_type_shield|itp_wooden_parry|itp_merchandise,itcf_carry_kite_shield,1080,weight(2.5)|hit_points(160)|body_armor(80)|spd_rtng(100)|shield_width(30)|shield_height(50),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
+["dol_shield_b","shield_dolamroth",[("shield_dolamroth",0)],itp_type_shield|itp_wooden_parry,itcf_carry_kite_shield,1200,weight(2.5)|hit_points(2220)|body_armor(92)|spd_rtng(82)|shield_width(40)|shield_height(90),imodbits_shield_metal, [], [fac_kingdom_1,fac_hospitalier_knights]],
 #RANGED
 
 
@@ -8875,7 +5726,7 @@ items = [
 ["nahptha_bomb", "nahptha_bomb", [("naphtha",0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary ,itcf_throw_stone, 2000 , weight(4)|difficulty(0)|spd_rtng(97)| shoot_speed(24)| thrust_damage(50 ,  pierce)|max_ammo(10)|weapon_length(8)|difficulty(3),imodbits_thrown_2,missile_distance_trigger+nahptha_fire_trigger, tatar_faction+arab_factions],
 
 ["throwing_knives", "Throwing Knives", [("mirkwood_white_knife",0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary ,itcf_throw_knife, 76 , weight(3.5)|difficulty(0)|spd_rtng(121)| shoot_speed(32)| thrust_damage(32 ,  pierce)|max_ammo(14)|weapon_length(0),imodbits_thrown,missile_distance_trigger, [fac_forest_ranger]],
-["throwing_daggers", "Throwing Daggers", [("SerpentDagger",0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary ,itcf_throw_knife, 50000 , weight(3.5)|difficulty(0)|spd_rtng(110)| shoot_speed(100)| thrust_damage(100 ,  pierce)|max_ammo(12)|weapon_length(0),imodbits_thrown,missile_distance_trigger, [fac_beast]],
+["throwing_daggers", "Throwing Daggers", [("SerpentDagger",0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary ,itcf_throw_knife, 20000 , weight(3.5)|difficulty(0)|spd_rtng(110)| shoot_speed(100)| thrust_damage(100 ,  pierce)|max_ammo(12)|weapon_length(0),imodbits_thrown,missile_distance_trigger, [fac_beast]],
 ["throwing_scimitar", "Throwing scimitar", [("harad_heavy_sword",0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_next_item_as_melee ,itcf_throw_stone, 193 , weight(3.5)|difficulty(0)|spd_rtng(110)| shoot_speed(24)| thrust_damage(40 ,  cut)|max_ammo(20)|weapon_length(60),imodbits_thrown,missile_distance_trigger, throw_factions],
 ["throwing_scimitar_alt", "Elite Scimitar", [("harad_heavy_sword",0),("scab_scimeter_b", ixmesh_carry)], itp_type_one_handed_wpn|itp_primary, itc_scimitar|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,290 , weight(1.5)|difficulty(0)|spd_rtng(104)| weapon_length(100)|swing_damage(39 , cut)| thrust_damage(0 ,  pierce),imodbits_sword_high ],
 
@@ -8936,7 +5787,7 @@ items = [
 #      (try_end),
 #    ])]+missile_distance_trigger],
     
-["vk_axe", "vk_axe", [("nordheroaxe",0)], itp_type_thrown|itp_crush_through|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield, itcf_throw_axe|itcf_throw_stone, 50000, weight(5)|difficulty(3)|spd_rtng(98)|shoot_speed(25)|thrust_damage(60,pierce)|max_ammo(5)|weapon_length(33)|difficulty(5), imodbits_thrown_minus_heavy,
+["vk_axe", "vk_axe", [("nordheroaxe",0)], itp_type_thrown|itp_crush_through|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_unique, itcf_throw_axe|itcf_throw_stone, 50000, weight(5)|difficulty(3)|spd_rtng(98)|shoot_speed(25)|thrust_damage(60,pierce)|max_ammo(5)|weapon_length(33)|difficulty(5), imodbits_thrown_minus_heavy,
 [(ti_on_weapon_attack,[
 (store_trigger_param_1,":shooter"),#Get the attacker Agent for add_missile'
 (try_for_range, ":unused", 1, 4),
@@ -9049,15 +5900,15 @@ items = [
 
 
 
-["granata", "Large_Grenade", [("bombaaa", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary, itcf_throw_stone, 5400, weight(4)|weapon_length(30)|difficulty(1)|spd_rtng(65)|shoot_speed(17)|abundance(33)|thrust_damage(175, blunt)|max_ammo(3), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 600, 7, 15),]),]+missile_distance_trigger,firearm_factions],
-["granata_medium", "Medium_Grenade", [("bombaaa_m", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary, itcf_throw_stone, 4500, weight(4)|weapon_length(25)|difficulty(2)|spd_rtng(67)|shoot_speed(18)|abundance(33)|thrust_damage(140, blunt)|max_ammo(5), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 400, 5, 15),]),]+missile_distance_trigger,firearm_factions],
-["granata_small", "Small_Grenade", [("bombaaa_s", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary, itcf_throw_stone, 4000, weight(4)|weapon_length(20)|difficulty(3)|spd_rtng(70)|shoot_speed(20)|abundance(33)|thrust_damage(100, blunt)|max_ammo(7), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 200, 4, 15),]),]+missile_distance_trigger,firearm_factions],
+["granata", "Large_Grenade", [("bombaaa", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_is_bomb, itcf_throw_stone, 5400, weight(4)|weapon_length(30)|difficulty(1)|spd_rtng(65)|shoot_speed(17)|abundance(33)|thrust_damage(175, blunt)|max_ammo(3), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 600, 7, 15),]),]+missile_distance_trigger,firearm_factions],
+["granata_medium", "Medium_Grenade", [("bombaaa_m", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_is_bomb, itcf_throw_stone, 4500, weight(4)|weapon_length(25)|difficulty(2)|spd_rtng(67)|shoot_speed(18)|abundance(33)|thrust_damage(140, blunt)|max_ammo(5), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 400, 5, 15),]),]+missile_distance_trigger,firearm_factions],
+["granata_small", "Small_Grenade", [("bombaaa_s", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_is_bomb, itcf_throw_stone, 4000, weight(4)|weapon_length(20)|difficulty(3)|spd_rtng(70)|shoot_speed(20)|abundance(33)|thrust_damage(100, blunt)|max_ammo(7), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 200, 4, 15),]),]+missile_distance_trigger,firearm_factions],
 
-["light_throwing_axes", "Light Throwing Axes", [("francisca",0),("francisca_quiver", ixmesh_carry)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,360, weight(5)|difficulty(2)|spd_rtng(88)| shoot_speed(18)| thrust_damage(55,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
+["light_throwing_axes", "Light Throwing Axes", [("francisca",0),("francisca_quiver", ixmesh_carry),("francisca_quiver", ixmesh_inventory)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,360, weight(5)|difficulty(2)|spd_rtng(88)| shoot_speed(18)| thrust_damage(55,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
 ["light_throwing_axes_melee", "Light Throwing Axe", [("francisca",0)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield,itc_scimitar,360, weight(1)|difficulty(2)|spd_rtng(99)|weapon_length(53)| swing_damage(26,pierce),imodbits_thrown_minus_heavy ],
-["throwing_axes", "Throwing Axes", [("throwing_axe_a",0),("throwing_axe_a_quiver", ixmesh_carry)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,490, weight(5)|difficulty(3)|spd_rtng(88)| shoot_speed(11)| thrust_damage(60,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
+["throwing_axes", "Throwing Axes", [("throwing_axe_a",0),("throwing_axe_a_quiver", ixmesh_carry),("throwing_axe_a_quiver", ixmesh_inventory)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,490, weight(5)|difficulty(3)|spd_rtng(88)| shoot_speed(11)| thrust_damage(60,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
 ["throwing_axes_melee", "Throwing Axe", [("throwing_axe_a",0)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield,itc_scimitar,490, weight(1)|difficulty(3)|spd_rtng(98)| swing_damage(29,pierce)|weapon_length(53),imodbits_thrown_minus_heavy ],
-["heavy_throwing_axes", "Heavy Throwing Axes", [("throwing_axe_b",0),("throwing_axe_b_quiver", ixmesh_carry)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,620, weight(5)|difficulty(4)|spd_rtng(88)| shoot_speed(11)| thrust_damage(65,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
+["heavy_throwing_axes", "Heavy Throwing Axes", [("throwing_axe_b",0),("throwing_axe_b_quiver", ixmesh_carry),("throwing_axe_b_quiver", ixmesh_inventory)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_axe,620, weight(5)|difficulty(4)|spd_rtng(88)| shoot_speed(11)| thrust_damage(65,pierce)|max_ammo(4)|weapon_length(33),imodbits_thrown_minus_heavy,missile_distance_trigger, ne_faction],
 ["heavy_throwing_axes_melee", "Heavy Throwing Axe", [("throwing_axe_b",0)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield,itc_scimitar,620, weight(1)|difficulty(4)|spd_rtng(97)| swing_damage(32,pierce)|weapon_length(53),imodbits_thrown_minus_heavy ],
 
 
@@ -9080,6 +5931,7 @@ items = [
 ["skeletonbow", "Long Bow", [("skeletonbow",0)], itp_type_bow|itp_primary|itp_two_handed ,itcf_shoot_bow|itcf_carry_bow_back,925 , weight(1.25)|difficulty(4)|accuracy(91)|spd_rtng(70)| shoot_speed(95)| thrust_damage(15 ,  pierce),imodbits_bow , [], [fac_elf,fac_undeads_2,fac_demon,fac_kingdom_3,fac_kingdom_5]],
 
 ["black_bow", "Black Bow", [("skeletonbowskull",0)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff|itp_merchandise, itcf_shoot_bow|itcf_carry_bow_back, 5000, weight(1.25)|difficulty(6)|accuracy(90)|spd_rtng(70)|shoot_speed(95)|thrust_damage(23,pierce), imodbits_bow, magic_bow_trigger, [fac_elf,fac_undeads_2,fac_demon,fac_kingdom_3,fac_kingdom_5] ],
+["banshee_bow", "banshee Bow", [("banshee_bow",0)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff|itp_merchandise, itcf_shoot_bow|itcf_carry_bow_back, 4000, weight(1.25)|difficulty(5)|accuracy(92)|spd_rtng(70)|shoot_speed(90)|thrust_damage(20,pierce), imodbits_bow, magic_bow_trigger, [fac_elf,fac_undeads_2,fac_demon] ],
 
 ["nord_bow_1", "nord Long Bow", [("nordherobow",0)], itp_merchandise|itp_type_bow|itp_primary|itp_two_handed|itp_cant_use_on_horseback ,itcf_shoot_bow|itcf_carry_bow_back,925 , weight(2)|difficulty(4)|accuracy(91)|spd_rtng(65)| shoot_speed(95)| thrust_damage(20 ,  pierce),imodbits_bow , [], [fac_kingdom_10, fac_scotland]],
 ["nord_bow_2", "nord hero Bow", [("bow_nordic",0)], itp_merchandise|itp_type_bow|itp_primary|itp_two_handed|itp_cant_use_on_horseback|itp_is_magic_staff ,itcf_shoot_bow|itcf_carry_bow_back,2000 , weight(3)|difficulty(5)|accuracy(94)|spd_rtng(63)| shoot_speed(100)| thrust_damage(24 ,  pierce),imodbits_bow , magic_bow_trigger, [fac_kingdom_10, fac_scotland]],
@@ -9089,12 +5941,12 @@ items = [
 
 
 ["dragon_bone_bow", "Dragon Bone Bow", [("dragonbonebow",0)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff, itcf_shoot_bow|itcf_carry_bow_back, 7500, weight(1.25)|difficulty(7)|spd_rtng(80)|shoot_speed(80)|thrust_damage(32,pierce), imodbits_bow, magic_bow_trigger, [fac_elf,fac_forest_ranger] ],
-["karztev_bow", "Black_Bow", [("dwarvenbowkarztev",0)], itp_type_bow|itp_primary|itp_is_magic_staff,itcf_shoot_bow|itcf_carry_bow_back, 20000 , weight(1.25)|difficulty(6)|accuracy(99)|spd_rtng(65)| shoot_speed(70)| thrust_damage(21 ,pierce),imodbits_bow , magic_bow_trigger, [fac_elf,fac_forest_ranger]],
-["auriels_bow", "Auriels_Bow", [("aurielsbow", 0)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff, itcf_shoot_bow|itcf_carry_bow_back, 50000, weight(1.4)|difficulty(7)|accuracy(99)|spd_rtng(88)|shoot_speed(75)|thrust_damage(34, pierce), imodbits_bow ],
+["karztev_bow", "Black_Bow", [("dwarvenbowkarztev",0)], itp_type_bow|itp_primary|itp_is_magic_staff|itp_unique,itcf_shoot_bow|itcf_carry_bow_back, 20000 , weight(1.25)|difficulty(6)|accuracy(99)|spd_rtng(65)| shoot_speed(70)| thrust_damage(21 ,pierce),imodbits_bow , magic_bow_trigger, [fac_elf,fac_forest_ranger]],
+["auriels_bow", "Auriels_Bow", [("aurielsbow", 0)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff|itp_unique, itcf_shoot_bow|itcf_carry_bow_back, 50000, weight(1.4)|difficulty(7)|accuracy(99)|spd_rtng(88)|shoot_speed(75)|thrust_damage(34, pierce), imodbits_bow ],
 
-["hurricane_bow", "Hurricane_Bow", [("lonely", 0), ("lonely_carry", ixmesh_carry)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff, itcf_shoot_bow|itcf_carry_bow_back, 50000, weight(1)|difficulty(7)|accuracy(99)|spd_rtng(92)|shoot_speed(60)|thrust_damage(28, pierce)|max_ammo(0), imodbits_bow , magic_bow_trigger],
+["hurricane_bow", "Hurricane_Bow", [("lonely", 0), ("lonely_carry", ixmesh_carry)], itp_type_bow|itp_two_handed|itp_primary|itp_is_magic_staff|itp_unique, itcf_shoot_bow|itcf_carry_bow_back, 50000, weight(1)|difficulty(7)|accuracy(99)|spd_rtng(92)|shoot_speed(60)|thrust_damage(28, pierce)|max_ammo(0), imodbits_bow , magic_bow_trigger],
 
-["elven_bow",         "elven_bow", [("elven_bow", 0)],itp_type_bow|itp_primary|itp_two_handed|itp_is_magic_staff ,itcf_shoot_bow,50000 , 
+["elven_bow",         "elven_bow", [("elven_bow", 0)],itp_type_bow|itp_primary|itp_two_handed|itp_is_magic_staff|itp_unique ,itcf_shoot_bow,50000 , 
 weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_damage(40,pierce),imodbits_bow, magic_bow_trigger, ne_faction],
 
 ["mirkwood_bow", "Mirkwood_Bow", [("mirkwood_bow", 0), ("mirkwood_bow_carry", ixmesh_carry)], itp_merchandise|itp_type_bow|itp_two_handed|itp_primary|itp_cant_use_on_horseback|itp_is_magic_staff, itcf_shoot_bow|itcf_carry_bow_back, 3616, weight(1.75)|difficulty(5)|accuracy(100)|spd_rtng(100)|shoot_speed(82)|thrust_damage(15, pierce)|abundance(10)|max_ammo(0), imodbits_bow, magic_bow_trigger, [fac_elf,fac_forest_ranger] ],
@@ -9109,15 +5961,16 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  
 ["sniper_crossbow", "Siege Crossbow", [("arbalest_h2",0)], itp_type_crossbow|itp_merchandise|itp_cant_reload_on_horseback|itp_two_handed|itp_primary|itp_bonus_against_shield, itcf_shoot_crossbow|itcf_carry_crossbow_back, 2400, weight(3.75)|difficulty(10)|spd_rtng(25)|shoot_speed(90)|thrust_damage(65,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
 
-["arbalest_1", "arbalest", [("spak_crsb01",0)], itp_type_crossbow|itp_merchandise|itp_cant_reload_on_horseback|itp_two_handed|itp_primary|itp_bonus_against_shield, itcf_shoot_crossbow|itcf_carry_crossbow_back, 4800, weight(3.75)|difficulty(10)|spd_rtng(20)|shoot_speed(90)|thrust_damage(75,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
-["arbalest_2", "arbalest", [("spak_crsb02",0)], itp_type_crossbow|itp_merchandise|itp_cant_reload_on_horseback|itp_two_handed|itp_primary|itp_bonus_against_shield, itcf_shoot_crossbow|itcf_carry_crossbow_back|itcf_reload_pistol, 9600, weight(3.75)|difficulty(10)|spd_rtng(25)|shoot_speed(100)|thrust_damage(85,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
+["arbalest_1", "arbalest", [("spak_crsb01",0)], itp_type_crossbow|itp_merchandise|itp_cant_reload_on_horseback|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back, 4800, weight(3.75)|difficulty(10)|spd_rtng(20)|shoot_speed(90)|thrust_damage(75,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
+["arbalest_2", "arbalest", [("spak_crsb02",0)], itp_type_crossbow|itp_merchandise|itp_cant_reload_on_horseback|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back|itcf_reload_pistol, 9600, weight(3.75)|difficulty(10)|spd_rtng(25)|shoot_speed(100)|thrust_damage(85,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
  
-["rhod_crossbow", "Crossbow", [("heavy_crossbow_h2",0)], itp_type_crossbow|itp_cant_reload_on_horseback|itp_primary, itcf_shoot_crossbow|itcf_carry_crossbow_back, 1200, weight(3)|spd_rtng(25)|shoot_speed(80)|thrust_damage(45,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
-["rhod_sniper_crossbow", "Siege Crossbow", [("arbalest_h3",0)], itp_type_crossbow|itp_cant_reload_on_horseback|itp_primary, itcf_shoot_crossbow|itcf_carry_crossbow_back, 3600, weight(3.75)|difficulty(10)|spd_rtng(20)|shoot_speed(90)|thrust_damage(60,pierce)|max_ammo(1),imodbits_crossbow, [], se_faction], 
+["rhod_crossbow", "Crossbow", [("arbalest_h3",0)], itp_type_crossbow|itp_cant_reload_on_horseback|itp_primary, itcf_shoot_crossbow|itcf_carry_crossbow_back|itp_is_magic_staff, 2400, weight(3.75)|difficulty(10)|spd_rtng(25)|shoot_speed(90)|thrust_damage(65,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
+["rhod_sniper_crossbow", "Siege Crossbow", [("van_helsing_crossbow_01",0)], itp_type_crossbow|itp_cant_reload_on_horseback|itp_primary|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back|itcf_reload_pistol, 9600, weight(3.75)|difficulty(10)|spd_rtng(25)|shoot_speed(100)|thrust_damage(85,pierce)|max_ammo(1), imodbits_crossbow , [], se_faction],
+ 
 
 ["van_helsing_crossbow_bolt", "Van Helsing Crossbow Bolt", [("van_helsing_crossbow_bolt",0),("van_helsing_crossbow_bolt_copy",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag",ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_inventory)], itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield, itcf_carry_quiver_right_vertical, 5000, weight(2.5)|abundance(20)|weapon_length(63)|thrust_damage(40,pierce)|max_ammo(60), imodbits_missile,missile_holy_fire_trigger+missile_holy_fire_trigger_1+missile_distance_trigger ],
 
-["van_helsing_crossbow", "Van Helsing Crossbow", [("van_helsing_crossbow_01",0),("van_helsing_crossbow_01_scabbard",ixmesh_carry),("van_helsing_crossbow_01_scabbard",ixmesh_inventory)], itp_type_crossbow|itp_two_handed|itp_primary|itp_next_item_as_melee, itcf_shoot_crossbow|itcf_carry_crossbow_back, 50000, weight(3.75)|difficulty(10)|spd_rtng(45)|shoot_speed(100)|thrust_damage(60,pierce)|max_ammo(10), imodbits_crossbow ,[(ti_on_weapon_attack,[
+["van_helsing_crossbow", "Van Helsing Crossbow", [("van_helsing_crossbow_01",0),("van_helsing_crossbow_01_scabbard",ixmesh_carry),("van_helsing_crossbow_01_scabbard",ixmesh_inventory)], itp_type_crossbow|itp_two_handed|itp_primary|itp_next_item_as_melee|itp_unique|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back, 50000, weight(3.75)|difficulty(10)|spd_rtng(45)|shoot_speed(100)|thrust_damage(60,pierce)|max_ammo(10), imodbits_crossbow ,[(ti_on_weapon_attack,[
 (store_trigger_param_1,":shooter"),#Get the attacker Agent for add_missile'
 (try_for_range, ":unused", 1, 3),
 #(try_for_range, ":unused", 1, 1),
@@ -9170,14 +6023,14 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
     
 (try_end),
 ]),]],
-["van_helsing_crossbow_auto", "Van Helsing Crossbow", [("van_helsing_crossbow_01",0),("van_helsing_crossbow_01_scabbard",ixmesh_carry)], itp_type_crossbow|itp_two_handed|itp_primary, itcf_shoot_crossbow|itcf_carry_crossbow_back, 20000, weight(3.75)|difficulty(10)|spd_rtng(100)|shoot_speed(120)|thrust_damage(80,pierce)|max_ammo(30), imodbits_crossbow ],
+["van_helsing_crossbow_auto", "Van Helsing Crossbow", [("van_helsing_crossbow_01",0),("van_helsing_crossbow_01_scabbard",ixmesh_carry)], itp_type_crossbow|itp_two_handed|itp_primary|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back, 20000, weight(3.75)|difficulty(10)|spd_rtng(100)|shoot_speed(120)|thrust_damage(80,pierce)|max_ammo(30), imodbits_crossbow ],
 
-["crossbow_cannon", "Buriza-Do Kyanon", [("spak_crsb02",0)], itp_type_crossbow|itp_unique|itp_two_handed|itp_primary|itp_bonus_against_shield, itcf_shoot_crossbow|itcf_carry_crossbow_back|itcf_reload_pistol, 20000, weight(3.75)|spd_rtng(50)|shoot_speed(100)|thrust_damage(100,pierce)|max_ammo(2), imodbits_crossbow ],
+["crossbow_cannon", "Buriza-Do Kyanon", [("spak_crsb02",0)], itp_type_crossbow|itp_unique|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back|itcf_reload_pistol, 20000, weight(3.75)|spd_rtng(50)|shoot_speed(100)|thrust_damage(100,pierce)|max_ammo(2), imodbits_crossbow ],
 ["charm_bow", "Cupid's bow", [("imperial_bow", 0), ("imperial_bow_case", ixmesh_carry)], itp_type_bow|itp_two_handed|itp_primary|itp_unique|itp_is_magic_staff, itcf_show_holster_when_drawn|itcf_shoot_bow|itcf_carry_bowcase_left, 20000, weight(1.5)|difficulty(5)|accuracy(95)|spd_rtng(80)|shoot_speed(75)|thrust_damage(25,pierce), imodbits_bow , magic_bow_trigger],
 ["sloth_crossbow", "Valder's Bow of Sloth", [("skeleton_crossbow",0)], itp_type_crossbow|itp_unique|itp_primary|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back, 20000, weight(2.5)|difficulty(8)|spd_rtng(80)|shoot_speed(70)|thrust_damage(45,pierce)|max_ammo(1),imodbits_crossbow , magic_bow_trigger],
 
 
-["bonecrossbow", "bonecrossbow", [("arbalest_h4",0)], itp_type_crossbow|itp_primary|itp_next_item_as_melee, itcf_shoot_crossbow|itcf_carry_crossbow_back, 5000, weight(3.75)|difficulty(9)|spd_rtng(50)|shoot_speed(100)|thrust_damage(55,pierce)|max_ammo(6), imodbits_crossbow ,[(ti_on_weapon_attack,[
+["bonecrossbow", "bonecrossbow", [("arbalest_h4",0)], itp_type_crossbow|itp_primary|itp_next_item_as_melee|itp_is_magic_staff, itcf_shoot_crossbow|itcf_carry_crossbow_back, 5000, weight(3.75)|difficulty(9)|spd_rtng(50)|shoot_speed(100)|thrust_damage(55,pierce)|max_ammo(6), imodbits_crossbow ,[(ti_on_weapon_attack,[
 (store_trigger_param_1,":shooter"),#Get the attacker Agent for add_missile'
 (try_for_range, ":unused", 1, 3),
 #(try_for_range, ":unused", 1, 1),
@@ -9353,8 +6206,8 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["torch",         "Torch", [("club",0)], itp_type_one_handed_wpn|itp_primary, itc_scimitar, 11 , weight(2.5)|difficulty(0)|spd_rtng(95)| weapon_length(95)|swing_damage(11 , blunt)| thrust_damage(0 ,  pierce),imodbits_none, [(ti_on_init_item, [(set_position_delta,0,60,0),(particle_system_add_new, "psys_torch_fire"),(particle_system_add_new, "psys_torch_smoke"),(set_current_color,150, 130, 70),(add_point_light, 10, 30),])]],
 
-["lyre",         "Lyre", [("lyre",0)], itp_type_shield|itp_wooden_parry|itp_civilian|itp_shield_no_parry, itcf_carry_bow_back,  118 , weight(2.5)|hit_points(480)|body_armor(1)|spd_rtng(82)|weapon_length(90),0 ],
-["lute",         "Lute", [("lute",0)], itp_type_shield|itp_wooden_parry|itp_civilian|itp_shield_no_parry, itcf_carry_bow_back,  118 , weight(2.5)|hit_points(480)|body_armor(1)|spd_rtng(82)|weapon_length(90),0 ],
+["lyre",         "Lyre", [("lyre",0)], itp_type_shield|itp_wooden_parry|itp_civilian, itcf_carry_bow_back,  118 , weight(2.5)|hit_points(480)|body_armor(1)|spd_rtng(82)|weapon_length(90),0 ],
+["lute",         "Lute", [("lute",0)], itp_type_shield|itp_wooden_parry|itp_civilian, itcf_carry_bow_back,  118 , weight(2.5)|hit_points(480)|body_armor(1)|spd_rtng(82)|weapon_length(90),0 ],
 
 
 ["court_dress", "Court Dress", [("court_dress",0)], itp_type_body_armor|itp_covers_legs|itp_civilian   ,0, 348 , weight(4)|abundance(100)|head_armor(0)|body_armor(14)|leg_armor(4)|difficulty(0) ,imodbits_cloth],
@@ -9399,7 +6252,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 #["duelrapier", "Duel Rapier", [("lui_duelrapier_copy",0)], itp_type_shield|itp_merchandise, 0, 370, weight(3)|hit_points(500)|body_armor(15)|spd_rtng(99)|shield_width(10)|shield_height(105),imodbits_none],
 #["dueling_scimitar", "Dueling scimitar", [("lui_duelscimitar_copy",0)], itp_type_shield, 0, 195 , weight(2)|hit_points(1000)|body_armor(17)|spd_rtng(100)|shield_width(5)|shield_height(100),imodbits_none],
 #["dueling_saber", "Dueling Saber", [("lui_duelsaber_copy",0)], itp_type_shield, itcf_carry_sword_left_hip, 195 , weight(2)|hit_points(1000)|body_armor(17)|spd_rtng(100)|shield_width(5)|shield_height(100),imodbits_none],
-["dueling_dagger", "Dueling Dagger", [("dueldagger",0)], itp_merchandise|itp_type_shield|itp_shield_no_parry, 0, 195 , weight(1)|hit_points(500)|body_armor(22)|spd_rtng(47)|shield_width(5)|shield_height(40),imodbits_none , [], [fac_neutral,fac_commoners,fac_beast]],
+["dueling_dagger", "Dueling Dagger", [("dueldagger",0)], itp_merchandise|itp_type_shield, 0, 195 , weight(1)|hit_points(500)|body_armor(22)|spd_rtng(47)|shield_width(5)|shield_height(40),imodbits_none , [], [fac_neutral,fac_commoners,fac_beast]],
 #["dueling_axe", "Dueling axe", [("lui_knightaxeonehb_copy",0)], itp_merchandise|itp_type_shield, 0, 195 , weight(1)|hit_points(1000)|body_armor(38)|spd_rtng(100)|shield_width(5)|shield_height(93),imodbits_none],
 #["dueling_sword", "Dueling sword", [("sword_medieval_d_long_copy",0)], itp_merchandise|itp_type_shield, 0, 195 , weight(1)|hit_points(1000)|body_armor(17)|spd_rtng(100)|shield_width(35)|shield_height(105),imodbits_none],
 
@@ -9411,43 +6264,95 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 #special_item
 
-["khorne_axe", "Drink blood", [("thrud_axe",0)], itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 30000, weight(6.5)|difficulty(24)|spd_rtng(130)|weapon_length(150)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork,],
+["khorne_axe", "Drink blood", [("thrud_axe",0), ("thrud_axe", ixmesh_carry)], itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 30000, weight(6.5)|difficulty(24)|spd_rtng(130)|weapon_length(150)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_khorne_axe"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment_mace"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks_mace"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
-["ebony_blade", "Ebony Blade", [("ebonyblade",0)], itp_unique|itp_two_handed|itp_type_two_handed_wpn|itp_primary|itp_extra_penetration|itp_can_penetrate_shield, itc_nodachi|itcf_carry_sword_back, 
+["ebony_blade", "Ebony Blade", [("ebonyblade",0), ("ebonyblade", ixmesh_carry)], itp_unique|itp_two_handed|itp_type_two_handed_wpn|itp_primary|itp_extra_penetration|itp_can_penetrate_shield, itc_nodachi|itcf_carry_sword_back, 
 50000 , weight(1.75)|difficulty(30)|spd_rtng(130)| weapon_length(150)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_sword_high , [
- (ti_on_weapon_attack, 
-  [
-   (store_trigger_param_1, ":shooter"),
-   (call_script,"script_cf_agent_cleave",":shooter", 1, 0),
-  ]),
-],],
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_ebony_blade"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_vampire_enchantment"),
+        (particle_system_add_new, "psys_vampire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ],],
 ["dawnbreaker_1", "Dawnbreaker Staff", [("tianshijian1", 0)], itp_merchandise|itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_sword_back,
  50000 , weight(3.25)|difficulty(0)|spd_rtng(90) | shoot_speed(150) | thrust_damage(80 ,pierce)|max_ammo(3)|accuracy(99),imodbits_magic_staff, magic_cast_trigger , [fac_elf] ], 
-["dawnbreaker", "Dawnbreaker", [("tianshijian1",0)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_is_magic_staff, itc_greatsword|itcf_carry_sword_back, 
-50000 , weight(2)|difficulty(18)|spd_rtng(120)| weapon_length(190)|swing_damage(55 , pierce)| thrust_damage(40 ,  pierce),imodbits_sword_high, ],
+["dawnbreaker", "Dawnbreaker", [("tianshijian1",0), ("tianshijian1", ixmesh_carry)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_is_magic_staff, itc_greatsword|itcf_carry_sword_back, 
+50000 , weight(2)|difficulty(18)|spd_rtng(120)| weapon_length(190)|swing_damage(55 , pierce)| thrust_damage(40 ,  pierce),imodbits_sword_high,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_dawnbreaker"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ] ],
 
-["swiftness_sword", "Sword of Swiftness", [("ElvenSword",0)], itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_longsword|itcf_carry_sword_back,
- 50000 , weight(2.0)|difficulty(15)|spd_rtng(100)| weapon_length(125)|swing_damage(45, pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high],
+["swiftness_sword", "Sword of Swiftness", [("ElvenSword",0), ("ElvenSword", ixmesh_carry)], itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_longsword|itcf_carry_sword_back,
+ 50000 , weight(2.0)|difficulty(15)|spd_rtng(100)| weapon_length(125)|swing_damage(45, pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_swiftness_sword"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment"),
+        (particle_system_add_new, "psys_poison_enchantment_2"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
  
-["flamberge_fire",         "Flamberge Zweihander", [("ssdj34",0),("ssdj34", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique|itp_cant_use_on_horseback, itc_greatsword, 30000 , weight(3.75)|difficulty(18)|spd_rtng(95)| weapon_length(150)|swing_damage(60, pierce)| thrust_damage(36 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [(ti_on_init_item, [
-(try_begin),
-(eq, "$g_weapon_fire_particle", 0),
-(set_current_color,600,510,400),(set_position_delta,0,75,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
-(particle_system_add_new, "psys_items_fire_blue"),
-(try_end),
-])]],
+["flamberge_fire",         "Flamberge Zweihander", [("ssdj34",0),("ssdj34", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique|itp_cant_use_on_horseback, itc_greatsword, 30000 , weight(3.75)|difficulty(18)|spd_rtng(95)| weapon_length(150)|swing_damage(60, pierce)| thrust_damage(36 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_flamberge_fire"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
-["trgba", "trgba", [("glassbattleaxe_2",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_penetrate_shield|itp_extra_penetration|itp_crush_through|itp_unique, itc_nodachi|itcf_carry_axe_back, 50000, weight(3.0)|difficulty(18)|spd_rtng(100)|weapon_length(120)|swing_damage(60,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork, [], ne_faction],
+["trgba", "trgba", [("glassbattleaxe_2",0), ("glassbattleaxe_2", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_penetrate_shield|itp_extra_penetration|itp_crush_through|itp_unique, itc_nodachi|itcf_carry_axe_back, 50000, weight(3.0)|difficulty(18)|spd_rtng(100)|weapon_length(120)|swing_damage(60,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_trgba"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_2_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks_mace"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ], ne_faction],
             
 ["frostmourne", "Frostmourne", [("DemonSword01",0),("DemonSword01", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_bastardsword|itc_claymore|itcf_carry_sword_back,20000 , weight(2.25)|difficulty(10)|spd_rtng(88)| weapon_length(140)|swing_damage(45 , pierce)| thrust_damage(50 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[(ti_on_init_item, [
 (try_begin),
  (eq, "$g_weapon_fire_particle", 0),
  (set_position_delta,0,50,0),
- (store_trigger_param_2, ":troop_no"),
- (troop_is_hero, ":troop_no"),
  (particle_system_add_new, "psys_frostfang_snowflake"),
  (particle_system_add_new, "psys_frostfang_smoke"),
 (try_end),
@@ -9458,8 +6363,6 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 (try_begin),
 (eq, "$g_weapon_fire_particle", 0),
 (set_position_delta,0,50,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
 (particle_system_add_new, "psys_frostfang_snowflake"),
 (particle_system_add_new, "psys_frostfang_smoke"),
 (try_end),
@@ -9475,9 +6378,33 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 (try_end),
 ])]],
 
-["plague_staff_1", "Plague Scythe", [("Scythe_Crusher_A_01",0)], itp_type_pistol|itp_crush_through|itp_next_item_as_melee|itp_primary|itp_is_magic_staff ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_spear,
- 20000 , weight(3.25)|difficulty(0)|spd_rtng(45) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger , [fac_undeads_2] ], 
-["plague_staff", "Plague Scythe", [("Scythe_Crusher_A_01",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_is_glaive, itc_nodachi|itcf_carry_spear, 5000, weight(1.5)|weapon_length(167)|difficulty(0)|spd_rtng(110)|abundance(10)|swing_damage(45, pierce)|thrust_damage(0, pierce), imodbits_axe|imodbit_masterwork ],
+["plague_staff_1", "Plague Scythe", [("Scythe_Crusher_A_01",0), ("Scythe_Crusher_A_01", ixmesh_carry)], itp_type_pistol|itp_crush_through|itp_next_item_as_melee|itp_primary|itp_is_magic_staff ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_spear,
+ 20000 , weight(3.25)|difficulty(0)|spd_rtng(45) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger +[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_plague_staff"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_2_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks_mace"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_undeads_2] ], 
+["plague_staff", "Plague Scythe", [("Scythe_Crusher_A_01",0), ("Scythe_Crusher_A_01", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_is_glaive, itc_nodachi|itcf_carry_spear, 5000, weight(1.5)|weapon_length(167)|difficulty(0)|spd_rtng(110)|abundance(10)|swing_damage(45, pierce)|thrust_damage(0, pierce), imodbits_axe|imodbit_masterwork ,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_plague_staff"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_poison_enchantment_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_2_mace"),
+        (particle_system_add_new, "psys_poison_enchantment_sparks_mace"),
+        (set_current_color, 70, 140, 35),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
 
@@ -9495,36 +6422,66 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 (particle_system_add_new, "psys_items_fire_white"),(add_point_light, 10, 30),
 (try_end),
 ])]],
-["zamorak", "zamorak", [("zamorak",0)], itp_unique|itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_greatsword, 50000, weight(6.5)|difficulty(21)|spd_rtng(130)|weapon_length(150)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork,],
+["zamorak", "zamorak", [("zamorak",0), ("zamorak", ixmesh_carry)], itp_unique|itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_greatsword, 50000, weight(6.5)|difficulty(21)|spd_rtng(130)|weapon_length(150)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork,curse_enchantment+[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_zamorak"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 ["calibur",  "Calibur", [("scottish_claymore",0)], itp_type_two_handed_wpn| itp_two_handed|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_claymore|itcf_carry_sword_back, 50000 , weight(2.5)|difficulty(18)|spd_rtng(100)| weapon_length(120)|swing_damage(40 , pierce)| thrust_damage(50 ,  pierce),imodbits_sword_high , [], [fac_kingdom_4]],
 
 ["excalibur_1", "Excalibur", [("henrysword",0),("henrysword_scabbard_02", ixmesh_carry)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_bastardsword|itc_claymore|itcf_show_holster_when_drawn|itcf_carry_sword_back,50000 , weight(2.25)|difficulty(12)|spd_rtng(115)| weapon_length(145)|swing_damage(65 , pierce)| thrust_damage(50 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, ],
 ["excalibur_2", "Excalibur without scabbard", [("henrysword",0)], itp_type_two_handed_wpn|itp_primary|itp_can_penetrate_shield|itp_bonus_against_shield|itp_extra_penetration|itp_unique, itc_bastardsword|itc_claymore|itcf_carry_sword_back,50000 , weight(2.25)|difficulty(15)|spd_rtng(115)| weapon_length(145)|swing_damage(65 , pierce)| thrust_damage(50 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, ],
 
-["angel_blade", "angel_blade", [("SigmarsSword1",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique, itc_bastardsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 50000 , weight(2.25)|difficulty(18)|spd_rtng(97)| weapon_length(155)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,holy_weapon_trigger],
+["angel_blade", "angel_blade", [("SigmarsSword1",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique, itc_bastardsword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 50000 , weight(2.25)|difficulty(18)|spd_rtng(97)| weapon_length(155)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_angel_blade"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (particle_system_add_new, "psys_holy_enchantment"),
+        (particle_system_add_new, "psys_holy_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
-["flame_blade", "flame_blade", [("jianhong",0),("jianhong", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique, itc_bastardsword|itcf_carry_sword_back, 50000 , weight(2.25)|difficulty(15)|spd_rtng(97)| weapon_length(155)|swing_damage(55 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[(ti_on_init_item, [
-(try_begin),
-(eq, "$g_weapon_fire_particle", 0),
-(set_position_delta,0,75,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
-(particle_system_add_new, "psys_items_fire_red"),
-(try_end),
-])]],
+["flame_blade", "flame_blade", [("jianhong",0),("jianhong", ixmesh_carry)], itp_type_two_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield|itp_unique, itc_bastardsword|itcf_carry_sword_back, 50000 , weight(2.25)|difficulty(15)|spd_rtng(97)| weapon_length(155)|swing_damage(55 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_flame_blade"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ]],
 
 
-["aurora_blade", "Aurora blade", [("WAoRSwordA",0),("WAoRSwordA", ixmesh_carry)], itp_type_one_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_unique, itc_longsword|itcf_carry_sword_left_hip, 50000 , weight(2.25)|difficulty(15)|spd_rtng(97)| weapon_length(140)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[(ti_on_init_item, [
-(try_begin),
-(eq, "$g_weapon_fire_particle", 0),
-(set_position_delta,0,70,0),
-(store_trigger_param_2, ":troop_no"),
-(troop_is_hero, ":troop_no"),
-(particle_system_add_new, "psys_aurora_blade_lightning"),
-(try_end),
-])]],
+["aurora_blade", "Aurora blade", [("WAoRSwordA",0),("WAoRSwordA", ixmesh_carry)], itp_type_one_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_unique, itc_longsword|itcf_carry_sword_left_hip, 50000 , weight(2.25)|difficulty(15)|spd_rtng(97)| weapon_length(140)|swing_damage(50 , pierce)| thrust_damage(35 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp,[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_aurora_blade"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_curse_enchantment"),
+        (particle_system_add_new, "psys_curse_enchantment_sparks"),
+        (set_current_color, 181, 30, 113),
+        (add_point_light, 10, 30),
+    ]),
+    ], ],
 
  
 ["jingubang", "jingubang", [("txz_weapon_a02_06",0)], itp_type_polearm|itp_primary|itp_penalty_with_shield|itp_offset_lance|itp_couchable|itp_crush_through|itp_unbalanced|itp_unique, itc_long_glaive|itcf_carry_sword_back, 50000, weight(20)|difficulty(24)|spd_rtng(65)|weapon_length(220)|swing_damage(150,blunt)|thrust_damage(150,blunt), imodbits_polearm ],
@@ -9554,11 +6511,11 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  
  
  
-["holy_granata", "Holy_Grenade", [("hhg", 0)], itp_type_thrown|itp_crush_through|itp_unique|itp_primary, itcf_throw_stone, 20000, weight(4)|weapon_length(30)|difficulty(0)|spd_rtng(100)|shoot_speed(30)|abundance(33)|thrust_damage(100, blunt)|max_ammo(30), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 600, 10, 14),]),]+missile_distance_trigger,firearm_factions],
+["holy_granata", "Holy_Grenade", [("hhg", 0)], itp_type_thrown|itp_crush_through|itp_unique|itp_primary|itp_is_bomb, itcf_throw_stone, 20000, weight(4)|weapon_length(30)|difficulty(0)|spd_rtng(100)|shoot_speed(30)|abundance(33)|thrust_damage(100, blunt)|max_ammo(30), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 600, 10, 14),]),]+missile_distance_trigger,firearm_factions],
  
-["mandolin"," Aiffe's Mandolin", [("lute",0)], itp_type_shield|itp_unique|itp_wooden_parry|itp_civilian|itp_shield_no_parry, itcf_carry_bow_back,  
+["mandolin"," Aiffe's Mandolin", [("lute",0)], itp_type_shield|itp_unique|itp_wooden_parry|itp_civilian, itcf_carry_bow_back,  
  50000 , weight(1.5)|shield_hit_points(10000)|body_armor(40)|spd_rtng(97)|shield_width(50)|shield_height(180)|difficulty(2), imodbits_shield ],
-["lordaeron", "lordaeron", [("fix_shield20_a_combined",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield, 50000, weight(3.5)|shield_hit_points(10000)|body_armor(20)|spd_rtng(87)|shield_width(50)|shield_height(80)|difficulty(5), imodbits_shield ],
+["lordaeron", "lordaeron", [("fix_shield20_a_combined",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield, 50000, weight(3.5)|shield_hit_points(10000)|body_armor(20)|spd_rtng(87)|shield_width(50)|shield_height(80)|difficulty(5), imodbits_shield_metal ],
 
 ["death_skull", "Death head", [("helmet_orc_skull",0)], itp_type_fullhelm|itp_unique|itp_fit_to_head, 0, 20000, weight(1.0)|abundance(100)|head_armor(120)|body_armor(0)|leg_armor(0)|difficulty(12), imodbits_plate],
 
@@ -9573,9 +6530,31 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["black_hole_plate", "Ebony mail plate", [("ebonyarmorbody",0)], itp_unique|itp_type_body_armor|itp_covers_legs, 0, 50000, weight(30)|abundance(20)|head_armor(13)|body_armor(85)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_8,fac_undeads_2,fac_beast]],
 ["enchanter_robe", "Enchanter_Robe", [("wizard_robe_3",0)], itp_unique|itp_type_body_armor|itp_covers_legs ,0, 50000,weight(11)|abundance(30)|head_armor(10)|body_armor(80)|leg_armor(45)|difficulty(6),imodbits_cloth , [], [fac_dark_knights,fac_commoners]],
 ["undead_scythe", "Death scythe", [("dragonbonescythe",0)], itp_unique|itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_guandao, 50000, weight(6.5)|difficulty(30)|spd_rtng(130)|weapon_length(150)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork,],
-["black_king_bar", "Black King Bar", [("ebony_long_mace",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_scimitar|itcf_carry_mace_left_hip,50000 , weight(2.5)|difficulty(10)|spd_rtng(100)| weapon_length(100)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace , [], [fac_undeads_2,fac_beast]],
-["antimage_shield", "Antimage_Shield", [("fix_lorien_kite", 0)], itp_unique|itp_type_shield|itp_cant_use_on_horseback, itcf_carry_kite_shield, 50000, weight(2)|shield_width(70)|shield_height(70)|abundance(10)|hit_points(5000)|body_armor(200)|spd_rtng(82), imodbits_shield, [], [fac_elf] ],
-["black_hole_sword", "black_hole Sword", [("ebonyPersonGreatsword",0)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_greatsword|itcf_carry_sword_back, 50000 , weight(2.75)|difficulty(15)|spd_rtng(130)| weapon_length(150)|swing_damage(55, pierce)| thrust_damage(50,pierce),imodbits_sword_high, [], [fac_undeads_2,fac_beast]],
+["black_king_bar", "Black King Bar", [("ebony_long_mace",0), ("ebony_long_mace", ixmesh_carry)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_unique|itp_primary, itc_scimitar|itcf_carry_mace_left_hip,50000 , weight(2.5)|difficulty(10)|spd_rtng(100)| weapon_length(100)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace , [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_black_king_bar"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 17),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_frost_enchantment_mace"),
+        (particle_system_add_new, "psys_frost_enchantment_sparks_mace"),
+        (set_current_color, 50, 50, 140),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_undeads_2,fac_beast]],
+["antimage_shield", "Antimage_Shield", [("mirkwood_greenwood_gold_shield", 0)], itp_unique|itp_type_shield|itp_cant_use_on_horseback, itcf_carry_kite_shield, 50000, weight(2)|shield_width(70)|shield_height(70)|abundance(10)|hit_points(5000)|body_armor(200)|spd_rtng(82), imodbits_shield_metal, [], [fac_elf] ],
+["black_hole_sword", "black_hole Sword", [("ebonyPersonGreatsword",0), ("ebonyPersonGreatsword", ixmesh_carry)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_greatsword|itcf_carry_sword_back, 50000 , weight(2.75)|difficulty(15)|spd_rtng(130)| weapon_length(150)|swing_damage(55, pierce)| thrust_damage(50,pierce),imodbits_sword_high, [
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_black_hole_sword"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_curse_enchantment"),
+        (particle_system_add_new, "psys_curse_enchantment_sparks"),
+        (set_current_color, 181, 30, 113),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_undeads_2,fac_beast]],
 
 
 ["khorne_helm", "Chaos Knight Helm", [("Helm_Khorne",0)], itp_unique|itp_type_fullhelm, 0, 
@@ -9629,7 +6608,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
         (store_random_in_range, ":ran", 0, 7),
         (try_begin),
           (eq,":ran",0),
-          (assign,":spawn_troop_id","trp_huge_inferno"),
+          (assign,":spawn_troop_id","trp_daemon_prince_slaanesh"),
         (else_try),  
           (eq,":ran",1),
           (assign,":spawn_troop_id","trp_demon_5"),
@@ -9641,15 +6620,13 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
           (assign,":spawn_troop_id","trp_demon_6"),
         (else_try),  
           (eq,":ran",4),
-          (assign,":spawn_troop_id","trp_demon_8"),
+          (assign,":spawn_troop_id","trp_daemon_prince_nurgle"),
         (else_try),  
           (eq,":ran",5),
           (assign,":spawn_troop_id","trp_demon_human_5_2"),
         (else_try),  
           (eq,":ran",6),
-          (assign,":spawn_troop_id","trp_demon_4_3"),
-          
-          
+          (assign,":spawn_troop_id","trp_demon_human_5_2"),
         (try_end),  
         (copy_position, pos51, pos5),
         (call_script,"script_cf_agent_spawn_agent_to_pos51", ":shooter", ":spawn_troop_id", 1),
@@ -9672,8 +6649,35 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["chest_4","chest", [("player_chest",0)], itp_type_goods, 0, 30000,weight(10)|abundance(50),imodbits_none],
 
 #["chest_5","chest", [("package",0)], itp_type_goods, 0, 30000,weight(10)|abundance(50),imodbits_none],
-["dragon_knight_lance", "Dragon knight Lance", [("lance22_a",0)], itp_type_polearm|itp_wooden_parry|itp_primary|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 30000, weight(5)|difficulty(12)|spd_rtng(75)|weapon_length(280)|swing_damage(0,cut)|thrust_damage(40,pierce)|abundance(30), imodbits_polearm , dragon_weapon_trigger, [fac_kingdom_8,fac_beast]],
-["dragon_knight_shield", "Dragon Knight_shield", [("fix_shield22_a_combined",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(70),imodbits_shield,  [], [fac_kingdom_8,fac_beast]],
+["dragon_knight_lance", "Dragon knight Lance", [("lance22_a",0), ("lance22_a", ixmesh_carry)], itp_type_polearm|itp_wooden_parry|itp_primary|itp_penalty_with_shield|itp_couchable|itp_crush_through, itc_greatlance, 30000, weight(5)|difficulty(12)|spd_rtng(75)|weapon_length(280)|swing_damage(0,cut)|thrust_damage(40,pierce)|abundance(30), imodbits_polearm , [
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (assign,":power",5),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])]+[
+    (ti_on_init_item, [
+        (item_get_weapon_length, ":length", "itm_dragon_knight_lance"),
+        (val_div, ":length", 2),
+        (val_add, ":length", 10),
+        (set_position_delta, 0, ":length", 0),
+        (particle_system_add_new, "psys_fire_enchantment"),
+        (particle_system_add_new, "psys_fire_enchantment_sparks"),
+        (set_current_color, 200, 150, 100),
+        (add_point_light, 10, 30),
+    ]),
+    ], [fac_kingdom_8,fac_beast]],
+["dragon_knight_shield", "Dragon Knight_shield", [("fix_shield22_a_combined",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(70),imodbits_shield_metal,  [], [fac_kingdom_8,fac_beast]],
 
 
 ["dragon_plate", "Dragon Knight_plate", [("longqishi_body",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(85)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_8,fac_beast]],
@@ -9695,7 +6699,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["grey_knight_head", "Grey Knight Helm", [("imphelmf",0)], itp_type_head_armor|itp_merchandise, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(100)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate,   [], [fac_demon_hunters, fac_hospitalier_knights]],
 ["grey_knight_hand","Grey Knight_hand", [("hm_glv_masV_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor,  [], [fac_demon_hunters, fac_hospitalier_knights]],
-["grey_knight_shield", "Grey Knight_shield", [("shield_of_grey_knight",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(70),imodbits_shield,  [], [fac_demon_hunters, fac_hospitalier_knights]],
+["grey_knight_shield", "Grey Knight_shield", [("shield_of_grey_knight",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(70),imodbits_shield_metal,  [], [fac_demon_hunters, fac_hospitalier_knights]],
 
 ["bane_blade_plate", "Bane Blade_plate", [("hm_arm_masX",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(95)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_7]],
 ["bane_blade_foot", "Bane Blade Boots", [("hm_boo_masX",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0,
@@ -9713,13 +6717,13 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["dawnguard_armor", "Dawnguard_Paladin_Armour", [("dawnguardbody", 0)], merc_body_armor, 0, 10868,full_plate_armor_tier_4, imodbits_plate, [], [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
 ["dawnguard_helmet", "Dawnguard_Paladin_Helm", [("dawnguardHelmet",0)], itp_merchandise| itp_type_head_armor,0, 
  4266 , weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate,  [], [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
-["dawnguard_shield", "Dawnguard Paladin_shield", [("fix_dawnguardShield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(4)|shield_hit_points(300)|body_armor(125)|spd_rtng(70)|shield_width(50),imodbits_shield,  [], [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
+["dawnguard_shield", "Dawnguard Paladin_shield", [("fix_dawnguardShield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(4)|shield_hit_points(300)|body_armor(125)|spd_rtng(70)|shield_width(50),imodbits_shield_metal,  [], [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
 
 ["dawnguard_sword", "Dawnguard Sword", [("dawnguardSword",0)], itp_merchandise|itp_type_one_handed_wpn|itp_primary, itc_longsword|itcf_carry_sword_back, 
-3040 , weight(2)|difficulty(8)|spd_rtng(115)| weapon_length(100)|swing_damage(30 , pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, holy_weapon_trigger, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
+3040 , weight(2)|difficulty(8)|spd_rtng(115)| weapon_length(100)|swing_damage(30 , pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, holy_weapon_trigger+holy_enchantment, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
 ["dawnguard_greatsword", "Dawnguard Great Sword", [("dawnguardgreatsword",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through, itc_greatsword|itcf_carry_sword_back, 
-3540 , weight(3)|difficulty(8)|spd_rtng(115)| weapon_length(140)|swing_damage(40 , pierce)| thrust_damage(35 ,  pierce),imodbits_sword_high, holy_weapon_trigger, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
-["dawnguard_hammer", "Dawnguard Hammer", [("dawnguardhammer",0)], itp_type_one_handed_wpn|itp_can_knock_down|itp_merchandise| itp_primary, itc_scimitar|itcf_carry_mace_left_hip,2000 , weight(3)|difficulty(0)|spd_rtng(100)| weapon_length(70)|swing_damage(37 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, holy_weapon_trigger, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
+3540 , weight(3)|difficulty(8)|spd_rtng(115)| weapon_length(140)|swing_damage(40 , pierce)| thrust_damage(35 ,  pierce),imodbits_sword_high, holy_weapon_trigger+holy_enchantment, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
+["dawnguard_hammer", "Dawnguard Hammer", [("dawnguardhammer",0)], itp_type_one_handed_wpn|itp_can_knock_down|itp_merchandise| itp_primary, itc_scimitar|itcf_carry_mace_left_hip,2000 , weight(3)|difficulty(0)|spd_rtng(100)| weapon_length(70)|swing_damage(37 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, holy_weapon_trigger+holy_enchantment, [fac_kingdom_10,fac_demon_hunters, fac_hospitalier_knights]], 
 ["dawnguard_javelin","Dawnguard Javelin",[("dawnguardshortspear",0),("jarid_quiver",ixmesh_carry)],itp_type_thrown|itp_merchandise|itp_primary|itp_bonus_against_shield,itcf_throw_javelin|itcf_carry_quiver_back|itcf_show_holster_when_drawn,3000,abundance(20)|weight(10)|difficulty(3)|shoot_speed(30)|spd_rtng(91)|weapon_length(75)|thrust_damage(53,pierce)|max_ammo(10),imodbits_thrown,
 [(ti_on_weapon_attack,[
 (store_trigger_param_1,":shooter"),#Get the attacker Agent for add_missile'
@@ -9756,10 +6760,10 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 
 ["black_knight_sword", "Black_knight_sword", [("ebonyPersonGreatsword",0)], itp_merchandise|itp_type_one_handed_wpn|itp_unique|itp_primary|itp_crush_through|itp_extra_penetration|itp_can_penetrate_shield, itc_longsword|itcf_carry_sword_back,
- 2700 , weight(2.0)|abundance(10)|difficulty(12)|spd_rtng(101)| weapon_length(150)|swing_damage(50, pierce)| thrust_damage(30 ,  pierce),imodbits_sword_high, [],[fac_undeads_2,fac_kingdom_3]],
+ 2700 , weight(2.0)|abundance(10)|difficulty(12)|spd_rtng(101)| weapon_length(150)|swing_damage(50, pierce)| thrust_damage(30 ,  pierce),imodbits_sword_high, curse_enchantment+vampire_enchantment,[fac_undeads_2,fac_kingdom_3]],
  
   
-["black_knight_shield", "Black Knight_shield", [("Black_d",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|abundance(10)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(50),imodbits_shield,  [], [fac_undeads_2,fac_kingdom_3]],
+["black_knight_shield", "Black Knight_shield", [("Black_d",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|abundance(10)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(50),imodbits_shield_metal,  [], [fac_undeads_2,fac_kingdom_3]],
 
 ["black_knight_plate", "Black Knight_plate", [("Black_Knight",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(95)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_undeads_2,fac_kingdom_3]],
 ["black_knight_foot", "Black Knight Boots", [("Black_Knightt",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0,
@@ -9898,7 +6902,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["org_shield_1",         "Org's Shield", [("fix_org_shield_1",0)], itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  100 , weight(2.0)|hit_points(50)|body_armor(30)|spd_rtng(90)|shield_width(30)|shield_height(40),imodbits_shield ],
 ["org_shield_2",         "Org's Shield", [("fix_org_shield_2",0)], itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  102 , weight(2.5)|hit_points(120)|body_armor(50)|spd_rtng(90)|shield_width(50)|shield_height(100),imodbits_shield ],
-["org_shield_3",         "Org's Shield", [("org_shield_3",0)], itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  118 , weight(4.5)|hit_points(1000)|body_armor(50)|spd_rtng(100)|shield_width(40)|shield_height(40),imodbits_shield ],
+["org_shield_3",         "Org's Shield", [("org_shield_3",0)], itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield,  118 , weight(4.5)|hit_points(1000)|body_armor(50)|spd_rtng(100)|shield_width(40)|shield_height(40),imodbits_shield_metal ],
 
 
 
@@ -9914,61 +6918,72 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["orc_armour", "Orc_Shirt", [("orc_archer", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 940,cloth_tier_3, imodbits_cloth], 
 ["orc_armour2", "Orc_Armoured_Shirt", [("orc_archer2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 1722,cloth_tier_4, imodbits_cloth], 
-["orc_armour3", "Orc_Mail_Shirt", [("orc_archer3", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
+["orc_armour3", "Orc_Mail_Shirt", [("orc_mail", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
 
-["orc_medarmor", "Orc_Mail_Shirt", [("orc_boy1", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
-["orc_medarmor2", "Orc_Mail_Shirt", [("orc_boy2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
-["orc_armorheav", "Orc_Armour", [("orc_boy_v1", 0)], itp_unique|itp_type_body_armor|itp_covers_legs, 536870912, 4035,mail_armor_tier_3, imodbits_plate], 
-["orc_armorheav2", "Orc_Armour", [("orc_boy_v2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs, 536870912, 4035,mail_armor_tier_3, imodbits_plate], 
+
+["orc_medarmor", "Orc_Mail_Shirt", [("orc_boarboy", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
+["orc_medarmor2", "Orc_Mail_Shirt", [("orc_boarboy_v", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2704,mail_armor_tier_2, imodbits_plate], 
+
+
+
+["orc_armorheav", "Orc_Armour", [("Berserkerarmor1", 0)], itp_unique|itp_type_body_armor|itp_covers_legs, 0, 4035,mail_armor_tier_3, imodbits_plate], 
+["orc_armorheav2", "Orc_Armour", [("Berserkerarmor2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs, 0, 4035,mail_armor_tier_3, imodbits_plate], 
 
 
 ["orc_bigun_armour", "Orc_Heavy_Armour", [("bigun_armour", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 5256,mail_armor_tier_4, imodbits_plate], 
 ["orc_bigun_armour2", "Orc_Heavy_Armour", [("bigun_armour2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 5256,mail_armor_tier_4, imodbits_plate], 
 
+
+
+
 ["orc_boar_armour", "Orc_Boar_Armour", [("orc_boarboy", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 3451,lamellar_armor_tier_1, imodbits_plate], 
 ["orc_boar_armour_vet", "Orc_Heavy_Boar_Armour", [("orc_boarboy_v", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 6360,lamellar_armor_tier_2, imodbits_plate], 
 
+
+
+
 ["blackorc", "Black_Orc_Armour", [("black_armour", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 7310,full_plate_armor_tier_1, imodbits_plate], 
-["blackorc_vet", "Black_Orc_Heavy_Armour", [("black_armour2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 9216,full_plate_armor_tier_2, imodbits_plate], 
-["blackorcboss_armour", "Black_Orc_Boss_Armour", [("blackboss_armour", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
+["blackorc_vet", "Black_Orc_Heavy_Armour", [("black_armour", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 9216,full_plate_armor_tier_2, imodbits_plate], 
+["blackorcboss_armour", "Black_Orc_Boss_Armour", [("black_armour2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
 
-["orcboss_armour", "Orc_Boss_Armour", [("bossorc2", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
-["orcboss_armour2", "Orc_Boss_Armour", [("bossorc", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
-["orcbigboss_armour", "Orc_BigBoss_Armour", [("bigbossorc", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 12769,full_plate_armor_tier_4, imodbits_plate], 
-
-["orc_pot", "Orc_Pot_Helmet", [("orc_archerpot", 0)], itp_unique|itp_type_head_armor, 0, 300, weight(1.25)|abundance(100)|difficulty(0)|head_armor(33)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orc_archerhelmet", "Orc_Light_Helmet", [("orc_archerhelmetspike", 0)], itp_unique|itp_type_head_armor, 0, 440, weight(1.00)|abundance(100)|difficulty(0)|head_armor(42)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orc_archerhelmet2", "Orc_Light_Helmet", [("orc_archerhelmet", 0)], itp_unique|itp_type_head_armor, 0, 640, weight(1.00)|abundance(100)|difficulty(0)|head_armor(51)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["orcboy_helmet", "Orc_Helmet", [("orcboy_helmet", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboy_helmet2", "Orc_Helmet", [("orcboy_helmet2", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboy_helmet3", "Orc_Helmet", [("orcguard_hetmet", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["orcvet_helmet", "Orc_Helmet", [("orcboy_helmetv", 0)], itp_unique|itp_type_head_armor, 0, 860, weight(2.50)|abundance(120)|difficulty(6)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcvet_helmet2", "Orc_Helmet", [("orcboy_helmetv2", 0)], itp_unique|itp_type_head_armor, 0, 860, weight(2.50)|abundance(120)|difficulty(6)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["orcboar_helmet", "Orc_Boar_Helmet", [("orcboar_helmet", 0)], itp_unique|itp_type_head_armor, 0, 1460, weight(2.50)|abundance(120)|difficulty(7)|head_armor(67)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboar_helmv", "Orc_Boar_Helm", [("orcboar_helmv", 0)], itp_unique|itp_type_head_armor, 0, 2300, weight(2.75)|abundance(100)|difficulty(10)|head_armor(75)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["orc_bigun_helm", "Bigun_Helm", [("orchelm", 0)], itp_unique|itp_type_head_armor, 0, 2100, weight(2.75)|abundance(100)|difficulty(9)|head_armor(72)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orc_bigun_helm2", "Bigun_Helm", [("orchelm2", 0)], itp_unique|itp_type_head_armor, 0, 2100, weight(2.75)|abundance(100)|difficulty(9)|head_armor(72)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["blackorc_helm", "Black_Orc_Helm", [("orcfullhelm", 0)], itp_type_head_armor, 0, 2700, weight(2.75)|abundance(100)|difficulty(11)|head_armor(79)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["blackorc_helm_vet", "Black_Orc_Heavy_Helm", [("orcfullhelmv", 0)], itp_type_head_armor, 0, 3100, weight(2.75)|abundance(100)|difficulty(11)|head_armor(82)|body_armor(0)|leg_armor(0), imodbits_plate], 
-
-["blackorcboss_helm", "Black_Orc_Boss_Helm", [("orcbosshelm5", 0)], itp_unique|itp_type_head_armor, 0, 4000, weight(3.00)|abundance(80)|difficulty(12)|head_armor(87)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboss_helm1", "Orc_Boss_Lite_Helmet", [("orcbosshelm1", 0)], itp_unique|itp_type_head_armor, 0, 2700, weight(2.75)|abundance(100)|difficulty(11)|head_armor(79)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboss_helm2", "Orc_Boss_Helmet", [("orcbosshelm2", 0)], itp_unique|itp_type_head_armor, 0, 3300, weight(2.75)|abundance(100)|difficulty(12)|head_armor(80)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcboss_helm3", "Orc_Boss_Helm", [("orcbosshelm3", 0)], itp_unique|itp_type_head_armor, 0, 4000, weight(3.00)|abundance(80)|difficulty(12)|head_armor(87)|body_armor(0)|leg_armor(0), imodbits_plate], 
-["orcbigboss_helm", "Orc_Big_Boss_Helm", [("orcbosshelm4", 0)], itp_unique|itp_type_head_armor, 0, 6000, weight(3.00)|abundance(80)|difficulty(14)|head_armor(90)|body_armor(0)|leg_armor(0), imodbits_plate], 
+["orcboss_armour", "Orc_Boss_Armour", [("bigun_armour_3", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
+["orcboss_armour2", "Orc_Boss_Armour", [("bigun_armour_4", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 10868,full_plate_armor_tier_3, imodbits_plate], 
+["orcbigboss_armour", "Orc_BigBoss_Armour", [("WarbossArmor", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 12769,full_plate_armor_tier_4, imodbits_plate], 
 
 
 
-["orc_boots", "Orc_Boots", [("orcboot1", 0)], itp_unique|itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 90, weight(1.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(15), imodbits_cloth, [], [fac_orc]], 
-["orc_boots2", "Orc_Capped_Boots", [("orcboot2", 0)], itp_unique|itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 174, weight(1.25)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(20), imodbits_cloth, [], [fac_orc]], 
-["orc_boots3", "Orc_Reinforced_Boots", [("orcboot3", 0)], itp_unique|itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 274, weight(1.25)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(25), imodbits_cloth, [], [fac_orc]], 
-["orc_boots4", "Orc_Armoured_Boots", [("orcboot4", 0)], itp_unique|itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 530, weight(3.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(30), imodbits_armor, [], [fac_orc]], 
-["orc_heavy_boots", "Orc_Heavy_Boots", [("orcboot5", 0)], itp_unique|itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 1250, weight(3.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(35), imodbits_armor, [], [fac_orc]], 
+["orc_archerhelmet", "Orc_Skully", [("LightA", 0)], itp_type_head_armor, 0, 220, weight(1.000000)|abundance(100)|difficulty(0)|head_armor(42)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+["orc_archerhelmet2", "Orc_Skully", [("LightB", 0)], itp_type_head_armor, 0, 300, weight(1.000000)|abundance(100)|difficulty(0)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+["orcboy_helmet", "Orc_Skully", [("MediumA", 0)], itp_type_head_armor, 0, 350, weight(2.000000)|abundance(120)|difficulty(6)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+["orcvet_helmet", "Orc_Eadplate", [("MediumB", 0)], itp_type_head_armor, 0, 3000, weight(2.500000)|abundance(120)|difficulty(6)|head_armor(73)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+["orc_heavy_helm", "Orc_Eadplate", [("HeavyA", 0)], itp_type_head_armor, 0, 4000, weight(2.750000)|abundance(100)|difficulty(11)|head_armor(82)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+["orc_heavy_helm2", "Orc_Eadplate", [("HeavyB", 0)], itp_type_head_armor, 0, 6000, weight(2.750000)|abundance(100)|difficulty(11)|head_armor(90)|body_armor(0)|leg_armor(0), imodbits_plate, [], [fac_kingdom_3]], 
+
+
+#["orc_pot", "Orc_Pot_Helmet", [("LightA", 0)], itp_unique|itp_type_head_armor, 0, 300, weight(1.25)|abundance(100)|difficulty(0)|head_armor(33)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orc_archerhelmet", "Orc_Light_Helmet", [("LightA", 0)], itp_unique|itp_type_head_armor, 0, 440, weight(1.00)|abundance(100)|difficulty(0)|head_armor(42)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orc_archerhelmet2", "Orc_Light_Helmet", [("LightB", 0)], itp_unique|itp_type_head_armor, 0, 640, weight(1.00)|abundance(100)|difficulty(0)|head_armor(51)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcboy_helmet", "Orc_Helmet", [("LightB", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcboy_helmet2", "Orc_Helmet", [("MediumA", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcboy_helmet3", "Orc_Helmet", [("MediumA", 0)], itp_unique|itp_type_head_armor, 0, 700, weight(2.00)|abundance(120)|difficulty(6)|head_armor(55)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcvet_helmet", "Orc_Helmet", [("MediumB", 0)], itp_unique|itp_type_head_armor, 0, 860, weight(2.50)|abundance(120)|difficulty(6)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcvet_helmet2", "Orc_Helmet", [("MediumB", 0)], itp_unique|itp_type_head_armor, 0, 860, weight(2.50)|abundance(120)|difficulty(6)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcboar_helmet", "Orc_Boar_Helmet", [("MediumB", 0)], itp_unique|itp_type_head_armor, 0, 1460, weight(2.50)|abundance(120)|difficulty(7)|head_armor(67)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orcboar_helmv", "Orc_Boar_Helm", [("HeavyA", 0)], itp_unique|itp_type_head_armor, 0, 2300, weight(2.75)|abundance(100)|difficulty(10)|head_armor(75)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orc_bigun_helm", "Bigun_Helm", [("HeavyA", 0)], itp_unique|itp_type_head_armor, 0, 2100, weight(2.75)|abundance(100)|difficulty(9)|head_armor(72)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["orc_bigun_helm2", "Bigun_Helm", [("HeavyA", 0)], itp_unique|itp_type_head_armor, 0, 2100, weight(2.75)|abundance(100)|difficulty(9)|head_armor(72)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["blackorc_helm", "Black_Orc_Helm", [("HeavyA", 0)], itp_type_head_armor, 0, 2700, weight(2.75)|abundance(100)|difficulty(11)|head_armor(79)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["blackorc_helm_vet", "Black_Orc_Heavy_Helm", [("HeavyA", 0)], itp_type_head_armor, 0, 3100, weight(2.75)|abundance(100)|difficulty(11)|head_armor(82)|body_armor(0)|leg_armor(0), imodbits_plate], 
+#["blackorcboss_helm", "Black_Orc_Boss_Helm", [("HeavyB", 0)], itp_unique|itp_type_head_armor, 0, 4000, weight(3.00)|abundance(80)|difficulty(12)|head_armor(87)|body_armor(0)|leg_armor(0), imodbits_plate], 
+
+
+
+
+["orc_boots", "Orc_Boots", [("orcboot1", 0)], itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 90, weight(1.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(15), imodbits_cloth, [], [fac_orc]], 
+["orc_boots2", "Orc_Capped_Boots", [("orcboot2", 0)], itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 174, weight(1.25)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(20), imodbits_cloth, [], [fac_orc]], 
+["orc_boots3", "Orc_Reinforced_Boots", [("orcboot3", 0)], itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 274, weight(1.25)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(25), imodbits_cloth, [], [fac_orc]], 
+["orc_boots4", "Orc_Armoured_Boots", [("orcboot4", 0)], itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 530, weight(3.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(30), imodbits_armor, [], [fac_orc]], 
+["orc_heavy_boots", "Orc_Heavy_Boots", [("orcboot5", 0)], itp_type_foot_armor|itp_civilian| itp_attach_armature, 0, 1250, weight(3.00)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(35), imodbits_armor, [], [fac_orc]], 
 
 
 ["orcaxe1", "Orc_Axe", [("GS_Axe_1H_TE_02", 0)], itp_type_one_handed_wpn|itp_primary|itp_secondary|itp_bonus_against_shield, itc_scimitar|itcf_carry_mace_left_hip, 150, weight(1.00)|abundance(100)|difficulty(0)|weapon_length(80)|spd_rtng(94)|swing_damage(30, cut)|thrust_damage(0, pierce), imodbits_axe, [], [fac_orc]], 
@@ -10002,15 +7017,20 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 
 
-["beastman_head", "Beastman_head", [("beastmen", 0)], itp_type_fullhelm, 0, 75, weight(2)|abundance(10)|head_armor(40)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
-["beastman_head2", "Beastman_head", [("beastmenss", 0)], itp_type_fullhelm, 0, 75, weight(2)|abundance(10)|head_armor(40)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
-["beastarmour_head", "Beastman_helmet", [("beastman", 0)], itp_type_fullhelm, 0, 200, weight(4)|abundance(10)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
-["beastlord_head", "Beastlord_head", [("beastlord", 0)], itp_type_fullhelm, 0, 400, weight(4)|abundance(10)|head_armor(70)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
+["beastman_head", "Beastman_head", [("beastman_head1", 0)], itp_type_fullhelm|itp_civilian, 0, 75, weight(2)|abundance(10)|head_armor(40)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
+["beastman_head2", "Beastman_head", [("beastman_head2", 0)], itp_type_fullhelm|itp_civilian, 0, 75, weight(2)|abundance(10)|head_armor(50)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
+["beastarmour_head", "Beastman_helmet", [("beastarmour", 0)], itp_type_fullhelm|itp_civilian, 0, 200, weight(4)|abundance(10)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
+["beastlord_head", "Beastlord_head", [("beastlord", 0)], itp_type_fullhelm|itp_civilian, 0, 400, weight(4)|abundance(10)|head_armor(70)|body_armor(0)|leg_armor(0), imodbits_none , [], [fac_beast]],
 
 
-["beastman_body", "Beastman", [("beastman_bodys", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 210, weight(10)|abundance(10)|head_armor(0)|body_armor(30)|leg_armor(10), imodbits_armor , [], [fac_beast]],
-["beastman_armour", "Beastman_armour", [("beastman_body", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 410, weight(11)|abundance(10)|head_armor(0)|body_armor(45)|leg_armor(10), imodbits_armor , [], [fac_beast]],
-["beastman_heavyarmour", "Beastman_heavy_armour", [("beastman_arm", 0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2100, weight(19)|abundance(10)|head_armor(0)|body_armor(60)|leg_armor(10), imodbits_armor , [], [fac_beast]],
+["beastman_body", "Beastman", [("beastman_armour8", 0)], itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 210, weight(10)|abundance(10)|head_armor(0)|body_armor(30)|leg_armor(10), imodbits_armor , [], [fac_beast]],
+["beastman_armour", "Beastman_armour", [("beastman_armour10", 0)], itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 410, weight(11)|abundance(10)|head_armor(0)|body_armor(45)|leg_armor(10), imodbits_armor , [], [fac_beast]],
+["beastman_heavyarmour", "Beastman_heavy_armour", [("beastman_armour9", 0)], itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2100, weight(19)|abundance(10)|head_armor(0)|body_armor(60)|leg_armor(10), imodbits_armor , [], [fac_beast]],
+
+
+["beastman_plate", "Plate Armor", [("beastman_heavy_armour",0)], merc_body_armor, 0, 12769,full_plate_armor_tier_4 ,imodbits_good_plate , [], [fac_beast]],
+["beast_leg", "beast_leg", [("beast_leg",0)], itp_type_foot_armor|itp_attach_armature|itp_civilian,0, 2664 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(30)|difficulty(9) ,imodbits_armor , [], [fac_beast]],
+
 
 ["rathelm", "rat's_Head", [("SkavenHead", 0)], itp_type_fullhelm|itp_unique, 0, 75, weight(2)|abundance(10)|head_armor(30)|body_armor(0)|leg_armor(0), imodbits_none ],
 ["rathelm2", "rat's_Head", [("SkavenHead2", 0)], itp_type_fullhelm|itp_unique, 0, 75, weight(2)|abundance(10)|head_armor(50)|body_armor(0)|leg_armor(0), imodbits_none ],
@@ -10039,7 +7059,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 #["dun_helm_e","Dun_Tall_War_Helm",[("rat_helm_b",0)],itp_type_head_armor,0,1200,weight(3)|head_armor(35)|difficulty(0),imodbits_armor],
 #######SHIELDS##########
 
-["granata_poison", "poison_Grenade", [("bombaaa_m", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary, itcf_throw_stone, 4500, weight(4)|weapon_length(25)|difficulty(2)|spd_rtng(67)|shoot_speed(18)|abundance(33)|thrust_damage(140, blunt)|max_ammo(6), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 120, 7, 11),]),]+missile_distance_trigger,firearm_factions],
+["granata_poison", "poison_Grenade", [("bombaaa_m", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_is_bomb, itcf_throw_stone, 4500, weight(4)|weapon_length(25)|difficulty(2)|spd_rtng(67)|shoot_speed(18)|abundance(33)|thrust_damage(140, blunt)|max_ammo(6), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_oim_deliver_granade_damage", ":shooter", 120, 7, 10),]),]+missile_distance_trigger,firearm_factions],
 
 ["lizard_armour_1", "lizard Armour", [("lizard_body1",0)], itp_type_body_armor  |itp_covers_legs|itp_unique ,0, 100,cloth_tier_1 ,imodbits_plate , [], [fac_scotland]],
 ["lizard_armour_2", "lizard Leather Armour", [("lizleather1",0)], itp_type_body_armor  |itp_covers_legs|itp_unique ,0, 940,cloth_tier_3 ,imodbits_plate , [], [fac_scotland]],
@@ -10095,13 +7115,11 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["hugewolfclaw", "Werewolf's_Right_Claw", [("toumingshen",0)], itp_type_one_handed_wpn| itp_primary|itp_secondary|itp_can_knock_down|itp_crush_through|itp_bonus_against_shield|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(140)| weapon_length(170)|swing_damage(40 , pierce)| thrust_damage(0 ,  pierce),imodbits_axe ],
 ["hugewolfclaw_w", "Werewolf's_Right_Claw", [("toumingshen",0)], itp_type_one_handed_wpn| itp_primary|itp_secondary|itp_can_knock_down|itp_crush_through|itp_bonus_against_shield|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(130)| weapon_length(150)|swing_damage(45 , pierce)| thrust_damage(0 ,  pierce),imodbits_axe ],
 
-["tree_trunk_invis", "Tree_Trunk", [("toumingshou",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(250)|difficulty(20)|spd_rtng(87)| weapon_length(186)|swing_damage(50, blunt)| thrust_damage(50 ,  blunt),imodbits_mace, [], [fac_elf]],
+["wolfclaw_dual", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
+["wolfclaw_dual_w", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ,],
 
-["wolfclaw_dual", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
-["wolfclaw_dual_w", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ,],
-
-["werewolfclaw_dual", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
-["werewolfclaw_dual_w", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ,],
+["werewolfclaw_dual", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
+["werewolfclaw_dual_w", "Werewolf's_Left_Claw", [("toumingshen",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ,],
 
 #["wolfarmor_w", "Werewolf's_Paws", [("WhiteWerebody",0)], itp_type_full_body_armor ,0, 6360,weight(1)|abundance(60)|head_armor(0)|body_armor(60)|leg_armor(24)|difficulty(14),imodbits_armor ],
 #["wolfboots_w", "Werewolf's_Paws", [("WhiteWolfBoot_L",0)], itp_type_foot_armor|itp_civilian|itp_unique ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(33)|difficulty(0) ,imodbits_cloth,],
@@ -10110,21 +7128,41 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["wolfhelm_w", "Werewolf's_Head", [("WhiteWerewolfHead", 0)], itp_type_fullhelm|itp_unique, 0, 75, weight(2)|abundance(10)|head_armor(80)|body_armor(0)|leg_armor(0), imodbits_none ],
 
 
-["lorien_boots", "Lothlorien_Boots", [("lorien_boots", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2945, weight(1)|abundance(10)|head_armor(0)|body_armor(0)|leg_armor(28), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
+["lorien_boots", "Lothlorien_Boots", [("lorien_boots", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2016, weight(1)|abundance(30)|head_armor(0)|body_armor(0)|leg_armor(28), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_archer", "Lorien_Archer_Armor", [("lorien_archer", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 1048, weight(8)|abundance(10)|head_armor(0)|body_armor(28)|leg_armor(10), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
+["lorien_captain_greaves", "lorien_captain_greaves", [("lorien_captain_greaves", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2520 , weight(1)|abundance(30)|head_armor(0)|body_armor(0)|leg_armor(35)|difficulty(7) ,imodbits_armor, [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_armor_e", "Lorien_Warden_Cloak", [("lorien_warden_cloak", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 4629, weight(10)|abundance(10)|difficulty(5)|head_armor(0)|body_armor(36)|leg_armor(20), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
+["lorien_palace_greaves", "Lothlorien_Boots", [("lorien_leather_greaves", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2664 , weight(1)|abundance(30)|head_armor(0)|body_armor(0)|leg_armor(37)|difficulty(9) ,imodbits_armor , [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_armor_c", "Lorien_Royal_Archer_Armor", [("lorien_royalarcher_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 7722, weight(18)|abundance(10)|difficulty(10)|head_armor(0)|body_armor(50)|leg_armor(20), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+["lorien_royal_greaves", "Lothlorien_Boots", [("copy_lorien_reward_greaves", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2880, weight(1)|abundance(30)|head_armor(0)|body_armor(0)|leg_armor(40)|difficulty(9), imodbits_good_plate , [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_armor_a", "Lorien_Infantry_Armor", [("lorien_infantry_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 1233, weight(12)|abundance(10)|difficulty(6)|head_armor(0)|body_armor(30)|leg_armor(10), imodbits_armor , [], [fac_elf,fac_hospitalier_knights]],
+["lorien_reward_greaves", "Lothlorien_Boots", [("lorien_reward_greaves", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2880, weight(1)|abundance(30)|head_armor(0)|body_armor(0)|leg_armor(45)|difficulty(9), imodbits_good_plate , [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_armor_b", "Lorien_Heavy_Infantry_Armor", [("lorien_vetinfantry_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 4765, weight(16)|abundance(10)|difficulty(8)|head_armor(0)|body_armor(40)|leg_armor(16), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
 
-["lorien_armor_f", "Lorien_Elite_Armor", [("lorien_eliteinfantry_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 7693, weight(20)|abundance(10)|difficulty(10)|head_armor(0)|body_armor(56)|leg_armor(18), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+["lorien_archer", "Lorien_Archer_Armor", [("lorien_heavy_leather", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 1800, weight(16)|abundance(50)|head_armor(0)|body_armor(33)|leg_armor(14)|difficulty(6), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
 
-["lorien_armor_d", "Lorien_Royal_Swordsman_Armor", [("lorien_royalswordsman_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 15382, weight(22)|abundance(10)|difficulty(12)|head_armor(0)|body_armor(70)|leg_armor(24), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+["lorien_armor_e", "Lorien_Warden_Cloak", [("lorien_heavy_scale", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 2800, weight(16)|abundance(50)|head_armor(0)|body_armor(41)|leg_armor(17)|difficulty(6), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
+
+["lorien_armor_c", "Lorien_Royal_Archer_Armor", [("lorien_gold_scales", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 4100, weight(16)|abundance(50)|head_armor(0)|body_armor(50)|leg_armor(20)|difficulty(9), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+
+
+
+["lorien_armor_a", "Lorien_Infantry_Armor", [("lorien_palace_guard_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 3500, weight(18)|abundance(40)|head_armor(0)|body_armor(48)|leg_armor(17)|difficulty(7), imodbits_cloth , [], [fac_elf,fac_hospitalier_knights]],
+
+["lorien_armor_b", "Lorien_Heavy_Infantry_Armor", [("lorien_captain_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 6500, weight(18)|abundance(40)|head_armor(0)|body_armor(63)|leg_armor(26)|difficulty(12), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+
+["lorien_armor_f", "Lorien_Elite_Armor", [("lorien_royal_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 8000, weight(18)|abundance(40)|head_armor(0)|body_armor(68)|leg_armor(32)|difficulty(15), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+
+["lorien_captain_helmet", "lorien_captain_helmet", [("lorien_captain_helmet", 0)], itp_merchandise|itp_type_head_armor, 0, 4900, weight(2.75)|abundance(10)|difficulty(10)|head_armor(70)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
+
+["lorien_palace_guard_helm", "lorien_palace_guard_helm", [("lorien_palace_guard_helm", 0)], itp_merchandise|itp_type_head_armor, 0, 8100, weight(2)|abundance(10)|difficulty(7)|head_armor(90)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
+["lorien_royal_helmet", "lorien_royal_helmet", [("lorien_royal_helmet", 0)], itp_merchandise|itp_type_head_armor, 0, 8100, weight(2.75)|abundance(10)|difficulty(10)|head_armor(120)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
+["lorien_royal_archer", "lorien_royal_archer", [("lorien_royal_archer", 0)], itp_type_head_armor, 0, 8100, weight(2.75)|abundance(10)|difficulty(10)|head_armor(120)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
+
+
+["lorien_armor_d", "Lorien_Royal_Swordsman_Armor", [("copy_lorien_reward_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 9500, weight(18)|abundance(40)|head_armor(0)|body_armor(73)|leg_armor(35)|difficulty(18), imodbits_armor, [], [fac_elf,fac_hospitalier_knights] ],
+
+["lorien_reward_armor", "twiligh_armor", [("lorien_reward_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 20000, weight(28)|abundance(100)|head_armor(20)|body_armor(90)|leg_armor(40)|difficulty(20), imodbits_good_plate ,[], [fac_elf,fac_hospitalier_knights]],
 
 ["elf_twiligh_armor", "twiligh_armor", [("elf_twiligh_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 20000, weight(28)|abundance(100)|head_armor(20)|body_armor(90)|leg_armor(40)|difficulty(20), imodbits_good_plate ,[], [fac_elf,fac_hospitalier_knights]],
 
@@ -10138,7 +7176,9 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["lorien_helm_e", "High_Helmet", [("gondor_leader_helm", 0)], itp_merchandise|itp_type_head_armor, 0, 8100, weight(2)|abundance(10)|difficulty(7)|head_armor(90)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
 
-["lorien_helm_f", "Tower_Guard_Helm", [("gondor_tower_guard_helm", 0)], itp_merchandise|itp_type_head_armor, 0, 8100, weight(2.75)|abundance(10)|difficulty(10)|head_armor(120)|body_armor(0)|leg_armor(0), imodbits_armor ,[], [fac_elf,fac_hospitalier_knights] ],
+
+
+
 
 #["tower_archer_helm", "Tower_Archer_Helm", [("gondor_tower_archer_helm", 0)], itp_type_head_armor, 0, 5625, weight(2)|abundance(10)|difficulty(7)|head_armor(112)|body_armor(0)|leg_armor(0), imodbits_armor ],
 
@@ -10150,39 +7190,53 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["lorien_sword_c", "Lorien_War_Sword", [("lorien_sword_hand_and_half", 0), ("scab_lorien_sword_hand_and_half", ixmesh_carry)], itp_merchandise|itp_type_two_handed_wpn|itp_primary, itcf_thrust_onehanded|itcf_overswing_onehanded|itcf_slashright_onehanded|itcf_slashleft_onehanded|itc_claymore|itcf_show_holster_when_drawn|itcf_carry_sword_left_hip, 6493, weight(1.5)|weapon_length(92)|difficulty(3)|spd_rtng(100)|abundance(10)|swing_damage(41, cut)|thrust_damage(34, pierce), imodbits_sword_high, [], [fac_elf,fac_hospitalier_knights] ],
 
 
-["lorien_shield_b", "Lorien_Tower_Shield", [("fix_lorien_kite", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry|itp_cant_use_on_horseback, itcf_carry_kite_shield, 2156, weight(2)|shield_width(40)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield, [], [fac_elf] ],
+["lorien_shield_b", "Lorien_Tower_Shield", [("fix_lorien_kite", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry|itp_cant_use_on_horseback, itcf_carry_kite_shield, 2156, weight(2)|shield_width(40)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield_metal, [], [fac_elf] ],
 
-["lorien_shield_c", "Lorien_Kite_Shield", [("fix_lorien_kite_small", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_round_shield, 1983, weight(2)|shield_width(40)|shield_height(55)|abundance(10)|hit_points(800)|body_armor(18)|spd_rtng(92), imodbits_shield , [], [fac_elf]],
+["lorien_shield_c", "Lorien_Kite_Shield", [("fix_lorien_kite_small", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_round_shield, 1983, weight(2)|shield_width(40)|shield_height(55)|abundance(10)|hit_points(800)|body_armor(18)|spd_rtng(92), imodbits_shield_metal , [], [fac_elf]],
 
-["lorien_round_shield", "Lorien_Round_Shield", [("lorien_round_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_round_shield, 1685, weight(1)|shield_width(50)|abundance(10)|hit_points(700)|body_armor(14)|spd_rtng(96), imodbits_shield , [], [fac_elf]],
+["lorien_round_shield", "Lorien_Round_Shield", [("lorien_round_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_round_shield, 1685, weight(1)|shield_width(50)|abundance(10)|hit_points(700)|body_armor(14)|spd_rtng(96), imodbits_shield_metal , [], [fac_elf]],
 
 
-["mirkwood_boots", "Mirkwood_boots", [("mirkwood_boots", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2520, weight(1)|abundance(10)|head_armor(0)|body_armor(0)|leg_armor(23), imodbits_cloth, [], [fac_forest_ranger,fac_kingdom_4] ],
+["lorien_shield_d", "Lorien_Tower_Shield", [("mirkwood_greenwood_brown_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 5000, weight(2)|shield_width(50)|shield_height(70)|abundance(10)|shield_hit_points(800)|body_armor(80)|spd_rtng(82), imodbits_shield_metal, [], [fac_elf] ],
+["lorien_shield_e", "Lorien_Tower_Shield", [("mirkwood_greenwood_gold_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 5000, weight(2)|shield_width(50)|shield_height(70)|abundance(10)|shield_hit_points(1000)|body_armor(80)|spd_rtng(82), imodbits_shield_metal, [], [fac_elf] ],
+["mirkwood_shield_d", "Mirkwood_Swordsman_Shield", [("mirkwood_greenwood_guard_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 5000, weight(2)|shield_width(50)|shield_height(70)|abundance(10)|shield_hit_points(800)|body_armor(80)|spd_rtng(82), imodbits_shield_metal, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_helm_a", "Mirkwood_Archer_Helm", [("mirkwood_helm", 0)], itp_merchandise|itp_type_head_armor|itp_merchandise|itp_fit_to_head, 0, 6593, weight(1)|abundance(10)|head_armor(50)|body_armor(0)|leg_armor(0), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_helm_d", "Mirkwood_Royal_Archer_Helm", [("mirkwoodroyalarcher", 0)], itp_merchandise|itp_type_head_armor|itp_fit_to_head, 0, 7037, weight(1)|abundance(10)|head_armor(70)|body_armor(0)|leg_armor(0), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_boots", "Mirkwood_boots", [("mirkwood_boots_green", 0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature|itp_civilian, 0, 2520, weight(1)|abundance(10)|head_armor(0)|body_armor(0)|leg_armor(23), imodbits_cloth, [], [fac_forest_ranger,fac_kingdom_4] ],
+
+["mirkwood_helm_a", "Mirkwood_Archer_Helm", [("mirkwoodroyalarcher", 0)], itp_merchandise|itp_type_head_armor|itp_merchandise|itp_fit_to_head, 0, 6593, weight(1)|abundance(10)|head_armor(50)|body_armor(0)|leg_armor(0), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+
+["mirkwood_helm_d", "Mirkwood_Royal_Archer_Helm", [("mirkwood_warden_helmet", 0)], itp_merchandise|itp_type_head_armor|itp_fit_to_head, 0, 7037, weight(1)|abundance(10)|head_armor(70)|body_armor(0)|leg_armor(0), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
 ["mirkwood_helm_b", "Mirkwood_Helm", [("mirkwoodnormalspearman", 0)], itp_merchandise|itp_type_head_armor|itp_fit_to_head, 0, 6845, weight(1)|abundance(10)|difficulty(5)|head_armor(60)|body_armor(0)|leg_armor(0), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
 ["mirkwood_helm_c", "Mirkwood_Royal_Spearman_Helm", [("mirkwoodroyalspearman", 0)], itp_merchandise|itp_type_head_armor|itp_fit_to_head, 0, 8252, weight(1)|abundance(10)|difficulty(6)|head_armor(80)|body_armor(0)|leg_armor(0), imodbits_good_plate , [], [fac_forest_ranger,fac_kingdom_4]],
 
+["mirkwood_clothes", "mirkwood_clothes", [("mirkwood_clothes", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 924, weight(10)|abundance(10)|difficulty(4)|head_armor(0)|body_armor(20)|leg_armor(12), imodbits_cloth, [], [fac_forest_ranger,fac_kingdom_4] ],
+
+["mirkwood_light_scale", "Light_Woodelf_Scale", [("mirkwood_noble_clothes", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 1424, weight(10)|abundance(10)|difficulty(6)|head_armor(0)|body_armor(30)|leg_armor(14), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+
+
 ["mirkwood_armor_a", "Light_Leather", [("mirkwood_leather", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 924, weight(10)|abundance(10)|difficulty(4)|head_armor(0)|body_armor(28)|leg_armor(12), imodbits_cloth, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_d", "Light_Quilted_Surcoat", [("mirkwood_quiltedsurcoat_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 3458, weight(13)|abundance(10)|difficulty(5)|head_armor(0)|body_armor(32)|leg_armor(14), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_e", "Light_Mail_and_Surcoat", [("mirkwood_maillewithsurcoat_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 6871, weight(15)|abundance(10)|difficulty(7)|head_armor(0)|body_armor(42)|leg_armor(18), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_light_scale", "Light_Woodelf_Scale", [("mirkwood_light_scale", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 1424, weight(10)|abundance(10)|difficulty(6)|head_armor(0)|body_armor(30)|leg_armor(14), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_armor_d", "Light_Quilted_Surcoat", [("mirkwood_leather_vest", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 1800, weight(12)|abundance(40)|head_armor(0)|body_armor(35)|leg_armor(10)|difficulty(10), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_b", "Light_Quilted_and_Scale_Armor", [("mirkwood_scalequilted_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 4047, weight(12)|abundance(10)|difficulty(6)|head_armor(0)|body_armor(40)|leg_armor(18), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_armor_e", "Light_Mail_and_Surcoat", [("mirkwood_light_leather", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 4000, weight(16)|abundance(50)|head_armor(0)|body_armor(45)|leg_armor(10)|difficulty(11), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_c", "Light_Scale_over_Mail", [("mirkwood_scaleovermaille_01", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 7425, weight(16)|abundance(10)|difficulty(8)|head_armor(0)|body_armor(50)|leg_armor(20), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_f", "Royal_Woodelf_Armor", [("mirkwood_royal", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 14752, weight(20)|abundance(10)|difficulty(12)|head_armor(3)|body_armor(65)|leg_armor(16), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_armor_b", "Light_Quilted_and_Scale_Armor", [("mirkwood_warden_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 5800, weight(16)|abundance(70)|head_armor(0)|body_armor(61)|leg_armor(23)|difficulty(13), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_armor_g", "Royal_Woodelf_Armor", [("Shadow_striker", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 14752, weight(20)|abundance(10)|difficulty(12)|head_armor(3)|body_armor(60)|leg_armor(16), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_armor_c", "Light_Scale_over_Mail", [("mirkwood_heavy", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 6800, weight(18)|abundance(60)|head_armor(0)|body_armor(67)|leg_armor(24)|difficulty(14), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
+["mirkwood_armor_f", "Royal_Woodelf_Armor", [("mirkwood_general", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 9000, weight(18)|abundance(10)|head_armor(0)|body_armor(72)|leg_armor(25)|difficulty(15), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+
+
+["mirkwood_hunter", "mirkwood_hunter_Armor", [("mirkwood_hunter", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 1424, weight(10)|abundance(10)|head_armor(0)|body_armor(35)|leg_armor(14)|difficulty(6), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_veteran_hunter", "mirkwood_veteran_hunter_Armor", [("mirkwood_veteran_hunter", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 4200, weight(10)|abundance(10)|head_armor(0)|body_armor(45)|leg_armor(18)|difficulty(6), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_master_hunter", "mirkwood_master_hunter_armor", [("mirkwood_master_hunter_armor", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 5800, weight(10)|abundance(10)|head_armor(0)|body_armor(61)|leg_armor(23)|difficulty(6), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_armor_g", "Royal_Woodelf_Armor", [("Shadow_striker", 0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 6300, weight(10)|abundance(10)|head_armor(3)|body_armor(60)|leg_armor(16)|difficulty(12), imodbits_armor, [], [fac_forest_ranger,fac_kingdom_4] ],
 
 
 
@@ -10200,11 +7254,11 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["mirkwood_great_lance", "Mirkwood_Great_Lance", [("mirkwood_great_spear_large", 0)], itp_merchandise|itp_type_polearm|itp_couchable|itp_wooden_parry|itp_primary, itc_greatlance, 5014, weight(3.5)|weapon_length(220)|difficulty(4)|spd_rtng(90)|abundance(10)|swing_damage(32, blunt)|thrust_damage(48, pierce), imodbits_polearm, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_spear_shield_a", "Mirkwood_Spearman_Shield", [("fix_mirkwood_spear_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry|itp_cant_use_on_horseback, itcf_carry_kite_shield, 2156, weight(3)|shield_width(40)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_spear_shield_a", "Mirkwood_Spearman_Shield", [("fix_mirkwood_spear_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry|itp_cant_use_on_horseback, itcf_carry_kite_shield, 2156, weight(3)|shield_width(40)|shield_height(70)|abundance(10)|hit_points(1000)|body_armor(20)|spd_rtng(82), imodbits_shield_metal, [], [fac_forest_ranger,fac_kingdom_4] ],
 
-["mirkwood_spear_shield_b", "Mirkwood_War_Shield", [("fix_mirkwood_med_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1923, weight(2)|shield_width(40)|shield_height(55)|abundance(10)|hit_points(800)|body_armor(15)|spd_rtng(90), imodbits_shield, [], [fac_forest_ranger] ],
+["mirkwood_spear_shield_b", "Mirkwood_War_Shield", [("fix_mirkwood_med_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1923, weight(2)|shield_width(40)|shield_height(55)|abundance(10)|hit_points(800)|body_armor(15)|spd_rtng(90), imodbits_shield_metal, [], [fac_forest_ranger] ],
 
-["mirkwood_spear_shield_c", "Mirkwood_Swordsman_Shield", [("fix_mirkwood_royal_round", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 3445, weight(2)|shield_width(40)|shield_height(40)|abundance(10)|hit_points(1000)|body_armor(28)|spd_rtng(90), imodbits_shield, [], [fac_forest_ranger,fac_kingdom_4] ],
+["mirkwood_spear_shield_c", "Mirkwood_Swordsman_Shield", [("fix_mirkwood_royal_round", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 3445, weight(2)|shield_width(40)|shield_height(40)|abundance(10)|hit_points(1000)|body_armor(28)|spd_rtng(90), imodbits_shield_metal, [], [fac_forest_ranger,fac_kingdom_4] ],
 
 
 
@@ -10252,7 +7306,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["tree_trunk_invis", "Tree_Trunk", [("toumingshou",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(250)|difficulty(20)|spd_rtng(87)| weapon_length(186)|swing_damage(50, blunt)| thrust_damage(50 ,  blunt),imodbits_mace, [], [fac_elf]],
 ["tree_trunk_invis_2", "Tree_Trunk", [("toumingshou",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(250)|difficulty(20)|spd_rtng(120)| weapon_length(186)|swing_damage(50, blunt)| thrust_damage(50 ,  blunt),imodbits_mace, [], [fac_elf]],
 
-["troll_stones", "Stones", [("stone_ball",0)], itp_type_thrown|itp_crush_through|itp_primary, itcf_throw_stone, 1 , abundance(10)|weight(4)|difficulty(5)|spd_rtng(97)| shoot_speed(90)| thrust_damage(150 ,  blunt)|max_ammo(18)|weapon_length(25),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 350, 4, 2),]),]+missile_distance_trigger, [fac_orc]],
+["troll_stones", "Stones", [("stone_ball",0)], itp_type_thrown|itp_crush_through|itp_primary|itp_is_bomb ,itcf_throw_stone, 1 , abundance(10)|weight(4)|difficulty(5)|spd_rtng(97)| shoot_speed(90)| thrust_damage(150 ,  blunt)|max_ammo(18)|weapon_length(25),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 350, 4, 2),]),]+missile_distance_trigger, [fac_orc]],
 
 ["troll_feet_boots", "Troll_Feet", [("troll_feet", 0)], itp_type_foot_armor|itp_unique|itp_civilian, 0, 4000, weight(58)|abundance(100)|head_armor(0)|body_armor(55)|leg_armor(55)|difficulty(70), imodbits_cloth ],
 
@@ -10277,24 +7331,21 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  50, weight(0)|abundance(100)|body_armor(10)|difficulty(70),imodbits_cloth, ],
 
 
-["giant_hammer", "Giant_Hammer", [("giant_hammer",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(7)|difficulty(40)|spd_rtng(96)| weapon_length(150)|swing_damage(55, blunt)| thrust_damage(82 ,  blunt),imodbits_mace, [(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])], [fac_orc]],
+["giant_hammer", "Giant_Hammer", [("giant_hammer",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(7)|difficulty(40)|spd_rtng(96)| weapon_length(150)|swing_damage(55, blunt)| thrust_damage(82 ,  blunt),imodbits_mace, [], [fac_orc]],
 
-["giant_mace", "Giant_Mace", [("giant_mace",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(7)|difficulty(40)|spd_rtng(96)| weapon_length(150)|swing_damage(60, blunt)| thrust_damage(92 ,  blunt),imodbits_mace, [(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])], [fac_orc]],
+["giant_mace", "Giant_Mace", [("giant_mace",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(7)|difficulty(40)|spd_rtng(96)| weapon_length(150)|swing_damage(60, blunt)| thrust_damage(92 ,  blunt),imodbits_mace, [], [fac_orc]],
 
   
-["dwarf_plate_armor", "Plate Armor", [("plate_and_kilt",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs ,0, 10868,full_plate_armor_tier_3,imodbits_good_plate , [], [fac_dwarf]],
-
-["dwarf_knight_plate", "Plate Armor", [("plate_and_kilt_2",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 12769,full_plate_armor_tier_4 ,imodbits_good_plate , [], [fac_dwarf]],
 
 ["dwarf_maul",         "Maul", [("stonemaul",0)], itp_merchandise|itp_type_one_handed_wpn|itp_can_knock_down|itp_crush_through| itp_primary|itp_wooden_parry|itp_unbalanced, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(83)| weapon_length(85)|swing_damage(40 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_dwarf]],
 
-["dwarf_maul_2",         "Great Hammer", [("DW_Hammer_2H_T4_01",0)], itp_merchandise|itp_type_one_handed_wpn|itp_can_knock_down|itp_crush_through| itp_primary|itp_unbalanced, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(83)| weapon_length(120)|swing_damage(45 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_dwarf]],
+["dwarf_maul_2",         "Great Hammer", [("Dain_warhammer",0)], itp_merchandise|itp_type_one_handed_wpn|itp_can_knock_down|itp_crush_through| itp_primary|itp_unbalanced, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(83)| weapon_length(120)|swing_damage(45 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_dwarf]],
 
 
-["dwarf_maul_3",         "Flame Lord Great Hammer", [("dwtwo_hand_hammer",0)], itp_type_polearm|itp_two_handed|itp_can_knock_down|itp_bonus_against_shield|itp_crush_through| itp_primary|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,97 , weight(6)|difficulty(12)|spd_rtng(92)| weapon_length(150)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace, [(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])], [fac_dwarf]],
+["dwarf_maul_3",         "Flame Lord Great Hammer", [("Dain_warhammer",0)], itp_type_polearm|itp_two_handed|itp_can_knock_down|itp_bonus_against_shield|itp_crush_through| itp_primary|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,97 , weight(6)|difficulty(12)|spd_rtng(92)| weapon_length(150)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace, [], [fac_dwarf]],
 
 
-["thunder_staff", "thunder_staff", [("lod_WAoRStaffB",0),("lightning",ixmesh_flying_ammo),], itp_type_thrown|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_bomb, itcf_throw_stone, 1 , weight(4)|difficulty(0)|spd_rtng(35)| shoot_speed(70)| thrust_damage(50 ,  pierce)|max_ammo(10)|weapon_length(25),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 170, 4, 5),]),]+missile_distance_trigger, [fac_dwarf]],
+["thunder_staff", "thunder_staff", [("lod_WAoRStaffB",0),("lightning",ixmesh_flying_ammo),], itp_type_thrown|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_bomb ,itcf_throw_stone, 1 , weight(4)|difficulty(0)|spd_rtng(35)| shoot_speed(70)| thrust_damage(50 ,  pierce)|max_ammo(10)|weapon_length(25),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 170, 4, 5),]),]+missile_distance_trigger, [fac_dwarf]],
 ["thunder_spear",  "thunder_spear", [("lod_WAoRStaffB",0)], itp_type_polearm|itp_wooden_parry| itp_primary, itc_glaive|itcf_carry_spear, 202 , weight(2)|difficulty(0)|spd_rtng(100)| weapon_length(195)|swing_damage(45 , pierce)| thrust_damage(45 ,  pierce),imodbits_axe, [], [fac_commoners, fac_undeads_2]],
 
 ["dwarf_thunder_maul","mjolnir", [("Mjolnir",0)], itp_type_thrown|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_unique ,itcf_throw_stone,30000, weight(5)|difficulty(6)|spd_rtng(91)| shoot_speed(70)| thrust_damage(50 ,  blunt)|max_ammo(10)|weapon_length(75),imodbits_thrown,thunder_weapon_trigger+missile_distance_trigger],
@@ -10328,7 +7379,6 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["dwarf_warhammer3", "Dwarven_Warhammer", [("dwtwo_hand_hammer", 0)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_merchandise|itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear, 550, weight(10)|difficulty(14)|spd_rtng(80)|weapon_length(93)|swing_damage(55, blunt)|thrust_damage(0, pierce), imodbits_mace, [], [fac_dwarf,fac_kingdom_10]], 
 ["dwarf_warhammer4", "Dwarven_Warhammer", [("dwtwo_hand_hammer", 0)], itp_can_knock_down|itp_crush_through|itp_type_two_handed_wpn|itp_merchandise|itp_primary|itp_two_handed|itp_wooden_parry|itp_wooden_attack|itp_unbalanced, itc_nodachi|itcf_carry_spear, 30000, weight(10)|difficulty(14)|spd_rtng(80)|weapon_length(100)|swing_damage(60, blunt)|thrust_damage(0, pierce), imodbits_mace, [], [fac_dwarf,fac_kingdom_10]], 
 
-["drawf_musket", "Musket", [("granatnik_a",0)], itp_merchandise|itp_type_musket|itp_crush_through|itp_cant_reload_on_horseback|itp_two_handed|itp_primary, itcf_shoot_musket|itcf_reload_musket|itc_parry_polearm|itcf_carry_crossbow_back, 1160, weight(7.5)|difficulty(0)|spd_rtng(29)|shoot_speed(150)|abundance(31)|thrust_damage(90 ,pierce)|max_ammo(1)|accuracy(90), imodbits_gun, musket_trigger , [fac_dwarf]], 
 
 
 ["dwarf_pistol_1", "Dwarf_Pistol", [("DW_Pistol_1H_T1_02",0)], itp_type_pistol|itp_merchandise|itp_primary ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_pistol_front_left, 
@@ -10357,7 +7407,6 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
     (store_random_in_range,":bullet_speed",8000,12000),
     (add_missile, ":agent_id", pos23, ":bullet_speed", ":weapon", 0, "itm_cartridges_dummy", 0),
   (try_end),])]+pistol_trigger , [fac_dwarf]],
-
 
 
 
@@ -10420,29 +7469,67 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  1350 , weight(1.25)|abundance(100)|head_armor(45)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_armor ,[], [fac_dwarf] ],
 ["dwarf_mail_coif_mask_1", "Footman's Helmet", [("DwarfHelmCoifMask",0)], itp_type_head_armor|itp_covers_beard   ,0, 
  1666 , weight(1.5)|abundance(100)|head_armor(50)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_plate ,[], [fac_dwarf] ],
-["dwarf_mail_coif_mask_2", "Footman's Helmet", [("DwarfHelmCoifMask_B",0)], itp_type_head_armor|itp_covers_beard   ,0, 
+
+
+["bear_1", "bear", [("horse_bear",0)], itp_merchandise|itp_type_horse|itp_disable_agent_sounds|itp_is_magic_staff|itp_is_pike, 0, 4000, abundance(40)|hit_points(400)|body_armor(50)|difficulty(5)|horse_speed(34)|horse_maneuver(43)|horse_charge(40)|horse_scale(120), imodbits_horse_adv, [], ee_faction],
+["bear_light", "bear_light", [("horse_bear_light",0)], itp_merchandise|itp_type_horse|itp_disable_agent_sounds|itp_is_magic_staff|itp_is_pike, 0, 6000, abundance(20)|hit_points(400)|body_armor(70)|difficulty(5)|horse_speed(34)|horse_maneuver(42)|horse_charge(40)|horse_scale(120), imodbits_horse_armor, [], ee_faction],
+["bear_armored","bear_armored", [("horse_bear_armored",0)], itp_merchandise|itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 95000,abundance(40)|hit_points(400)|body_armor(90)|difficulty(6)|horse_speed(33)|horse_maneuver(49)|horse_charge(50)|horse_scale(100),imodbits_horse_armor, [], ee_faction],
+
+["urskin","urskin", [("horse_bear",0)], itp_unique|itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 95000,abundance(40)|hit_points(720)|body_armor(90)|difficulty(6)|horse_speed(35)|horse_maneuver(40)|horse_charge(55)|horse_scale(100),imodbits_horse_armor, [], ee_faction],
+
+
+["dwarf_light_helmet_1", "Dwarf_Helmet", [("ironhills_light_helmet", 0)], itp_type_head_armor, 0, 
  1666 , weight(1.5)|abundance(100)|head_armor(50)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_plate ,[], [fac_dwarf] ],
-
-["dwarf_helm", "Guard Helmet", [("DwarfHelmFrisianChain",0)], itp_type_head_armor   ,0, 
+["dwarf_light_helmet_2", "Dwarf_Helmet", [("erebor_light_helmet", 0)], itp_type_head_armor, 0, 
  2016 , weight(1.5)|abundance(100)|head_armor(55)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_plate,[], [fac_dwarf]  ],
-["dwarf_helm_mask_1", "Guard Helmet", [("DwarfHelmFrisianMask_A", 0)], itp_type_head_armor|itp_covers_beard, 0, 
- 2400 , weight(1.75)|abundance(100)|head_armor(60)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_plate ,[], [fac_dwarf] ],
-["dwarf_helm_mask_2", "Guard Helmet", [("DwarfHelmFrisianMask_B", 0)], itp_type_head_armor|itp_covers_beard, 0, 
- 2400 , weight(1.75)|abundance(100)|head_armor(60)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_plate ,[], [fac_dwarf] ],
 
-["dwarf_sallet_coif", "sallet_coif", [("DwarfHelmSalletChain",0)], itp_type_head_armor, 0, 
+["dwarf_heavy_helmet_1", "Guard Helmet", [("ironhills_heavy_helmet",0)], itp_type_head_armor   ,0, 
+ 2400 , weight(1.75)|abundance(100)|head_armor(60)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_plate ,[], [fac_dwarf] ],
+["dwarf_heavy_helmet_2", "Guard Helmet", [("erebor_heavy_helmet",0)], itp_type_head_armor   ,0, 
  2816 , weight(2.5)|abundance(100)|head_armor(65)|body_armor(0)|leg_armor(0)|difficulty(9) ,imodbits_plate,[], [fac_dwarf]],
- 
-["dwarf_sallet_coif_mask", "sallet_coif", [("DwarfHelmSalletSargeant",0)], itp_type_head_armor|itp_covers_beard, 0, 
+
+["dwarf_guard_helmet_1", "Guard Helmet", [("ironhills_guard_helmet",0)],  itp_type_head_armor|itp_covers_beard,0, 
  3750 , weight(2.5)|abundance(100)|head_armor(75)|body_armor(0)|leg_armor(0)|difficulty(9) ,imodbits_plate,[], [fac_dwarf]],
-
-["dwarf_great_helmet_1", "Great Helmet", [("DwarfHelmIronheadFace",0)],  itp_type_head_armor|itp_covers_beard,0, 
+["dwarf_guard_helmet_2", "Guard Helmet", [("erebor_guard_helmet",0)],  itp_type_head_armor|itp_covers_beard,0, 
  4266 , weight(2.75)|abundance(100)|head_armor(80)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate,[], [fac_dwarf] ],
-["dwarf_great_helmet_2", "Great Helmet", [("DwarfHelmIronheadNasal",0)], itp_type_head_armor|itp_covers_beard,0, 
- 4266 , weight(2.75)|abundance(100)|head_armor(80)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate,[], [fac_dwarf] ],
-
-["dwarf_kingcrown", "new_sallet", [("DwarfHelmKingCrown",0)], itp_type_head_armor|itp_covers_beard, 0, 
+["dwarf_black_helmet_3", "Black_helmet", [("erebor_helmet_reward",0)], itp_type_head_armor|itp_covers_beard, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate,[], [fac_dwarf] ],
+
+["erebor_tunic_1", "dwarf Tunic", [("erebor_tunic_1",0)], merc_body_armor|itp_civilian ,0, 940,cloth_tier_3,imodbits_cloth , [], [fac_dwarf]],
+["erebor_tunic_2", "dwarf Tunic", [("erebor_tunic_2",0)], merc_body_armor|itp_civilian ,0, 940,cloth_tier_3,imodbits_cloth , [], [fac_dwarf]],
+
+["ironhills_tunic_1", "dwarf Tunic", [("ironhills_tunic_1",0)], merc_body_armor|itp_civilian ,0, 940,cloth_tier_3,imodbits_cloth , [], [fac_dwarf]],
+["ironhills_tunic_2", "dwarf Tunic", [("ironhills_tunic_2",0)], merc_body_armor|itp_civilian ,0, 940,cloth_tier_3,imodbits_cloth , [], [fac_dwarf]],
+
+["dwarf_gambeson_1", "dwarf_gambeson", [("dwarf_gambeson_1",0)], merc_body_armor|itp_civilian ,0, 1722,mail_armor_tier_1 ,imodbits_cloth, [], [fac_dwarf]],
+["dwarf_gambeson_2", "dwarf_gambeson", [("dwarf_gambeson_2",0)], merc_body_armor|itp_civilian ,0, 2704,mail_armor_tier_2 ,imodbits_cloth, [], [fac_dwarf]],
+
+["dwarf_padtunic_1", "dwarf_tunicmail", [("dwarf_padtunic_1",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0,
+3451,lamellar_armor_tier_1,imodbits_armor,[], [fac_dwarf]],
+["dwarf_padtunic_2", "dwarf_tunicmail", [("dwarf_padtunic_2",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0,
+6360,lamellar_armor_tier_2,imodbits_armor,[], [fac_dwarf]],
+
+["ironhills_mail_1", "dwarf_mail_1", [("ironhills_mail_1",0)], merc_body_armor ,0, 4035,mail_armor_tier_3,imodbits_armor , [], [fac_dwarf]],
+["ironhills_mail_2", "dwarf_mail_1", [("ironhills_mail_2",0)], merc_body_armor ,0, 5256,mail_armor_tier_4,imodbits_armor , [], [fac_kingdom_4]],
+
+["ironhills_scalemail_1", "dwarven_scalemail", [("ironhills_scalemail_1",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
+10868,full_plate_armor_tier_4,imodbits_armor,[], [fac_dwarf]],
+["ironhills_scalemail_2", "dwarven_scalemail", [("ironhills_scalemail_2",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
+10868,full_plate_armor_tier_4,imodbits_armor,[], [fac_dwarf]],
+
+["ironhills_heavy_armor", "Plate Armor", [("ironhills_heavy_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs ,0, 10868,full_plate_armor_tier_3,imodbits_good_plate , [], [fac_dwarf]],
+
+["ironhills_guard_armor", "Plate Armor", [("ironhills_guard_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 12769,full_plate_armor_tier_4 ,imodbits_good_plate , [], [fac_dwarf]],
+
+["erebor_padmail", "dwarf_padmail", [("erebor_padmail",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 6360,lamellar_armor_tier_2,imodbits_armor,[], [fac_dwarf]],
+
+["erebor_scalemail", "dwarven_scalemail", [("erebor_scalemail",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
+9216,full_plate_armor_tier_2,imodbits_armor,[], [fac_dwarf]],
+
+["erebor_heavy_armor", "Plate Armor", [("erebor_heavy_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs ,0, 10868,full_plate_armor_tier_3,imodbits_good_plate , [], [fac_dwarf]],
+
+["erebor_guard_armor", "Plate Armor", [("erebor_guard_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 12769,full_plate_armor_tier_4 ,imodbits_good_plate , [], [fac_dwarf]],
+["dwarf_black_armor", "Black Armor", [("erebor_armor_reward",0)], itp_type_body_armor|itp_covers_legs, 0, 20000, weight(30)|abundance(20)|head_armor(0)|body_armor(90)|leg_armor(50)|difficulty(18), imodbits_good_plate, [], [fac_dwarf]],
 
 
 ["dwarf_padmail", "dwarf_padmail", [("dwarf_padmail",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
@@ -10452,6 +7539,35 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["dwarf_scalemail", "dwarven_scalemail", [("dwarf_scalemail",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
 10868,full_plate_armor_tier_4,imodbits_armor,[], [fac_dwarf]],
 
+["dwarf_gauntlets","Lamellar Gauntlets", [("dwarf_gauntlets_L",0)], itp_merchandise|itp_type_hand_armor,0, 
+ 1010, weight(1.75)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, 
+ [], [fac_dwarf]],
+
+["dwarf_boots", "Leather Boots", [("dwarf_leather_boots",0)], itp_merchandise| itp_type_foot_armor|itp_civilian| itp_attach_armature,0, 
+ 750 , weight(1.25)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(10)|difficulty(0) ,imodbits_cloth , 
+ [], [fac_dwarf]],
+["dwarf_chain_boots", "Mail Boots", [("dwarf_chain_boots",0)],  itp_type_foot_armor| itp_attach_armature  ,0, 
+ 2016 , weight(3)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(28)|difficulty(7) ,imodbits_armor,[], [fac_dwarf] ],
+["dwarf_scale_boots", "scale Greaves", [("dwarf_scale_boots",0)],  itp_type_foot_armor| itp_attach_armature,0, 
+ 2592 , weight(2.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(36)|difficulty(8) ,imodbits_plate ,[], [fac_dwarf] ],
+
+["erebor_heavy_greaves", "erebor_heavy_greaves", [("erebor_heavy_greaves",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0, 
+ 2520 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(35)|difficulty(7) ,imodbits_armor , 
+ [], [fac_dwarf] ],
+
+["ironhills_heavy_greaves", "Iron Greaves", [("ironhills_heavy_greaves",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0, 
+ 2664 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(37)|difficulty(9) ,imodbits_armor , 
+ [], [fac_dwarf] ],
+["ironhills_guard_greaves", "Iron Greaves", [("ironhills_guard_greaves",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0, 
+ 2664 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(37)|difficulty(9) ,imodbits_armor , 
+ [], [fac_dwarf] ],
+["erebor_guard_greaves", "erebor_guard_greaves", [("erebor_guard_greaves",0)], itp_merchandise| itp_type_foot_armor| itp_attach_armature,0,
+ 2664 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(37)|difficulty(9) ,imodbits_armor , 
+ [], [fac_dwarf] ],
+["dwarf_black_greaves", "dwarf Black Greaves", [("erebor_greaves_reward",0)], itp_type_foot_armor|itp_attach_armature, 0, 
+ 2880, weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(40)|difficulty(9), imodbits_good_plate, [], [fac_dwarf] ],
+
+
 ["dwarf_tunicmail_2", "dwarf_tunicmailarcher", [("dwarven_paddedlongcoat",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
 6360,lamellar_armor_tier_2,imodbits_armor,[], [fac_dwarf]],
 ["dwarven_tunicovermail", "dwarven_tunicovermail", [("annihilator_coat",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
@@ -10459,13 +7575,12 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["dwarven_scalemail", "dwarven_scalemail", [("dwarven_scalemail",0)], itp_unique|itp_type_body_armor|itp_covers_legs|itp_civilian ,0, 
 10868,full_plate_armor_tier_4,imodbits_armor,[], [fac_dwarf]],
 
-["dwarf_chain_boots", "Mail Boots", [("dwarf_chain_boots",0)],  itp_type_foot_armor| itp_attach_armature  ,0, 
- 2016 , weight(3)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(28)|difficulty(7) ,imodbits_armor,[], [fac_dwarf] ],
-["dwarf_scale_boots", "scale Greaves", [("dwarf_scale_boots",0)],  itp_type_foot_armor| itp_attach_armature,0, 
- 2592 , weight(2.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(36)|difficulty(8) ,imodbits_plate ,[], [fac_dwarf] ],
+["dwarf_light_shield_1", "dwarf_light_shield_1", [("dwarf_light_shield_1", 0)], itp_type_shield|itp_merchandise|itp_wooden_parry, itcf_carry_board_shield, 1260, weight(3.5)|abundance(90)|shield_hit_points(215)|body_armor(200)|spd_rtng(90)|shield_width(50)|shield_height(60), imodbits_shield,],
+["dwarf_light_shield_2", "dwarf_light_shield_2", [("dwarf_light_shield_2", 0)], itp_type_shield|itp_merchandise|itp_wooden_parry, itcf_carry_board_shield, 1260, weight(3.5)|abundance(90)|shield_hit_points(215)|body_armor(200)|spd_rtng(90)|shield_width(50)|shield_height(60), imodbits_shield,],
 
-
-
+["erebor_shield", "Steel Shield", [("erebor_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(500)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield_metal , [], [fac_dwarf]],
+["erebor_guard_shield", "Steel Shield", [("erebor_guard_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(800)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield_metal , [], [fac_dwarf]],
+["ironhills_shield", "Steel Shield", [("ironhills_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  2091 , weight(4)|shield_hit_points(500)|body_armor(100)|spd_rtng(61)|shield_width(40),imodbits_shield_metal , [], [fac_dwarf]],
 
 ["skeleton_body_1", "skeleton", [("barf_skeleton",0)], itp_type_body_armor|itp_covers_legs|itp_civilian|itp_unique ,0, 950,weight(1)|abundance(50)|head_armor(0)|body_armor(25)|leg_armor(10)|difficulty(1),imodbits_armor ],
 ["skeleton_body_2", "skeleton", [("barf_skeleton_armor",0)], itp_type_body_armor|itp_covers_legs|itp_civilian|itp_unique ,0, 6360,mail_armor_tier_2,imodbits_armor ],
@@ -10507,209 +7622,148 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 
 
- ["magic_summon_neutral_near_ememy", "cast_magic_summon_neutral", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_summon_neutral", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  5000, weight(2.25)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(3),
+ ["magic_summon_neutral_near_ememy", "cast_magic_summon_neutral", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_summon_neutral", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  5000, weight(2.0)|difficulty(15)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(3),
   imodbits_none, cast_magic_summon_neutral+missile_distance_trigger , [fac_commoners, fac_demon_hunters, fac_hospitalier_knights , fac_undeads_2, fac_kingdom_1] ],
 
- ["magic_summon_demon", "summon_demon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_3_icon", ixmesh_inventory)], itp_merchandise|itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  9000, weight(2.25)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
+ ["magic_summon_demon", "summon_demon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_3_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(18)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
   imodbits_none, missile_distance_trigger , [fac_undeads_2, fac_commoners] ],
- ["magic_summon_demon_near_ememy", "summon_demon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_3_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  9000, weight(2.25)|abundance(10)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(2),
+ ["magic_summon_demon_near_ememy", "summon_demon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_3_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(21)|abundance(10)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(2),
   imodbits_none, cast_magic_summon_demon , [fac_undeads_2, fac_commoners] ],
 
  ["magic_heal", "heal_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("magic_4_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
+  1000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
   imodbits_none, cast_magic_heal+missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights, fac_hospitalier_knights] ],
 
- ["magic_heal_near", "heal_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("magic_20_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
-  imodbits_none, missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights] ],
 
- ["magic_summon_undead", "summon_undead_Scroll", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_summon_undead", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  6000, weight(2.25)|abundance(15)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(6),
-  imodbits_none, cast_magic_basic_curse+missile_distance_trigger , [fac_undeads_2] ],
- ["magic_summon_undead_near_ememy", "cast_magic_summon_undeadl", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_summon_undead", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  6000, weight(2.25)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
-  imodbits_none, cast_magic_basic_curse+cast_magic_summon_undead+missile_distance_trigger , [fac_undeads_2] ],
 
- ["magic_soulhunter", "Soulhunter", [("bullet_1",0),("laser_bolt_yellow",ixmesh_flying_ammo),("icon_magic_Soulhunter", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
-  imodbits_none, cast_magic_basic_curse+cast_magic_summon_Soulhunter+missile_distance_trigger , [fac_undeads_2] ],
- ["magic_zombie_lord", "Zombie_Lord", [("bullet_1",0),("laser_bolt_yellow",ixmesh_flying_ammo),("icon_magic_Zombie_Lord", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
-  imodbits_none, cast_magic_basic_curse+cast_magic_summon_Zombie_Lord+missile_distance_trigger , [fac_undeads_2] ],
-
- ["magic_curse", "curse_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_curse", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+ ["magic_curse", "curse_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_curse", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
   imodbits_none, cast_magic_curse+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
- ["magic_slow", "slow_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_Slow", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+ ["magic_slow", "slow_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_Slow", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(2)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
   imodbits_none, cast_magic_Slow+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
- ["magic_weakness", "weakness_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_Weakness", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(20),
+ ["magic_weakness", "weakness_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_Weakness", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2500, weight(2.0)|difficulty(2)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(20),
   imodbits_none, cast_magic_weakness+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 
- ["magic_poison", "poison_Scroll", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("magic_7_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(20,cut)|max_ammo(20),
-  imodbits_none, cast_magic_poison+missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
- ["magic_death_cloud_dummy", "death_cloud Scroll", [("bullet_1",0),("magic_7_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  5000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
+ ["magic_death_cloud_dummy", "death_cloud Scroll", [("bullet_1",0),("magic_7_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  5000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
   imodbits_none, cast_magic_death_cloud_2  , [fac_commoners, fac_undeads_2] ],
- ["magic_death_cloud", "death_cloud_Scroll", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_death_cloud", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  17500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(4),
-  imodbits_none, cast_magic_death_cloud+missile_distance_trigger , [fac_undeads_2] ],
- ["magic_soul_leech", "soul_Leech_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_soul_Leech", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  17500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(8),
-  imodbits_none, cast_magic_soul_Leech+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
-
- ["magic_ice_ray", "ice_ray_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_IceBolt", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(25,cut)|max_ammo(30),
-  imodbits_none, cast_magic_ice_ray+missile_distance_trigger , [fac_commoners, fac_kingdom_5] ],
-
- ["magic_deep_freeze", "deep_freeze_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_19_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2750, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(6),
-  imodbits_missile, cast_magic_deep_freeze+missile_distance_trigger , [fac_commoners] ],
-
- ["magic_frost_cloud", "deep_freeze_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Frost_cloudr", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  7500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(4),
-  imodbits_missile, cast_magic_Frost_cloud+missile_distance_trigger , [fac_commoners] ],
- ["magic_frost_cloud_dummy", "deep_freeze_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Frost_cloudr", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2750, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(15),
-  imodbits_missile, cast_magic_Frost_cloudr+missile_distance_trigger , [fac_undeads_2, fac_commoners] ],
-
- ["magic_deadly_cold", "DEADLY_COLD_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_DEADLY_COLD", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(6),
-  imodbits_none, cast_magic_DEADLY_COLD+missile_distance_trigger , [fac_undeads_2, fac_kingdom_7] ],
-
- ["magic_frozen_orb", "frozen_orb_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_frozen_orb", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(10)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(5),
-  imodbits_none, cast_magic_frozen_orb+missile_distance_trigger , [fac_undeads_2] ],
- ["magic_blizzard", "blizzard_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Blizzard", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(30)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(7),
-  imodbits_none, cast_magic_blizzard+missile_distance_trigger , [ fac_undeads_2] ],
-  
-  
 
 
- ["magic_paralysis_cloud", "paralysis_cloud_Scroll", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_Petrification", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  7500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
-  imodbits_none, cast_magic_Petrification+missile_distance_trigger , [fac_undeads_2] ],
 
  ["magic_arrow", "_magic_arrow_Scroll", [("bullet_1",0),("evil_arrow_fl",ixmesh_flying_ammo),("magic_12_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(15,cut)|max_ammo(30),
+  1000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(15,cut)|max_ammo(30),
   imodbits_none, [] , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 
- ["magic_entangling", "Entangling_Scroll", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("icon_magic_EntanglingRoots", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  4000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
-  imodbits_missile, cast_magic_Entangling+missile_distance_trigger , [fac_commoners] ],
  ["magic_web", "Arcane_web_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("icon_magic_Web", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  4000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  4000, weight(2.0)|difficulty(0)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
   imodbits_missile, cast_magic_web+missile_distance_trigger , [fac_commoners] ],
- ["magic_dispel_magic", "Dispel_Magic_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("icon_magic_Dispel_Magic", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  4000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
-  imodbits_missile, cast_magic_Dispel_Magic+missile_distance_trigger , [fac_commoners] ],
 
 
- ["magic_spark", "spark_Scroll", [("bullet_1",0),("blitzball",ixmesh_flying_ammo),("icon_magic_thunder", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(25,cut)|max_ammo(30),
-  imodbits_none, cast_magic_LightningBolt+missile_distance_trigger , [fac_commoners, fac_kingdom_5] ],
- ["magic_lightning", "lightning_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("icon_magic_LightningBolt", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(20),
-  imodbits_none, cast_magic_lightning+missile_distance_trigger , [fac_commoners] ],
- ["magic_arcane_orb", "Arcane_Orb_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("icon_magic_Arcane_Orb", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  4000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(15),
+ ["magic_arcane_orb", "Arcane_Orb_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("icon_magic_Arcane_Orb", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(15),
   imodbits_missile, cast_magic_Arcane_Orb+missile_distance_trigger , [fac_commoners] ],
   
- ["magic_black_hold", "Black_Hold_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("magic_15_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  10000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(90,cut)|max_ammo(4),
-  imodbits_missile, cast_magic_black_hold_long+missile_distance_trigger , [fac_commoners] ],
   
- ["magic_black_hold_2", "Black_Hold_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("magic_15_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  10000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(90,cut)|max_ammo(10),
+ ["magic_black_hold_2", "Black_Hold_Scroll", [("bullet_1",0),("flash_arcane_02",ixmesh_flying_ammo),("magic_15_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(30)|abundance(40)|weapon_length(3)|thrust_damage(90,cut)|max_ammo(10),
   imodbits_missile, cast_magic_black_hold+missile_distance_trigger , [fac_commoners] ],
   
- ["magic_lightning_burst", "Lightning Burst_Scroll", [("bullet_1",0),("blitzball",ixmesh_flying_ammo),("icon_magic_LightningBurst", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  7500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(5),
-  imodbits_none, cast_magic_lightning_burst+missile_distance_trigger , [fac_undeads_2, fac_commoners] ],
  ["magic_lightningball", "lightningball_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("icon_magic_LightningBurst", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
   2000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
-  imodbits_none, cast_magic_lightningball+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+  imodbits_none, cast_magic_lightningball , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 
-
- ["magic_shrapmetal", "shrapmetal_Scroll", [("bullet_1",0),("evil_arrow",ixmesh_flying_ammo),("magic_9_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(20),
-  imodbits_none, missile_distance_trigger , [fac_commoners,fac_kingdom_5] ],
-  
  ["magic_summon_blade", "summon_blade", [("bullet_1",0),("laser_bolt_yellow",ixmesh_flying_ammo),("magic_16_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  15000, weight(2.25)|difficulty(18)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
   imodbits_none, cast_magic_summon_blade+missile_distance_trigger , [fac_commoners] ],
- ["magic_fireball", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
-  imodbits_none, cast_magic_fire_ball+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
- ["magic_fireball_2", "power_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  10000, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(7),
-  imodbits_none, cast_magic_fire_ball_2+missile_distance_trigger , [fac_undeads_2, fac_commoners] ],
   
- ["magic_pyroblast", "Pyroblast_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo),("icon_magic_Pyroblast", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  20000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(6),
-  imodbits_none, cast_magic_Pyroblast+missile_distance_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
-  
- ["magic_dragon_breath", "dragon_breath_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("icon_magic_dragon_breath", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(12),
+ ["magic_dragon_breath", "dragon_breath_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("icon_magic_dragon_breath", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(12),
   imodbits_none, missile_distance_trigger , [fac_commoners, fac_commoners] ],
   
- ["magic_meteor_shower", "meteor_shower_Scroll", [("bullet_1",0),("laser_bolt_yellow",ixmesh_flying_ammo),("magic_6_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(7),
+ ["magic_meteor_shower", "meteor_shower_Scroll", [("bullet_1",0),("laser_bolt_yellow",ixmesh_flying_ammo),("magic_6_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2500, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(7),
   imodbits_none, cast_magic_meteor_shower+missile_distance_trigger , [fac_commoners, fac_undeads_2, fac_commoners] ],
 
- ["magic_incediary_cloud", "incediary_cloud_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_incediary_cloud", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(3),
+ ["magic_incediary_cloud", "incediary_cloud_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_incediary_cloud", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(24)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(3),
   imodbits_none, cast_magic_incediary_cloud+missile_distance_trigger , [fac_undeads_2, fac_commoners] ],
   
- ["magic_apocalypse", "apocalypse_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo),("icon_magic_apocalypse", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  15000, weight(2.25)|abundance(30)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(4),
+ ["magic_apocalypse", "apocalypse_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo),("icon_magic_apocalypse", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(21)|abundance(30)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(4),
   imodbits_none, cast_magic_apocalypse+missile_distance_trigger , [ fac_undeads_2, fac_commoners] ],
   
   
- ["magic_heaven_fist", "heaven_fist_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("magic_13_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(10),
+ ["magic_heaven_fist", "heaven_fist_Scroll", [("bullet_1",0),("bullet_1",ixmesh_flying_ammo),("magic_13_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2500, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(10),
   imodbits_none, cast_magic_heaven_fist+missile_distance_trigger, [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
   
- ["magic_sun_ray", "sun_ray_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("icon_magic_sun_ray", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(25,cut)|max_ammo(20),
-  imodbits_none, cast_magic_sun_ray+missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
- ["magic_column_of_fire", "column_of_fire_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("icon_magic_Sunburst", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
+ ["magic_column_of_fire", "column_of_fire_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("icon_magic_Sunburst", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
   imodbits_none, cast_magic_column_of_fire+missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights] ],
- ["magic_teleport", "teleport_Scroll", [("bullet_1",0),("laser_bolt_blue",ixmesh_flying_ammo),("icon_magic_hurricane", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  4000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(8),
-  imodbits_none, cast_magic_teleport+missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights]],
   
- ["magic_armageddon", "Armageddon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_18_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  50000, weight(2.25)|abundance(20)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(2),
+ ["magic_armageddon", "Armageddon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_18_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  50000, weight(2.0)|difficulty(30)|abundance(20)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(2),
   imodbits_missile, cast_magic_armageddon+missile_distance_trigger , [fac_undeads_2] ],
- ["magic_armageddon_dummy", "Armageddon Scroll", [("bullet_1",0),("huge_infern",ixmesh_flying_ammo),("magic_18_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  275, weight(2.25)|abundance(40)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(5),
+ ["magic_armageddon_dummy", "Armageddon Scroll", [("bullet_1",0),("huge_infern",ixmesh_flying_ammo),("magic_18_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  275, weight(2.0)|difficulty(21)|abundance(40)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(5),
   imodbits_missile, cast_magic_armageddon_2 , [fac_commoners] ],
 
+ ["magic_flamehand", "flamehand_Scroll", [("minie_ball",ixmesh_flying_ammo),("minie_ball",0)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(10)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
+  0, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
+ ["magic_icehand", "ice_bit_Scroll", [("minie_ball",ixmesh_flying_ammo),("minie_ball",0)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(10)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
+  0, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
   
- ["magic_meteor_shower_dummy", "Stones", [("bullet_1",0),("flame_ball",ixmesh_flying_ammo),("magic_6_icon", ixmesh_inventory)], itp_type_bolts|itp_is_magic_staff ,0, 
- 1 , weight(2.75)|abundance(90)|weapon_length(25)| thrust_damage(50 ,  blunt)|max_ammo(18),
- imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 200, 7, 0),]),]],
-    
- ["magic_heaven_fist_dummy", "heaven_fist Scroll", [("bullet_1",0),("iron_fist",ixmesh_flying_ammo),("magic_13_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(20),
+["magic_meteor_shower_dummy", "Stones", [("bullet_1",0),("flame_ball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_type_bolts|itp_is_magic_staff ,0, 
+ 1 , weight(2.75)|difficulty(5)|abundance(90)|weapon_length(25)| thrust_damage(50 ,  blunt)|max_ammo(18),
+ imodbits_none,[(ti_on_missile_hit, 
+ [(store_trigger_param_1, ":shooter"),
+ (copy_position,pos51,pos1),
+ (position_set_z_to_ground_level, pos51),
+ (assign, ":cost_stamina", 10),
+ (try_begin),
+   (agent_has_item_equipped,":shooter","itm_natalya_slayer"),
+   (assign, ":cost_stamina", 5),
+ (try_end),
+ (agent_get_slot, ":stamina", ":shooter", slot_agent_mana),
+ (assign,":damage",50),
+ (try_begin),
+   (ge, ":stamina", ":cost_stamina"),
+   (assign,":damage",200),
+ (try_end),
+ (val_sub, ":stamina", ":cost_stamina"),
+ (val_clamp,":stamina",0,101),
+ (agent_set_slot, ":shooter", slot_agent_mana, ":stamina"),
+ (call_script, "script_magic_deliver_area_damage", ":shooter", ":damage", 7, 0),]),]],       
+ ["magic_heaven_fist_dummy", "heaven_fist Scroll", [("bullet_1",0),("iron_fist",ixmesh_flying_ammo),("magic_13_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(20),
   imodbits_none, cast_magic_heaven_fist_2],
 
- ["magic_incediary_cloud_dummy", "incediary_cloud Scroll", [("bullet_1",0),("magic_8_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  2500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(6),
+ ["magic_incediary_cloud_dummy", "incediary_cloud Scroll", [("bullet_1",0),("magic_8_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2500, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(6),
   imodbits_none, cast_magic_incediary_cloud_2  ],
 
- ["magic_poison_dummy", "death_cloud Scroll", [("bullet_1",0),("flame_ball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(1),
-  imodbits_none, cast_magic_fire_ball_3,  ],
+ ["magic_poison_dummy", "death_cloud Scroll", [("bullet_1",0),("flame_ball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
+  500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(30),
+  imodbits_none, cast_magic_fire_ball_3 , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 
+ ["magic_ice_ray_dummy", "ice_ray_Scroll", [("guangjian_fly2",ixmesh_flying_ammo),("guangjian_fly2",0)], itp_type_bullets|itp_is_magic_staff, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(10),
+  imodbits_none, cast_magic_ice_ray_dummy , [fac_commoners, fac_undeads_2] ],
+ ["magic_sun_ray_dummy", "sun_ray_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("laser_bolt_orange", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(150,cut)|max_ammo(40),imodbits_none ],
+ ["magic_fire_ray_dummy", "fire_ray_Scroll", [("guangjian_fly3",ixmesh_flying_ammo),("guangjian_fly3",0)], itp_type_bullets|itp_is_magic_staff, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, cast_magic_fire_ray_dummy , [fac_commoners, fac_undeads_2] ],
+ ["magic_arrow_power", "_magic_arrow_Scroll", [("bullet_1",0),("holy_arrow_fl",ixmesh_flying_ammo),("magic_12_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1000, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(150,cut)|max_ammo(30),
+  imodbits_none, missile_ice_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 
 ["wooden_staff_1", "wooden Staff", [("jorneyman_staff",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
  10000 , weight(3.25)|difficulty(0)|spd_rtng(20) | shoot_speed(80) | thrust_damage(50 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners, fac_demon_hunters, fac_hospitalier_knights, fac_undeads_2, fac_kingdom_5, fac_kingdom_1] ], 
@@ -10736,10 +7790,10 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  20000 , weight(3.25)|difficulty(0)|spd_rtng(35) | shoot_speed(140) | thrust_damage(75 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners, fac_commoners] ], 
 ["thunder_staff_melee",  "thunder Staff", [("lod_WAoRStaffB",0)], itp_type_polearm|itp_couchable|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_greatlance|itcf_carry_spear, 2502 , weight(2)|difficulty(0)|spd_rtng(97)| weapon_length(195)|swing_damage(25 , cut)| thrust_damage(35 ,  pierce),imodbits_axe, [], [fac_commoners, fac_commoners,fac_kingdom_8,fac_beast]],
 
-["shaman_staff_1", "shaman_staff", [("flame_staff",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
+["shaman_staff_1", "shaman_staff", [("flame_staff",0), ("flame_staff", ixmesh_carry)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
  20000 , weight(3.25)|difficulty(0)|spd_rtng(35) | shoot_speed(140) | thrust_damage(75 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, [(ti_on_init_item, [(set_position_delta,0,120,0),(particle_system_add_new, "psys_torch_fire"),(particle_system_add_new, "psys_torch_smoke"),(set_current_color,150, 130, 70),(add_point_light, 10, 30),])]+magic_cast_trigger , [fac_commoners, fac_undeads_2,fac_kingdom_10] ], 
   
-["shaman_staff",  "shaman_staff", [("flame_staff",0)], itp_type_two_handed_wpn|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_glaive|itcf_carry_spear, 202 , weight(2)|difficulty(0)|spd_rtng(97)| weapon_length(175)|swing_damage(35 , cut)| thrust_damage(26 ,  blunt),imodbits_axe, [(ti_on_init_item, [(set_position_delta,0,120,0),(particle_system_add_new, "psys_torch_fire"),(particle_system_add_new, "psys_torch_smoke"),(set_current_color,150, 130, 70),(add_point_light, 10, 30),])], [fac_commoners, fac_undeads_2]],
+["shaman_staff",  "shaman_staff", [("flame_staff",0), ("flame_staff", ixmesh_carry)], itp_type_two_handed_wpn|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_glaive|itcf_carry_spear, 202 , weight(2)|difficulty(0)|spd_rtng(97)| weapon_length(175)|swing_damage(35 , cut)| thrust_damage(26 ,  blunt),imodbits_axe, [(ti_on_init_item, [(set_position_delta,0,120,0),(particle_system_add_new, "psys_torch_fire"),(particle_system_add_new, "psys_torch_smoke"),(set_current_color,150, 130, 70),(add_point_light, 10, 30),])], [fac_commoners, fac_undeads_2]],
 
 ["warlock_staff_1", "warlock Staff", [("lod_WAoRStaffA",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
  15000 , weight(3.25)|difficulty(0)|spd_rtng(30) | shoot_speed(110) | thrust_damage(60 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners, fac_commoners] ], 
@@ -10773,6 +7827,16 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  30000 , weight(3.25)|difficulty(0)|spd_rtng(45) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger , [fac_kingdom_8,fac_beast] ], 
 ["drow_staff_2_melee", "drow Staff", [("WAoRStaffE",0)], itp_type_polearm|itp_offset_lance| itp_primary|itp_crush_through|itp_two_handed|itp_extra_penetration, itc_glaive|itcf_carry_spear, 202 , weight(2)|difficulty(0)|spd_rtng(97)| weapon_length(170)|swing_damage(36 , pierce)| thrust_damage(26 ,  blunt),imodbits_polearm, [], [fac_beast]],
 
+["drow_staff_3", "drow Staff", [("s2",0)], itp_type_pistol|itp_crush_through|itp_primary|itp_is_magic_staff ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_spear,
+ 30000 , weight(3.25)|difficulty(0)|spd_rtng(45) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger , [fac_kingdom_8,fac_beast] ], 
+
+["druid_staff_1", "druid Staff", [("mc_druid",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
+ 125000 , weight(3.25)|difficulty(0)|spd_rtng(40) | shoot_speed(170) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger ,  [fac_forest_ranger,fac_kingdom_4,fac_culture_4] ], 
+["druid_staff_melee_1",  "druid Staff", [("mc_druid",0)], itp_type_polearm|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_staff|itcf_carry_spear, 202 , weight(2)|spd_rtng(97)| weapon_length(180)|swing_damage(25 , blunt)| thrust_damage(26 ,  blunt),imodbits_polearm ],
+["druid_staff_2", "druid Staff", [("h2",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
+ 30000 , weight(3.25)|difficulty(0)|spd_rtng(45) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger , [fac_forest_ranger,fac_kingdom_4,fac_culture_4] ], 
+["druid_staff_melee_2",  "druid Staff", [("h2",0)], itp_type_polearm|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_staff|itcf_carry_spear, 202 , weight(2)|spd_rtng(97)| weapon_length(180)|swing_damage(25 , blunt)| thrust_damage(26 ,  blunt),imodbits_polearm ],
+
 
 ["ogrehammer_cast", "Ogre's Hammer", [("ogrehammer",0)], itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_sword_left_hip,
 50000 , weight(20)|abundance(1)|difficulty(0)|spd_rtng(40) | shoot_speed(90) | thrust_damage(60 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners, fac_orc] ], 
@@ -10786,12 +7850,12 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["nec_robe", "nec_robe", [("demonrobe",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs ,0, 1722,cloth_tier_4,imodbits_cloth, [], [fac_undeads_2, fac_commoners]],
 ["lich_armor", "lich_armor", [("lich_robe2",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 8100,breastplate_tier_5,imodbits_plate, [], [fac_undeads_2]],
 ["archlich_armor", "twiligh_armor", [("archlich_armor",0)], itp_merchandise|itp_type_body_armor|itp_covers_legs, 0, 10868,full_plate_armor_tier_3, imodbits_good_plate , [], [fac_undeads_2,fac_kingdom_5,fac_commoners]],
-["vampire_rapierd", "Rapierd", [("Reitschwert_Pistolier_A_01", 0), ("Reitschwert_scabbard", ixmesh_carry)], itp_merchandise|itp_type_one_handed_wpn|itp_primary, itc_side_sword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,1201, weight(1.5)|difficulty(0)|spd_rtng(110)|weapon_length(115)|swing_damage(26,cut)|thrust_damage(39,pierce), imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_undeads_2]],
+["vampire_rapierd", "Rapierd", [("Reitschwert_Pistolier_A_01", 0), ("Reitschwert_scabbard", ixmesh_carry)], itp_merchandise|itp_type_one_handed_wpn|itp_primary, itc_side_sword|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,1201, weight(1.5)|difficulty(0)|spd_rtng(110)|weapon_length(115)|swing_damage(26,cut)|thrust_damage(39,pierce), imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, vampire_enchantment+none_trigger, [fac_undeads_2]],
 
 
 ["undead_double_axe", "Double Axe", [("AN_axe03b",0)], itp_merchandise|itp_type_two_handed_wpn|itp_cant_use_on_horseback|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_unbalanced|itp_extra_penetration, itc_nodachi|itcf_carry_axe_back, 2500, weight(6.5)|difficulty(8)|spd_rtng(110)|weapon_length(100)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork, [], [fac_undeads_2]],
 
-["undead_shield_kite_cav", "Knightly Kite Shield",   [("undead_newsh" ,0)], itp_merchandise|itp_type_shield, itcf_carry_kite_shield,2160 , weight(3.5)|shield_hit_points(250)|body_armor(90)|spd_rtng(100)|shield_width(40)|shield_height(55),imodbits_shield, [], [fac_undeads_2,fac_kingdom_3,fac_kingdom_5] ],
+["undead_shield_kite_cav", "Knightly Kite Shield",   [("undead_newsh" ,0)], itp_merchandise|itp_type_shield, itcf_carry_kite_shield,2160 , weight(3.5)|shield_hit_points(250)|body_armor(90)|spd_rtng(100)|shield_width(40)|shield_height(55),imodbits_shield_metal, [], [fac_undeads_2,fac_kingdom_3,fac_kingdom_5] ],
 
 ["skeleton_throwing_pike",  "Throwing Pikes", [("skeleton_pike",0)], itp_type_thrown| itp_cant_use_on_horseback|itp_primary|itp_penalty_with_shield|itp_wooden_parry, itcf_throw_javelin, 500 , weight(3.0)|difficulty(4)|spd_rtng(81)| weapon_length(180)| thrust_damage(60 ,pierce)| shoot_speed(26)|max_ammo(3),imodbits_thrown , missile_distance_trigger, [fac_undeads_2]],
 ["skeleton_pike_melee",     "Throwing Pike", [("skeleton_pike",0)], itp_type_polearm| itp_cant_use_on_horseback|itp_primary|itp_penalty_with_shield|itp_wooden_parry|itp_two_handed|itp_is_pike, itc_pike, 500 , weight(3.0)|difficulty(0)|spd_rtng(81)| weapon_length(245)|swing_damage(16 , blunt)| thrust_damage(26 ,  pierce),imodbits_thrown, [], [fac_undeads_2] ],
@@ -10806,7 +7870,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["death_knight_head", "Dread Knight Helm", [("siwangqishitou",0)], itp_merchandise|itp_type_fullhelm, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate,   [], [fac_undeads_2]],
 ["death_knight_hand","Dread Knight_hand", [("siwangshou_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(30)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_undeads_2]],
-["death_knight_shield", "Dread Knight_shield", [("fix_EOS_knight_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60),imodbits_shield , [], [fac_undeads_2,fac_kingdom_5]],
+["death_knight_shield", "Dread Knight_shield", [("fix_EOS_knight_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(300)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60),imodbits_shield_metal , [], [fac_undeads_2,fac_kingdom_5]],
 
 ["undead_great_helmet", "Great Helmet", [("2great_helmet_black",0)],  itp_merchandise|itp_type_fullhelm,0, 
  4266 , weight(2.75)|abundance(100)|head_armor(80)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate, [], [fac_undeads_2] ],
@@ -10882,11 +7946,11 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ],
 
 #["amade_steel_winged_helm_small","Steel Winged Helm",[("amade_steel_winged_helm_plain",0)],itp_type_head_armor|itp_civilian,0, 2400 , weight(2.0)|abundance(100)|head_armor(60)|body_armor(0)|leg_armor(0)|difficulty(7) ,imodbits_plate, [], [fac_dark_knights]],
-["drow_bolts","drow Bolts", [("toumingtou",0),("van_helsing_crossbow_bolt_copy",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_carry|imodbit_large_bag)], itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 5000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(15),imodbits_missile,missile_poison_trigger+missile_distance_trigger, [], [fac_beast]],
+["drow_bolts","drow Bolts", [("toumingtou",0),("van_helsing_crossbow_bolt_copy",ixmesh_flying_ammo),("van_helsing_crossbow_bolt_bag", ixmesh_carry),("van_helsing_crossbow_bolt_bag", ixmesh_carry|imodbit_large_bag)], itp_type_bolts|itp_can_penetrate_shield|itp_bonus_against_shield|itp_is_magic_staff, itcf_carry_quiver_right_vertical, 5000,weight(2.25)|abundance(35)|weapon_length(55)|thrust_damage(40,pierce)|max_ammo(15),imodbits_missile,missile_poison_trigger+missile_distance_trigger, [fac_beast]],
 
 ["throwing_lightning",         "Throwing lightning", [("small_lightning_combined",0),("lightning", ixmesh_flying_ammo)], itp_type_thrown|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_bomb ,itcf_throw_stone,10000 , weight(4)|difficulty(4)|spd_rtng(60)| shoot_speed(100)| thrust_damage(67 ,  cut)|max_ammo(24)|weapon_length(65),imodbits_thrown,thunder_weapon_trigger+missile_distance_trigger, [fac_dark_knights]],
 
-["throwing_lightning_melee",         "Throwing lightning", [("small_lightning_combined",0),("lightning", ixmesh_flying_ammo)],itp_type_polearm|itp_primary|itp_wooden_parry , itc_longsword,10000 , weight(1)|difficulty(4)|spd_rtng(91)| swing_damage(54, pierce)| thrust_damage(40 ,  pierce)|weapon_length(200),imodbits_thrown, thunder_weapon_trigger_2, [fac_dark_knights] ],
+["throwing_lightning_melee",         "Throwing lightning", [("small_lightning_combined",0),("lightning", ixmesh_flying_ammo)],itp_type_polearm|itp_primary|itp_wooden_parry , itc_longsword,10000 , weight(1)|difficulty(4)|spd_rtng(91)| swing_damage(54, pierce)| thrust_damage(40 ,  pierce)|weapon_length(200),imodbits_thrown, thunder_weapon_trigger_2+none_trigger, [fac_dark_knights] ],
 
 
 
@@ -10914,10 +7978,10 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["sissofbattle_armor_red","Sister of battle armor",[("red_sissofbattle_armor",0)],itp_type_body_armor|itp_covers_legs,0,23550,weight(25)|abundance(100)|head_armor(0)|body_armor(150)|leg_armor(60)|difficulty(16),imodbits_good_plate,[], [fac_demon_hunters, fac_hospitalier_knights]],
 ["sissofbattle_armor_fly","Sister of battle armor",[("fly_red_sissofbattle_armor",0)],itp_type_body_armor|itp_covers_legs,0,23550,weight(30)|abundance(100)|head_armor(0)|body_armor(150)|leg_armor(60)|difficulty(16),imodbits_good_plate,[], [fac_demon_hunters, fac_hospitalier_knights]],
 
-["sissofbattle_sword",         "Sister of battle Zweihander", [("lod_WAoREELongSword",0)], itp_type_polearm|itp_two_handed|itp_primary|itp_cant_use_on_horseback|itp_can_penetrate_shield|itp_next_item_as_melee, itc_zweihander|itcf_carry_sword_back, 2445 , weight(3.75)|difficulty(15)|spd_rtng(100)| weapon_length(150)|swing_damage(53, pierce)| thrust_damage(28 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger,[fac_demon_hunters, fac_hospitalier_knights]],
-["sissofbattle_sword_alt",         "Sister of battle Zweihander", [("lod_WAoREELongSword",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_unbalanced|itp_crush_through|itp_can_knock_down|itp_cant_use_on_horseback|itp_can_penetrate_shield, itc_nodachi|itcf_carry_sword_back, 2445 , weight(3.75)|difficulty(15)|spd_rtng(100)| weapon_length(150)|swing_damage(55, pierce)| thrust_damage(0 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger,[fac_demon_hunters, fac_hospitalier_knights]],
+["sissofbattle_sword",         "Sister of battle Zweihander", [("lod_WAoREELongSword",0)], itp_type_polearm|itp_two_handed|itp_primary|itp_cant_use_on_horseback|itp_can_penetrate_shield|itp_next_item_as_melee, itc_zweihander|itcf_carry_sword_back, 2445 , weight(3.75)|difficulty(15)|spd_rtng(100)| weapon_length(150)|swing_damage(53, pierce)| thrust_damage(28 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger+holy_enchantment,[fac_demon_hunters, fac_hospitalier_knights]],
+["sissofbattle_sword_alt",         "Sister of battle Zweihander", [("lod_WAoREELongSword",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_unbalanced|itp_crush_through|itp_can_knock_down|itp_cant_use_on_horseback|itp_can_penetrate_shield, itc_nodachi|itcf_carry_sword_back, 2445 , weight(3.75)|difficulty(15)|spd_rtng(100)| weapon_length(150)|swing_damage(55, pierce)| thrust_damage(0 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger+holy_enchantment,[fac_demon_hunters, fac_hospitalier_knights]],
 
-["sissofbattle_sword_short",         "Sister of battle sword", [("smlj",0)], itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_longsword|itcf_carry_sword_back, 2445 , weight(1.5)|difficulty(5)|spd_rtng(100)| weapon_length(115)|swing_damage(35, pierce)| thrust_damage(0 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger,[fac_demon_hunters, fac_hospitalier_knights]],
+["sissofbattle_sword_short",         "Sister of battle sword", [("smlj",0)], itp_type_one_handed_wpn|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_longsword|itcf_carry_sword_back, 2445 , weight(1.5)|difficulty(5)|spd_rtng(100)| weapon_length(115)|swing_damage(35, pierce)| thrust_damage(0 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, holy_weapon_trigger+holy_enchantment,[fac_demon_hunters, fac_hospitalier_knights]],
 
 ["sissofbattle_e5", "e5", [("pistol_2stwolC",0)], itp_type_pistol|itp_crush_through|itp_primary ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_pistol_front_left, 
  50000 , weight(2.0)|difficulty(0)|spd_rtng(70) | shoot_speed(120) | thrust_damage(110 ,pierce)|max_ammo(2)|accuracy(90),imodbits_gun, flame_cast_trigger , [fac_demon_hunters, fac_hospitalier_knights] ],
@@ -10978,19 +8042,19 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
   
 ["bishop_staff", "Bishop Staff", [("cleric_staff",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
  20000 , weight(3.25)|difficulty(0)|spd_rtng(20) | shoot_speed(80) | thrust_damage(50 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_demon_hunters, fac_hospitalier_knights] ], 
-["bishop_staff_melee","Bishop Staff", [("cleric_staff",0)],itp_type_polearm|itp_offset_lance|itp_primary|itp_penalty_with_shield|itp_wooden_parry|itp_wooden_attack,itc_staff|itc_parry_polearm|itcf_carry_sword_back,9, weight(2)|spd_rtng(120) | weapon_length(115)|swing_damage(30,blunt) | thrust_damage(30,blunt),imodbits_polearm, holy_weapon_trigger],
+["bishop_staff_melee","Bishop Staff", [("cleric_staff",0)],itp_type_polearm|itp_offset_lance|itp_primary|itp_penalty_with_shield|itp_wooden_parry|itp_wooden_attack,itc_staff|itc_parry_polearm|itcf_carry_sword_back,9, weight(2)|spd_rtng(120) | weapon_length(115)|swing_damage(30,blunt) | thrust_damage(30,blunt),imodbits_polearm,],
 
 ["war_clerics_warhammer_cast", "Warhammer", [("war_mace_2",0),("spak_book", ixmesh_carry)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(30) | shoot_speed(110) | thrust_damage(60 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_demon_hunters, fac_hospitalier_knights] ], 
- ["war_clerics_warhammer", "Warhammer", [("war_mace_2",0),("spak_book", ixmesh_carry)], itp_type_one_handed_wpn|itp_can_knock_down| itp_primary|itp_wooden_parry|itp_crush_through, itc_scimitar|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 653 , weight(4)|difficulty(18)|spd_rtng(100)| weapon_length(120)|swing_damage(45 , blunt),imodbits_mace, holy_weapon_trigger],
+ ["war_clerics_warhammer", "Warhammer", [("war_mace_2",0),("spak_book", ixmesh_carry)], itp_type_one_handed_wpn|itp_can_knock_down| itp_primary|itp_wooden_parry|itp_crush_through, itc_scimitar|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn, 653 , weight(4)|difficulty(18)|spd_rtng(100)| weapon_length(120)|swing_damage(45 , blunt),imodbits_mace, holy_weapon_trigger+holy_mace_enchantment],
 
 ["war_clerics_warhammer_cast_2", "Great Hammer", [("smchui",0),("spak_book", ixmesh_carry)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_sword_left_hip|itcf_show_holster_when_drawn,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(40) | shoot_speed(170) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_demon_hunters, fac_hospitalier_knights] ], 
-["war_clerics_warhammer_2",         "Great Hammer", [("smchui",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_can_knock_down|itp_crush_through| itp_primary|itp_cant_use_on_horseback, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(93)| weapon_length(120)|swing_damage(50 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, holy_weapon_trigger],
+["war_clerics_warhammer_2",         "Great Hammer", [("smchui",0),("spak_book", ixmesh_carry)], itp_type_two_handed_wpn|itp_two_handed|itp_can_knock_down|itp_crush_through| itp_primary|itp_cant_use_on_horseback, itc_nodachi|itcf_carry_spear,97 , weight(6)|difficulty(8)|spd_rtng(93)| weapon_length(120)|swing_damage(50 , blunt)| thrust_damage(0 ,  pierce),imodbits_mace, holy_weapon_trigger+holy_mace_enchantment],
 
 ["bishop_staff_2", "Bishop Staff", [("duanzhui26",0)], itp_type_pistol|itp_crush_through|itp_next_item_as_melee|itp_primary|itp_is_magic_staff ,itcf_shoot_pistol|itcf_reload_pistol|itcf_carry_spear,
  30000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(200) | thrust_damage(85 ,pierce)|max_ammo(1)|accuracy(85),imodbits_magic_staff, magic_cast_trigger , [fac_demon_hunters, fac_hospitalier_knights] ], 
-["bishop_staff_2_melee", "Bishop Staff", [("duanzhui26",0)], itp_type_two_handed_wpn|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_glaive|itcf_carry_spear, 60 , weight(2)|difficulty(0)|spd_rtng(104)| weapon_length(130)|swing_damage(35 , blunt)| thrust_damage(20 ,  blunt),imodbits_polearm, holy_weapon_trigger],
+["bishop_staff_2_melee", "Bishop Staff", [("duanzhui26",0)], itp_type_two_handed_wpn|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_glaive|itcf_carry_spear, 60 , weight(2)|difficulty(0)|spd_rtng(104)| weapon_length(130)|swing_damage(35 , blunt)| thrust_damage(20 ,  blunt),imodbits_polearm,],
 
  ["magic_heaven_fist_throw_2", "heaven_fist_Scroll", [("throwable_cross",0),("throwable_cross",ixmesh_flying_ammo)], itp_merchandise|itp_type_thrown|itp_crush_through|itp_is_magic_staff|itp_primary, itcf_throw_stone,
   2500, weight(2.25)|abundance(90)|spd_rtng(65)|shoot_speed(50)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(10),
@@ -11010,10 +8074,10 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["succubus_body", "Succubus body", [("darkmoon",0)], itp_type_full_body_armor, 0, 20000, weight(5)|abundance(65)|head_armor(70)|body_armor(80)|leg_armor(60)|difficulty(12), imodbits_armor ],
  
-["imp_head", "imp head", [("demon_head_01",0)], itp_type_fullhelm|itp_covers_beard|itp_unique|itp_fit_to_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(0)|difficulty(9), imodbits_plate],
-["imp_foot", "imp foot", [("demon_legs",0)], itp_type_foot_armor|itp_attach_armature|itp_unique, 0, 2570 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(30)|difficulty(9), imodbits_armor ],
-["imp_hand", "imp hand", [("demon_hand_L",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(100)|body_armor(10)|difficulty(0), imodbits_armor ],
-["imp_body", "imp body", [("demon_body",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(0)|body_armor(45)|leg_armor(15)|difficulty(12), imodbits_armor ],
+["imp_head", "imp head", [("Tzeentch_demon_head",0)], itp_type_fullhelm|itp_covers_beard|itp_attach_armature|itp_unique|itp_fit_to_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(0)|difficulty(9), imodbits_plate],
+["imp_foot", "imp foot", [("Tzeentch_demon_legs",0)], itp_type_foot_armor|itp_attach_armature|itp_unique, 0, 2570 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(30)|difficulty(9), imodbits_armor ],
+["imp_hand", "imp hand", [("Tzeentch_demon_handL",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(100)|body_armor(10)|difficulty(0), imodbits_armor ],
+["imp_body", "imp body", [("Tzeentch_demon_body",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(0)|body_armor(45)|leg_armor(15)|difficulty(12), imodbits_armor ],
  
 ["imp_fork","imp Fork", [("basic_demon_lance",0)], itp_type_thrown|itp_crush_through|itp_primary|itp_next_item_as_melee ,itcf_throw_javelin,560 , weight(4)|difficulty(2)|spd_rtng(89)| shoot_speed(24)| thrust_damage(48 ,  pierce)|max_ammo(45)|weapon_length(131),imodbits_thrown,missile_distance_trigger, throw_factions],
 ["imp_fork_melee","imp Fork", [("basic_demon_lance",0)], itp_type_polearm|itp_offset_lance| itp_primary|itp_wooden_parry, itc_staff|itcf_horseback_slash_polearm, 282 , weight(2.2)|difficulty(0)|spd_rtng(90)| weapon_length(200)|swing_damage(0, cut)| thrust_damage(40 ,  pierce),imodbits_polearm ],
@@ -11021,12 +8085,12 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["demon_lance","demon_lance", [("long_demon_lance",0)], itp_type_polearm|itp_offset_lance| itp_primary|itp_is_pike|itp_extra_penetration, itc_greatlance, 282 , weight(2.2)|difficulty(0)|spd_rtng(90)| weapon_length(250)|swing_damage(0, cut)| thrust_damage(35 ,  pierce),imodbits_polearm ],
 
 
-["demon_fireball", "Large_Grenade", [("bombaaa_m", 0),("guangjian3",ixmesh_flying_ammo)], itp_type_thrown|itp_crush_through|itp_primary, itcf_throw_stone, 10000, weight(4)|weapon_length(30)|difficulty(0)|spd_rtng(100)|shoot_speed(70)|thrust_damage(35, pierce)|max_ammo(12), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 50, 5, 1),]),]+missile_distance_trigger,firearm_factions],
+["demon_fireball", "Large_Grenade", [("bombaaa_m", 0),("fireball",ixmesh_flying_ammo)], itp_type_thrown|itp_crush_through|itp_primary, itcf_throw_stone, 10000, weight(4)|weapon_length(30)|difficulty(0)|spd_rtng(100)|shoot_speed(70)|thrust_damage(35, pierce)|max_ammo(12), imodbits_none,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 50, 5, 1),]),]+missile_distance_trigger,firearm_factions],
  
-["imp_head_2", "imp head", [("red_demon_head_01",0)], itp_type_fullhelm|itp_covers_beard|itp_unique|itp_fit_to_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(90)|body_armor(30)|leg_armor(0)|difficulty(9), imodbits_plate],
 ["imp_foot_2", "imp foot", [("red_demon_legs",0)], itp_type_foot_armor|itp_attach_armature|itp_unique, 0, 2570 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(65)|difficulty(9), imodbits_armor ],
-["imp_hand_2", "imp hand", [("red_demon_hand_L",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(100)|body_armor(10)|difficulty(0), imodbits_armor ],
-["imp_body_2", "imp body", [("red_demon_body",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(0)|body_armor(45)|leg_armor(15)|difficulty(12), imodbits_armor ],
+["imp_head_2", "imp head", [("3_ssss",0)], itp_type_full_body_armor, 0, 3000, weight(15)|abundance(100)|head_armor(60)|body_armor(60)|leg_armor(60)|difficulty(12), imodbits_armor ],
+["imp_hand_2", "imp hand", [("2_ssss",0)], itp_type_full_body_armor, 0, 3000, weight(15)|abundance(100)|head_armor(60)|body_armor(60)|leg_armor(60)|difficulty(12), imodbits_armor ],
+["imp_body_2", "imp body", [("1_ssss",0)], itp_type_full_body_armor, 0, 3000, weight(15)|abundance(100)|head_armor(60)|body_armor(60)|leg_armor(60)|difficulty(12), imodbits_armor ],
  
 ["arch_demon_axe_2", "Arch Demon scythe", [("CharonsCall",0)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 959, weight(6.5)|difficulty(8)|spd_rtng(75)|weapon_length(150)|swing_damage(100,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork],
  
@@ -11035,6 +8099,22 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["demon_hand", "toumingshou", [("toumingtou",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(1)|body_armor(0)|difficulty(0), imodbits_armor ],
 
 ["horned_demon_body", "Horned Demon body", [("guaishou1",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(65)|body_armor(65)|leg_armor(65)|difficulty(12), imodbits_armor ],
+
+["flamer", "Flamer_of_Tzeentch", [("krag_flamer",0)], itp_type_full_body_armor, 0, 1000, weight(26)|abundance(65)|head_armor(50)|body_armor(35)|leg_armor(35)|difficulty(12), imodbits_armor ],
+
+["flamer_sword", "flamer_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
+ 25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(100),imodbits_magic_staff,flame_cast_trigger , [fac_commoners] ],  
+["flamer_melee", "flamer_melee", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(90)|swing_damage(30 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (assign,":power",3),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+    ])]
+ ],
+
+
 #["horned_demon_sword", "Horned Demon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet,610 , weight(5.5)|difficulty(13)|spd_rtng(120)| weapon_length(140)|swing_damage(35 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace ],
 
 ["sandwraith_body", "Sandwraith", [("efreeti", 0)], itp_type_half_body_armor, 0, 2000, weight(30.)|abundance(100)|difficulty(15)|head_armor(0)|body_armor(70)|leg_armor(70), imodbits_armor], 
@@ -11045,8 +8125,22 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["arch_demon_body", "Arch Demon body", [("ArchDemon",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(120)|body_armor(120)|leg_armor(100)|difficulty(12), imodbits_armor ],
 ["arch_demon_axe", "Arch Demon Axe", [("thrud_axe",0)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 959, weight(6.5)|difficulty(8)|spd_rtng(125)|weapon_length(180)|swing_damage(60,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork],
- 
-["balor_body", "Balor body", [("guaishou2",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(70)|body_armor(85)|leg_armor(70)|difficulty(12), imodbits_armor ],
+
+["slaanesh_prince", "Slaanesh_Prince_Body", [("krag_Slaanesh_greater_demon",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(120)|body_armor(120)|leg_armor(100)|difficulty(12), imodbits_armor ],
+["slaanesh_daemon_shield", "Slaanesh_Daemon_Claw_Attack", [("toumingshen",0)], itp_type_shield|itp_unique,itcf_carry_round_shield, 1597, weight(4)|shield_hit_points(500)|body_armor(90)|spd_rtng(61)|shield_width(50), imodbits_shield ],
+["slaanesh_daemon_sword", "Slaanesh_Daemon_Claw_Attack", [("toumingshen",0)], itp_type_one_handed_wpn|itp_primary|itp_unique|itp_is_magic_staff, itc_scimitar,610 , weight(5.5)|difficulty(13)|spd_rtng(200)| weapon_length(100)|swing_damage(70 , pierce)| thrust_damage(30 ,  pierce),imodbits_sword_high ],
+
+["nurgle_prince", "nurgle_Prince_Body", [("nurgle_greater_demon",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(120)|body_armor(120)|leg_armor(100)|difficulty(12), imodbits_armor ],
+["nurgle_hands", "nurgle_Prince_Hands", [("nurgle_handL", 0)], itp_type_hand_armor|itp_unique|itp_civilian, 0, 900, weight(1.)|abundance(150)|difficulty(10)|head_armor(0)|body_armor(10)|leg_armor(0), imodbits_none], 
+
+
+["balor_body", "Balor body", [("krag_Tzeentch_greater_demon",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(70)|body_armor(85)|leg_armor(70)|difficulty(12), imodbits_armor ],
+["tzeentch_hands", "Tzeentch_Prince_Hands", [("krag_tzeentch_handL", 0)], itp_type_hand_armor|itp_unique|itp_civilian, 0, 900, weight(1.)|abundance(150)|difficulty(10)|head_armor(0)|body_armor(10)|leg_armor(0), imodbits_none], 
+
+["lobo_body","Vargheists_Body",[("lobo",0)],itp_type_full_body_armor,0,1,weight(250)|head_armor(50)|body_armor(65)|leg_armor(0)|difficulty(70),0,],
+["demon_zombie","Crypt Horrors_Body",[("demon_zombie",0)],itp_type_full_body_armor,0,1,weight(250)|head_armor(50)|body_armor(65)|leg_armor(0)|difficulty(70),0,],
+
+
 
 ["balor_sword", "Balor_sword", [("long_WAoRChaosAxeD",0)], itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(150) | thrust_damage(80 ,pierce)|max_ammo(3)|accuracy(100),imodbits_magic_staff,magic_cast_trigger , [fac_commoners] ], 
@@ -11075,7 +8169,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["wizard_hood_2_2", "ranger hood", [("greehat1",0)],  itp_type_head_armor|itp_civilian ,0, 1300 , weight(1)|abundance(100)|head_armor(31)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth],
 ["wizard_hood_3", "ranger hood", [("greehat",0)],  itp_type_head_armor|itp_civilian ,0, 2020 , weight(1)|abundance(100)|head_armor(65)|body_armor(0)|leg_armor(0)|difficulty(0) ,imodbits_cloth],
   
-["death_scythe", "Death scythe", [("dk_ebony",0)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 95900, weight(6.5)|difficulty(21)|spd_rtng(100)|weapon_length(190)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork, [(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])],],
+["death_scythe", "Death scythe", [("dk_ebony",0)], itp_type_polearm|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 95900, weight(6.5)|difficulty(21)|spd_rtng(100)|weapon_length(190)|swing_damage(55,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork, [],],
 
 
 ["death_head", "Death head", [("barf_skull",0)], itp_type_fullhelm|itp_unique|itp_fit_to_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(9), imodbits_plate],
@@ -11383,81 +8477,191 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["skeleton", "Human_skeleton", [("skeleton_a", 0)], itp_type_goods, 0, 1, weight(55.)|abundance(100)|max_ammo(54)|food_quality(70), imodbits_none], 
 
 ["green_dragon_body", "green_dragon body", [("green_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(80)|leg_armor(50)|difficulty(18), imodbits_plate ],
-["green_dragon_shield", "green_dragon_shield", [("toumingshen",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_round_shield, 1597, weight(4)|shield_hit_points(500)|body_armor(90)|spd_rtng(61)|shield_width(50), imodbits_shield ],
+["green_dragon_shield", "green_dragon_shield", [("toumingshen",0)], itp_type_shield,itcf_carry_round_shield|itp_unique, 1597, weight(4)|shield_hit_points(500)|body_armor(90)|spd_rtng(61)|shield_width(50), imodbits_shield ],
 ["green_dragon_sword", "green_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(80) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff,magic_cast_trigger , [fac_commoners] ],  
-["green_dragon_sword_melee", "green_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(45 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["green_dragon_sword_melee", "green_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(45 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (this_or_next|eq, ":troop", "trp_ent_3"),
+        (eq, ":troop", "trp_green_dragon"),
+        (assign,":power",4),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["red_dragon_body", "red_dragon body", [("red_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(90)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
 ["red_dragon_sword", "red_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(100),imodbits_magic_staff,magic_cast_trigger+flame_cast_trigger , [fac_commoners] ],  
-["red_dragon_sword_melee", "red_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["red_dragon_sword_melee", "red_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (eq, ":troop", "trp_red_dragon"),
+        (assign,":power",5),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["black_dragon_body", "black_dragon body", [("mutare_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(100)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
 ["black_dragon_sword", "black_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(70) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff,magic_cast_trigger , [fac_commoners] ],  
-["black_dragon_sword_melee", "black_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["black_dragon_sword_melee", "black_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (this_or_next|eq, ":troop", "trp_great_demon_nurgle"),
+        (eq, ":troop", "trp_black_dragon"),
+        (assign,":power",7),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["gold_dragon_body", "gold_dragon body", [("gold_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(120)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
 ["gold_dragon_sword", "gold_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(70) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(3)|accuracy(99),imodbits_magic_staff,magic_cast_trigger+flame_cast_trigger , [fac_commoners] ],  
-["gold_dragon_sword_melee", "gold_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(120)|swing_damage(35 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["gold_dragon_sword_melee", "gold_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(120)|swing_damage(35 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (eq, ":troop", "trp_gold_dragon"),
+        (assign,":power",6),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["fire_dragon_body", "fire_dragon body", [("fire_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(90)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
 ["fire_dragon_sword", "fire_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(100),imodbits_magic_staff,magic_cast_trigger+flame_cast_trigger , [fac_commoners] ],  
-["fire_dragon_sword_melee", "fire_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["fire_dragon_sword_melee", "fire_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (eq, ":troop", "trp_fire_dragon"),
+        (assign,":power",6),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["lava_dragon_body", "lava_dragon body", [("lava_drake_body",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(120)|leg_armor(60)|difficulty(18), imodbits_plate ],
 
 ["lava_dragon_sword", "lava_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(70) | shoot_speed(60) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff,magic_cast_trigger+flame_cast_trigger , [fac_commoners] ],  
-["lava_dragon_sword_melee", "lava_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(75 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,dragon_weapon_trigger ],
+["lava_dragon_sword_melee", "lava_dragon_sword", [("toumingshen",0)], itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(150)|swing_damage(75 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (eq, ":troop", "trp_lava_dragon"),
+        (assign,":power",7),
+        (store_random_in_range, ":r1", 0, 15),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (try_begin),
+          (eq, ":r1", 1),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":power"),
+        (else_try),
+          (ge, ":r1", 10),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", 1),
+        (else_try),
+          (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+        (try_end),
+    ])] ],
 
 ["bone_dragon_body", "bone_dragon body", [("bone_dragon",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(90)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
-["bone_dragon_sword_melee", "bone_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace ],
+["bone_dragon_sword_melee", "bone_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(90)| weapon_length(150)|swing_damage(50 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace ],
 
 ["ghost_dragon_body", "ghost_dragon body", [("ghost_dragon",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(100)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
-["ghost_dragon_sword_melee", "ghost_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(150)| weapon_length(120)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])] ],
+["ghost_dragon_sword_melee", "ghost_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(150)| weapon_length(120)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[] ],
 
 ["lich_dragon_body", "lich_dragon body", [("lich_dragon",0)], itp_type_full_body_armor, 0, 25000, weight(30)|abundance(30)|head_armor(0)|body_armor(120)|leg_armor(50)|difficulty(18), imodbits_plate ],
 
 ["lich_dragon_sword", "lich_dragon_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
  25000 , weight(3.25)|difficulty(0)|spd_rtng(70) | shoot_speed(90) | thrust_damage(80 ,pierce)|max_ammo(3)|accuracy(99),imodbits_magic_staff,magic_cast_trigger+flame_cast_trigger , [fac_commoners] ],  
-["lich_dragon_sword_melee", "lich_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(150)| weapon_length(120)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])] ],
+["lich_dragon_sword_melee", "lich_dragon_sword", [("toumingshen",0)], itp_can_knock_down|itp_type_one_handed_wpn|itp_primary|itp_unique, itc_gauntlet|itcf_carry_mace_left_hip,610 , weight(5.5)|difficulty(13)|spd_rtng(150)| weapon_length(120)|swing_damage(55 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[] ],
 
 
- ["black_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["black_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(30),
   imodbits_missile, cast_magic_weakness+cast_magic_soul_Leech , firearm_factions ],
- ["green_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["green_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(30),
   imodbits_missile, cast_magic_poison , firearm_factions ],
- ["green_dragon_breath_2", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["green_dragon_breath_2", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
   imodbits_missile, cast_magic_death_cloud , firearm_factions ],
 
- ["red_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["red_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(20),
   imodbits_missile, cast_magic_fire_ball+missile_distance_trigger , firearm_factions ],
- ["red_dragon_breath_2", "death_cloud Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["red_dragon_breath_2", "death_cloud Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(15),
-  imodbits_missile, cast_magic_incediary_cloud_2 , firearm_factions ],
+  imodbits_missile, cast_magic_Pyroblast , firearm_factions ],
   
- ["gold_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["gold_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(30),
-  imodbits_missile, cast_magic_column_of_fire+cast_magic_fire_ball+missile_distance_trigger , firearm_factions ],
+  imodbits_missile, cast_magic_blinding_light+missile_distance_trigger , firearm_factions ],
 
- ["fire_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["fire_dragon_breath", "_fireball_Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
-  imodbits_missile, cast_magic_fire_ball_2+missile_distance_trigger , firearm_factions ],
- ["lava_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+  imodbits_missile, cast_magic_plague_of_rust+missile_distance_trigger , firearm_factions ],
+ ["lava_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("guangjian_fly3",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(5),
   imodbits_missile, cast_magic_incediary_cloud , firearm_factions ],
 
@@ -11479,12 +8683,12 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
   imodbits_none, cast_magic_column_of_fire+cast_magic_heaven_fist_3, [fac_demon_hunters, fac_hospitalier_knights] ],
 
 ["infreno_armor", "infreno_Paws", [("shikuilei",0)], itp_type_full_body_armor ,0, 6360,lamellar_armor_tier_2,imodbits_armor ],
-["infreno_right_claw", "infreno_Right_Claw", [("shiyoushou",0)], itp_type_one_handed_wpn|itp_primary|itp_secondary|itp_unique|itp_bonus_against_shield|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(100)| weapon_length(60)|swing_damage(40 , blunt)| thrust_damage(0 ,  blunt),imodbits_axe ],
-["infreno_left_claw", "infreno_Left_Claw", [("shizuoshou",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground|itp_shield_no_parry, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
+["infreno_right_claw", "infreno_Right_Claw", [("shiyoushou",0)], itp_type_one_handed_wpn| itp_primary|itp_secondary|itp_unique|itp_bonus_against_shield|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(100)| weapon_length(60)|swing_damage(40 , blunt)| thrust_damage(0 ,  blunt),imodbits_axe ],
+["infreno_left_claw", "infreno_Left_Claw", [("shizuoshou",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
 
 ["huge_infreno_armor", "infreno_Paws", [("shikuilei",0)], itp_type_full_body_armor ,0, 12769,full_plate_armor_tier_4,imodbits_armor ],
-["huge_infreno_right_claw", "infreno_Right_Claw", [("shiyoushou",0)], itp_type_one_handed_wpn|itp_primary|itp_secondary|itp_unique|itp_bonus_against_shield|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(95)| weapon_length(60)|swing_damage(50 , blunt)| thrust_damage(0 ,  blunt),imodbits_axe ],
-["huge_infreno_left_claw", "infreno_Left_Claw", [("shizuoshou",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground|itp_shield_no_parry, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
+["huge_infreno_right_claw", "infreno_Right_Claw", [("shiyoushou",0)], itp_type_one_handed_wpn| itp_primary|itp_secondary|itp_unique|itp_bonus_against_shield|itp_no_pick_up_from_ground, itc_gauntlet, 0 , weight(1.5)|difficulty(100)|spd_rtng(95)| weapon_length(60)|swing_damage(50 , blunt)| thrust_damage(0 ,  blunt),imodbits_axe ],
+["huge_infreno_left_claw", "infreno_Left_Claw", [("shizuoshou",0)], itp_type_shield|itp_unique, itcf_carry_round_shield,  2091 , weight(4)|difficulty(100)|shield_hit_points(999)|body_armor(125)|spd_rtng(61)|shield_width(60),imodbits_shield ],
 
 ["stone_golemarmor", "stone_golem_body", [("stone_golem_torso",0)], itp_type_body_armor|itp_covers_legs|itp_civilian|itp_unique ,0, 6360,weight(1)|abundance(60)|head_armor(0)|body_armor(60)|leg_armor(0)|difficulty(14),imodbits_armor ],
 ["stone_golemboots", "stone_golem_feet", [("stone_golem_feet",0)], itp_type_foot_armor|itp_civilian|itp_unique ,0, 
@@ -11516,7 +8720,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["banshen_hand","banshen_hand", [("banshen_handL",0)], itp_type_hand_armor|itp_unique,0, 
  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, ],
 ["banshen_axe", "banshen_axe", [("banshen_fu",0)], itp_type_one_handed_wpn| itp_primary|itp_secondary|itp_bonus_against_shield, itc_morningstar, 0 , weight(1.5)|difficulty(100)|spd_rtng(100)| weapon_length(100)|swing_damage(60 , pierce)| thrust_damage(0 ,  blunt),imodbits_axe ],
-["banshen_shield", "banshen_shield", [("fix_banshen_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(999)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(100),imodbits_shield ],
+["banshen_shield", "banshen_shield", [("fix_banshen_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(10)|shield_hit_points(999)|body_armor(125)|spd_rtng(100)|shield_width(50)|shield_height(100),imodbits_shield_metal ],
 
 ["rhun_armor_1","Demon_Light_Battlewear",[("RhunArmorLight1",0)],itp_type_body_armor|itp_covers_legs,0,300,cloth_tier_2,imodbits_cloth],
 ["rhun_armor_2","Demon_Light_Battlewear",[("RhunArmorLight4",0)],itp_type_body_armor|itp_covers_legs,0,940,cloth_tier_3,imodbits_cloth],
@@ -11564,33 +8768,63 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["demon_knight_leg", "Khorne Knight_leg", [("Boots_Khorne",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
 ["demon_knight_hand","Khorne Knight_hand", [("Glove_Khorne_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_kingdom_9,fac_demon]],
 
-["nurgle_chosen_armor", "Nurgle Knight_plate", [("Armor_Elite_Nurgle",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(95)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
-["nurgle_chosen_head_1", "Nurgle Knight Helm", [("Helm_Nurgle_1",0)], itp_merchandise|itp_type_fullhelm, 0, 
+["nurgle_chosen_armor", "Nurgle Knight_plate", [("nurgle_chosen_armor",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(95)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["nurgle_chosen_head_1", "Nurgle Knight Helm", [("nurgle_chosen2_armor_helmet",0)], itp_merchandise|itp_type_fullhelm, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(95)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
 ["nurgle_chosen_head_2", "Nurgle Knight Helm", [("Helm_Nurgle_2",0)], itp_merchandise|itp_type_fullhelm, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(95)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
-["nurgle_chosen_leg", "Nurgle Knight_leg", [("Boots_Nurgle",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
-["nurgle_chosen_hand","Nurgle Knight_hand", [("Glove_Nurgle_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_kingdom_9,fac_demon]],
-["nurgle_shield_1", "Nurgle_Warrior_Shield", [("Shield_Nurgle_1", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
-["nurgle_shield_2", "Nurgle_Warrior_Shield", [("Shield_Nurgle_2", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+["nurgle_chosen_leg", "Nurgle Knight_leg", [("nurgle_chosen_armor_boots",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+["nurgle_chosen_hand","Nurgle Knight_hand", [("nurgle_chosen_armor_glove_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+
+["slaanesh_chosen_armor", "slaanesh chosen_plate", [("slaanesh_chosen_armor_C",0)], merc_body_armor, 0, 20000, weight(20)|abundance(20)|head_armor(8)|body_armor(90)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["slaanesh_chosen_head", "slaanesh chosen Helm", [("slaanesh_chosen_armor_helmet_C",0)], itp_merchandise|itp_type_head_armor, 0, 
+ 5400 , weight(2.0)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["slaanesh_chosen_leg", "slaanesh chosen_leg", [("slaanesh_chosen_armor_boots_C",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(45)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+["slaanesh_chosen_hand","slaanesh chosen_hand", [("slaanesh_chosen_armor_glove_C_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+
+["slaanesh_chosen_sword_1", "slaanesh_chosen_sword", [("witch_klinge_A",0)], itp_merchandise|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_sword_back,
+ 25000 , weight(3.25)|difficulty(0)|spd_rtng(40) | shoot_speed(150) | thrust_damage(80 ,pierce)|max_ammo(3)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners, fac_kingdom_9,fac_demon] ], 
+["slaanesh_chosen_sword",  "slaanesh_chosen_sword", [("witch_klinge_A",0)], itp_type_one_handed_wpn| itp_primary|itp_crush_through|itp_unique|itp_can_knock_down|itp_bonus_against_shield, itc_longsword|itcf_carry_sword_back, 10000 , weight(2)|difficulty(0)|spd_rtng(90)| weapon_length(140)|swing_damage(40, pierce)| thrust_damage(0 ,  pierce),imodbits_polearm, [], [fac_commoners]],
+
+["slaanesh_witch_armor", "slaanesh witch_plate", [("stinger_armor_A",0)], merc_body_armor,0, 5738,breastplate_tier_3,imodbits_plate, [], [fac_kingdom_9,fac_demon]],
+["slaanesh_witch_head", "slaanesh witch Helm", [("stinger_helm_A",0)], itp_type_fullhelm|itp_attach_armature,0,3000,weight(4)|head_armor(75)|difficulty(0),imodbits_armor],
+ 
+["slaanesh_witch_leg", "slaanesh witch_leg", [("stinger_boots_A",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+
+
+["slaanesh_banshee_armor", "slaanesh banshee_plate", [("slaanesh_costum_A",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(13)|body_armor(95)|leg_armor(45)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["slaanesh_banshee_head", "slaanesh banshee Helm", [("banshee_helm_A",0)], itp_type_fullhelm|itp_attach_armature,0,3000,weight(4)|head_armor(85)|difficulty(0),imodbits_armor],
+["slaanesh_banshee_sword",  "slaanesh_banshee_sword", [("fury_blade_A",0)], itp_type_one_handed_wpn| itp_primary|itp_crush_through|itp_can_knock_down|itp_bonus_against_shield, itc_longsword|itcf_carry_sword_back, 5000 , weight(2)|difficulty(0)|spd_rtng(90)| weapon_length(140)|swing_damage(35, pierce)| thrust_damage(0 ,  pierce),imodbits_polearm, [], [fac_commoners]],
+
+["slaanesh_witch_shield", "slaanesh_Witch_Shield", [("witch_shield_A", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(85)|shield_width(25)|shield_height(50), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+["slaanesh_chosen_shield", "slaanesh_chosen_Shield", [("stinger_shield_A", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(130)|shield_width(90), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+
+["tzeentch_chosen_armor", "tzeentch chosen_plate", [("tzeentch_chosen_armor",0)], merc_body_armor, 0, 20000, weight(30)|abundance(20)|head_armor(0)|body_armor(90)|leg_armor(40)|difficulty(18), imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["tzeentch_chosen_head", "tzeentch chosen Helm", [("tzeentch_chosen_armor_helmet",0)], itp_merchandise|itp_type_fullhelm, 0, 
+ 5400 , weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate, [], [fac_kingdom_9,fac_demon]],
+["tzeentch_chosen_leg", "tzeentch chosen_leg", [("tzeentch_chosen_armor_boots",0)], itp_merchandise|itp_type_foot_armor|itp_attach_armature ,0,  2376 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+["tzeentch_chosen_hand","tzeentch chosen_hand", [("tzeentch_chosen_armor_glove_L",0)], itp_merchandise|itp_type_hand_armor,0,  820, weight(1)|abundance(100)|body_armor(10)|difficulty(0),imodbits_armor, [], [fac_kingdom_9,fac_demon]],
+
+["nurgle_shield_1", "Nurgle_Warrior_Shield", [("Shield_Nurgle_1", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+["nurgle_shield_2", "Nurgle_Warrior_Shield", [("Shield_Nurgle_2", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(10)|hit_points(1000)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
 ["nurgle_mace", "Iron Mace", [("Greatmace_Elite_Crusher_B_01",0)], itp_type_one_handed_wpn|itp_primary|itp_bonus_against_shield|itp_crush_through|itp_can_knock_down, itc_scimitar|itcf_carry_axe_back, 20000, weight(4.5)|difficulty(12)|spd_rtng(100)|weapon_length(120)|swing_damage(45,blunt)|thrust_damage(0,blunt), imodbits_mace|imodbit_masterwork, [], [fac_kingdom_9]],
 
 
-["chaos_warrior_shield", "Chaos_Warrior_Shield", [("Shield_Chaos", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1010, weight(4.)|abundance(100)|difficulty(0)|hit_points(120)|body_armor(80)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield, [], [fac_kingdom_9,fac_demon]], 
-["chaos_knight_shield", "Chaos_Knight_shield", [("Shield_Elite_Chaos_01", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1525, weight(4.)|abundance(100)|difficulty(0)|hit_points(160)|body_armor(90)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield, [], [fac_kingdom_9,fac_demon]], 
-["chaos_chosen_shield", "chaos_chosen_shield", [("Shield_Elite_Chaos_02", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1525, weight(4.)|abundance(100)|difficulty(0)|hit_points(160)|body_armor(90)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield, [], [fac_kingdom_9,fac_demon]],
-["khorne_shield", "Khorne_Warrior_Shield", [("Shield_Khorne", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
-["khorne_shield2", "Khorne_Warrior_Shield", [("Shield_Khorne_2", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+["chaos_warrior_shield", "Chaos_Warrior_Shield", [("Shield_Chaos", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1010, weight(4.)|abundance(100)|difficulty(0)|hit_points(120)|body_armor(80)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon]], 
+["chaos_knight_shield", "Chaos_Knight_shield", [("Shield_Elite_Chaos_01", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1525, weight(4.)|abundance(100)|difficulty(0)|hit_points(160)|body_armor(90)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon]], 
+["chaos_chosen_shield", "chaos_chosen_shield", [("Shield_Elite_Chaos_02", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 1525, weight(4.)|abundance(100)|difficulty(0)|hit_points(160)|body_armor(90)|spd_rtng(85)|shield_width(50)|shield_height(70), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon]],
+["khorne_shield", "Khorne_Warrior_Shield", [("Shield_Khorne", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
+["khorne_shield2", "Khorne_Warrior_Shield", [("Shield_Khorne_2", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(90), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon,fac_commoners]], 
 
-["demon_knight_shield", "tzeentch_Knight_shield", [("chaos_knight_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(50)|shield_height(60), imodbits_shield, [], [fac_kingdom_9,fac_demon]], 
+["demon_knight_shield", "tzeentch_Knight_shield", [("chaos_knight_shield", 0)], itp_merchandise|itp_type_shield|itp_wooden_parry, itcf_carry_kite_shield, 2025, weight(4.)|abundance(100)|difficulty(0)|hit_points(200)|body_armor(100)|spd_rtng(85)|shield_width(50)|shield_height(60), imodbits_shield_metal, [], [fac_kingdom_9,fac_demon]], 
 
 ["demon_warrior_body", "Demon Warrior body", [("chaos_w",0)], itp_type_full_body_armor, 0, 20000, weight(3)|abundance(60)|head_armor(95)|body_armor(95)|leg_armor(95)|difficulty(0), imodbits_armor , [], [fac_kingdom_9,fac_demon]],
 
 
-["imp_head_3", "imp head", [("bloodletter_head",0)], itp_type_fullhelm|itp_covers_beard|itp_unique|itp_covers_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(30)|body_armor(0)|leg_armor(0)|difficulty(9), imodbits_plate],
+["imp_head_3", "imp head", [("krag_bloodletter_head",0)], itp_type_fullhelm|itp_covers_beard|itp_unique|itp_covers_head, 0, 4500, weight(2.75)|abundance(100)|head_armor(30)|body_armor(0)|leg_armor(0)|difficulty(9), imodbits_plate],
 ["imp_foot_3", "imp foot", [("bloodletter_legs",0)], itp_type_foot_armor|itp_attach_armature|itp_unique, 0, 2570 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(30)|difficulty(9), imodbits_armor ],
-["imp_hand_3", "imp hand", [("herald_handL",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(100)|body_armor(10)|difficulty(0), imodbits_armor ],
-["imp_body_3", "imp body", [("bloodletter",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(10)|body_armor(50)|leg_armor(15)|difficulty(12), imodbits_armor ],
+["imp_hand_3", "imp hand", [("krag_bloodletter_handL",0)], itp_type_hand_armor|itp_unique, 0, 540, weight(1.25)|abundance(100)|body_armor(10)|difficulty(0), imodbits_armor ],
+["imp_body_3", "imp body", [("krag_bloodletter",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(40)|body_armor(50)|leg_armor(45)|difficulty(12), imodbits_armor ],
 
 ["demon_sword_3", "Fury_Sword", [("TH_CSword", 0)], itp_type_two_handed_wpn|itp_primary|itp_two_handed|itp_can_knock_down|itp_cant_use_on_horseback, itc_greatsword, 5000, weight(7)|weapon_length(150)|difficulty(8)|spd_rtng(80)|abundance(10)|swing_damage(50, pierce)|thrust_damage(50, pierce), imodbits_sword_high ],
 
@@ -11621,7 +8855,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["chaos_sword5", "Chaos_Lord_Sword", [("DemonSword", 0)], itp_type_two_handed_wpn|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_bastardsword|itcf_carry_sword_back, 4550, weight(2.750000)|abundance(100)|difficulty(13)|weapon_length(130)|spd_rtng(95)|swing_damage(45, pierce)|thrust_damage(45, pierce), imodbits_sword_high, [], [fac_kingdom_9]], 
 
 
-["demon_pickaxe_2", "Deadly_Hand", [("Scythe_Crusher_A_01", 0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_is_glaive, itc_nodachi, 5000, weight(1.5)|weapon_length(167)|difficulty(0)|spd_rtng(98)|abundance(10)|swing_damage(40, pierce)|thrust_damage(0, pierce), imodbits_axe|imodbit_masterwork , [], [fac_demon]],
+["demon_pickaxe_2", "Deadly_Hand", [("Scythe_Crusher_A_01", 0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_is_glaive, itc_nodachi, 5000, weight(1.5)|weapon_length(167)|difficulty(0)|spd_rtng(130)|abundance(10)|swing_damage(40, pierce)|thrust_damage(0, pierce), imodbits_axe|imodbit_masterwork , [], [fac_demon]],
 ["demon_axe", "Thrud_Axe", [("thrud_axe",0)], itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_unbalanced|itp_can_penetrate_shield, itc_nodachi|itcf_carry_sword_back, 10000 , weight(3.75)|difficulty(30)|spd_rtng(80)| weapon_length(130)|swing_damage(50, pierce)| thrust_damage(0 ,  pierce),imodbit_balanced|imodbit_tempered|imodbit_masterwork| imodbit_deadly| imodbit_sharp, [], [fac_kingdom_9,fac_demon]],
 
 ["chaos_throw1", "Chaos_Warrior_Throwing_Axe", [("Axe_A_Chaos_Warrior_01", 0)], itp_type_thrown|itp_crush_through|itp_merchandise|itp_primary|itp_bonus_against_shield, itcf_throw_axe, 300, weight(5)|abundance(100)|difficulty(5)|accuracy(0)|spd_rtng(80)|shoot_speed(18)|max_ammo(4)|thrust_damage(60, pierce)|weapon_length(50), imodbits_thrown_minus_heavy,missile_distance_trigger, [fac_kingdom_9]], 
@@ -11642,10 +8876,10 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["undead_body_gr", "Undead_Body", [("undeadbody2_g", 0)], itp_type_body_armor|itp_unique|itp_covers_legs, 0, 1, mail_armor_tier_3, imodbits_cloth], 
 ["undead_foots_gr", "Undead_Foots", [("undead_calf_green_L", 0)], itp_type_foot_armor|itp_unique, 0, 1, weight(10.)|abundance(100)|difficulty(0)|head_armor(0)|body_armor(0)|leg_armor(40), imodbits_cloth], 
 
-["draugr_body_1","draugr_body",[("draugr",0)],itp_type_body_armor|itp_covers_legs|itp_unique,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
-["draugr_body_2","draugr_body",[("draugr1",0)],itp_type_body_armor|itp_covers_legs|itp_unique,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
-["draugr_body_3","draugr_body",[("draugr2",0)],itp_type_body_armor|itp_covers_legs|itp_unique,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
-["draugr_body_4","draugr_body",[("draugr3",0)],itp_type_body_armor|itp_covers_legs|itp_unique,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
+["draugr_body_1","draugr_body",[("draugr",0)],itp_type_body_armor|itp_covers_legs,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
+["draugr_body_2","draugr_body",[("draugr1",0)],itp_type_body_armor|itp_covers_legs,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
+["draugr_body_3","draugr_body",[("draugr2",0)],itp_type_body_armor|itp_covers_legs,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
+["draugr_body_4","draugr_body",[("draugr3",0)],itp_type_body_armor|itp_covers_legs,0,2000,weight(26)|head_armor(2)|body_armor(50)|leg_armor(13)|difficulty(0),imodbits_armor,],
  
 ["draugr_head_0","draugr Helmet",[("draugr_head",0)],itp_type_fullhelm,0,600,weight(2)|head_armor(30)|difficulty(7),imodbits_plate,],
 ["draugr_head_1","draugr Helmet",[("draugr_Helmet_A_vs2",0)],itp_type_fullhelm,0,600,weight(2)|head_armor(30)|difficulty(7),imodbits_plate,],
@@ -11666,7 +8900,12 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["pixie_body", "Pixie body", [("Pixie",0)], itp_type_full_body_armor, 0, 4000, weight(3)|abundance(15)|head_armor(45)|body_armor(60)|leg_armor(45)|difficulty(0), imodbits_armor ],
 ["dryad_body", "Dryad body", [("Dryad",0)], itp_type_full_body_armor, 0, 5000, weight(3)|abundance(15)|head_armor(60)|body_armor(75)|leg_armor(60)|difficulty(0), imodbits_armor ],
+["dendroid_body", "Dendroid_Guard_Body", [("dendroid",0)], itp_type_full_body_armor, 0, 5000, weight(3)|abundance(15)|head_armor(60)|body_armor(75)|leg_armor(60)|difficulty(0), imodbits_armor ],
 
+["harpy_body_1", "harpy body", [("harpy_body_1",0)], itp_civilian|itp_unique|itp_type_body_armor|itp_covers_legs|itp_replaces_shoes, 0, 4000, weight(3)|abundance(15)|head_armor(45)|body_armor(60)|leg_armor(45)|difficulty(0), imodbits_armor ],
+["harpy_body_2", "harpy body", [("harpy_body_2",0)], itp_civilian|itp_unique|itp_type_body_armor|itp_covers_legs|itp_replaces_shoes, 0, 5000, weight(3)|abundance(15)|head_armor(60)|body_armor(75)|leg_armor(60)|difficulty(0), imodbits_armor ],
+["harpy_head_1","harpy head",[("harpy_head_1",0)],itp_unique|itp_type_fullhelm,0,5000,weight(2)|head_armor(20)|difficulty(0),imodbits_plate,],
+["harpy_head_2","harpy head",[("harpy_head_2",0)],itp_unique|itp_type_fullhelm,0,5000,weight(2)|head_armor(25)|difficulty(0),imodbits_plate,],
 
 #["herald_body", "Herald_of_Khorne", [("herald", 0)], itp_type_body_armor|itp_unique|itp_covers_legs|itp_civilian|itp_covers_head, 0, 2000, weight(30.)|abundance(100)|difficulty(15)|head_armor(80)|body_armor(80)|leg_armor(80), imodbits_armor], 
 
@@ -11696,14 +8935,8 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["holy_cross","holy_cross", [("holy_cross",0), ("goods_cross_silver", ixmesh_inventory)], itp_type_goods, 0, 2500,weight(3)|abundance(90),imodbits_none],
 
- ["magic_ice_ray_dummy", "ice_ray_Scroll", [("guangjian_fly2",ixmesh_flying_ammo),("guangjian_fly2",0)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
-  imodbits_none, cast_magic_ice_ray_dummy , [fac_commoners, fac_undeads_2] ],
- ["magic_sun_ray_dummy", "sun_ray_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("laser_bolt_orange", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(150,cut)|max_ammo(20),imodbits_none ],
- ["magic_fire_ray_dummy", "fire_ray_Scroll", [("guangjian_fly3",ixmesh_flying_ammo),("guangjian_fly3",0)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
-  imodbits_none, cast_magic_fire_ray_dummy , [fac_commoners, fac_undeads_2] ],
+  
+  
   ["cannon_dummy", "Small_Grenade", [("bombaaa_s", 0)], itp_type_bullets|itp_primary, 0, 
   4000, weight(4)|weapon_length(20)|abundance(70)|thrust_damage(100, blunt)|max_ammo(7), 
   imodbits_none,
@@ -11722,14 +8955,14 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 
 
-["bingqishi", "ICE Knight_plate", [("dzin_armor",0)], itp_type_body_armor|itp_covers_legs|itp_civilian|itp_unique, 0, 12769,full_plate_armor_tier_4,imodbits_plate],
-["bingqishitui", "ICE Knight Boots", [("toumingtou",0)],  itp_type_foot_armor|itp_attach_armature|itp_unique, 0,
+["bingqishi", "ICE Knight_plate", [("dzin_armor",0)], itp_type_body_armor|itp_covers_legs|itp_civilian, 0, 12769,full_plate_armor_tier_4,imodbits_plate],
+["bingqishitui", "ICE Knight Boots", [("toumingtou",0)],  itp_type_foot_armor| itp_attach_armature,0,
  2376 , weight(3.5)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(40)|difficulty(9) ,imodbits_plate, ],
-["bingqishitoukui", "ICE Knight Helm", [("dzin_head2",0)], itp_type_fullhelm|itp_unique, 0, 
+["bingqishitoukui", "ICE Knight Helm", [("dzin_head2",0)], itp_type_fullhelm, 0, 
  5400 , weight(2.75)|abundance(100)|head_armor(80)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_plate,],
-["bingqishishou","ICE Knight_hand", [("d_handL",0)], itp_type_hand_armor|itp_unique, 0, 820, weight(1)|abundance(30)|body_armor(10)|difficulty(0),imodbits_plate, ],
-["bingdun", "ICE Knight_shield", [("toumingtou",0)], itp_type_shield|itp_unique|itp_no_pick_up_from_ground, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(1)|shield_hit_points(30)|body_armor(20)|spd_rtng(100)|shield_width(100),imodbits_shield, ],
-["bingjian", "ICE_knight_sword", [("toumingtou",0)], itp_type_two_handed_wpn|itp_unique|itp_primary|itp_no_pick_up_from_ground, itc_bastardsword|itcf_carry_sword_back,
+["bingqishishou","ICE Knight_hand", [("d_handL",0)], itp_type_hand_armor,0,  820, weight(1)|abundance(30)|body_armor(10)|difficulty(0),imodbits_plate, ],
+["bingdun", "ICE Knight_shield", [("toumingtou",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(1)|shield_hit_points(30)|body_armor(20)|spd_rtng(100)|shield_width(100),imodbits_shield, ],
+["bingjian", "ICE_knight_sword", [("toumingtou",0)], itp_type_two_handed_wpn|itp_unique|itp_primary, itc_bastardsword|itcf_carry_sword_back,
  2700 , weight(2.5)|difficulty(9)|spd_rtng(101)| weapon_length(160)|swing_damage(40, pierce)| thrust_damage(32 ,  pierce),imodbits_sword_high, 
  [
   (ti_on_weapon_attack, 
@@ -11821,7 +9054,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["stahlrim_battleaxe", "Stalhrim battleaxe", [("stahlrimbattleaxe",0)], itp_type_two_handed_wpn| itp_two_handed|itp_primary|itp_bonus_against_shield|itp_extra_penetration|itp_wooden_parry|itp_crush_through|itp_cant_use_on_horseback, itc_nodachi|itcf_carry_axe_back, 8000 , weight(3.8)|abundance(30)|difficulty(10)|spd_rtng(100)| weapon_length(130)|swing_damage(60 , pierce)| thrust_damage(0 ,  pierce),imodbits_axe, [], [fac_kingdom_10, fac_scotland]],
 ["stalhrim_sword_short", "Stalhrim Sword", [("stahlrimsword", 0)], itp_merchandise|itp_type_one_handed_wpn|itp_primary|itp_extra_penetration, itc_longsword|itcf_carry_sword_back, 6000, weight(1.5)|weapon_length(90)|difficulty(0)|spd_rtng(114)|abundance(30)|swing_damage(43, pierce)|thrust_damage(34, pierce), imodbits_sword_high, [], [fac_kingdom_10, fac_scotland] ],
 
-["black_shield", "Black Knight_shield", [("fix_EOS_knight_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(5)|shield_hit_points(200)|body_armor(125)|spd_rtng(70)|shield_width(40)|shield_height(60),imodbits_shield,  [], [fac_kingdom_8,fac_undeads_2,fac_kingdom_10,fac_beast,fac_kingdom_4]],
+["black_shield", "Black Knight_shield", [("fix_EOS_knight_shield",0)], itp_type_shield, itcf_carry_kite_shield,  2091 , weight(4)|difficulty(5)|shield_hit_points(200)|body_armor(125)|spd_rtng(70)|shield_width(40)|shield_height(60),imodbits_shield_metal,  [], [fac_kingdom_8,fac_undeads_2,fac_kingdom_10,fac_beast,fac_kingdom_4]],
 
  ["witch_robe_1", "witch_robe", [("witch_robe",0)], itp_type_body_armor|itp_covers_legs ,0, 1000,weight(11)|abundance(50)|head_armor(0)|body_armor(42)|leg_armor(14)|difficulty(5),imodbits_cloth , [], [fac_kingdom_8,fac_beast]],
  ["witch_robe_3", "witch_robe", [("chaosfemale_armour2",0)], itp_type_body_armor|itp_covers_legs ,0, 9216,weight(11)|abundance(30)|head_armor(0)|body_armor(70)|leg_armor(35)|difficulty(20),imodbits_cloth , [], [fac_kingdom_8]],
@@ -11880,9 +9113,9 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["dragonfly", "dragonfly body", [("dragonfly",0)], itp_type_full_body_armor, 0, 4000, weight(3)|abundance(15)|head_armor(30)|body_armor(40)|leg_armor(40)|difficulty(0), imodbits_armor ],
 
 
-["serpentfly_weapon", "Serpent_Fly_Poison", [("bullet_1", 0)], itp_secondary|itp_type_one_handed_wpn|itp_primary|itp_unique|itp_no_pick_up_from_ground, 9223372036879941646, 0, weight(1.5)|weapon_length(40)|difficulty(0)|spd_rtng(120)|abundance(30)|swing_damage(25, cut)|thrust_damage(0, pierce), imodbits_axe,],
+["serpentfly_weapon", "Serpent_Fly_Poison", [("bullet_1", 0)], itp_secondary|itp_type_one_handed_wpn|itp_primary|itp_unique, 9223372036879941646, 0, weight(1.5)|weapon_length(40)|difficulty(0)|spd_rtng(120)|abundance(30)|swing_damage(25, cut)|thrust_damage(0, pierce), imodbits_axe,],
 
-["firefly_fireball", "fireFly_Poison", [("bullet_1", 0),("guangjian3",ixmesh_flying_ammo)], itp_type_thrown|itp_crush_through|itp_primary|itp_unique|itp_no_pick_up_from_ground, itcf_throw_stone, 0, weight(4)|weapon_length(0)|difficulty(0)|spd_rtng(120)|shoot_speed(70)|thrust_damage(35, cut)|max_ammo(30), imodbits_none],
+["firefly_fireball", "fireFly_Poison", [("bullet_1", 0),("guangjian3",ixmesh_flying_ammo)], itp_type_thrown|itp_crush_through|itp_primary|itp_unique, itcf_throw_stone, 0, weight(4)|weapon_length(0)|difficulty(0)|spd_rtng(120)|shoot_speed(70)|thrust_damage(35, cut)|max_ammo(30), imodbits_none],
 
 ["ghost_behemoth_armor", "Ghost Behemoth'armor", [("ghost_rancor",0)], itp_type_full_body_armor ,0, 6360,weight(1)|abundance(60)|head_armor(75)|body_armor(75)|leg_armor(75)|difficulty(14),imodbits_armor ],
 
@@ -12044,7 +9277,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
 ["rat_king_skin", "Rat_king Skin", [("rat_chieftain",0)], itp_unique|itp_type_body_armor|itp_covers_legs, 0, 40000,weight(2)|abundance(50)|head_armor(25)|body_armor(75)|leg_armor(25)|difficulty(15),imodbits_good_plate],
 
-["glass_shield", "glass Shield", [("glass_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  4000 , weight(1)|difficulty(5)|shield_hit_points(400)|body_armor(90)|spd_rtng(120)|shield_width(50)|shield_height(60),imodbits_shield , [], [fac_elf, fac_kingdom_4,fac_forest_ranger]],
+["glass_shield", "glass Shield", [("glass_shield",0)], itp_merchandise|itp_type_shield, itcf_carry_round_shield,  4000 , weight(1)|difficulty(5)|shield_hit_points(400)|body_armor(90)|spd_rtng(120)|shield_width(50)|shield_height(60),imodbits_shield_metal , [], [fac_elf, fac_kingdom_4,fac_forest_ranger]],
 
 
 ["cartridges_sissofbattle_holy", "Cartridges", [("bullet_2", 0),("huojian_fly2",ixmesh_flying_ammo),("spak_book",ixmesh_carry)],  itp_type_bullets|itp_can_penetrate_shield|itp_bonus_against_shield|itp_covers_legs, itcf_carry_sword_left_hip, 
@@ -12098,7 +9331,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 
  
  
-["goblin_barrel","goblin_in_barrel", [("ale_barrel",0)], itp_type_thrown|itp_primary|itp_no_pick_up_from_ground, itcf_throw_stone, 5000, weight(3)|difficulty(5)|abundance(120)|spd_rtng(97)| shoot_speed(80)| thrust_damage(100 ,  blunt)|max_ammo(8)|weapon_length(8),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 210, 4, 2),]),]+missile_distance_trigger+goblin_summon, [fac_orc]],
+["goblin_barrel","goblin_in_barrel", [("ale_barrel",0)], itp_type_thrown|itp_primary|itp_no_pick_up_from_ground|itp_is_bomb, itcf_throw_stone, 5000, weight(3)|difficulty(5)|abundance(120)|spd_rtng(97)| shoot_speed(80)| thrust_damage(100 ,  blunt)|max_ammo(8)|weapon_length(8),imodbits_thrown_2,[(ti_on_missile_hit, [(store_trigger_param_1, ":shooter"),(copy_position,pos51,pos1),(call_script, "script_magic_deliver_area_damage", ":shooter", 210, 4, 2),]),]+missile_distance_trigger+goblin_summon, [fac_orc]],
 
 
 
@@ -12115,7 +9348,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["fire_elemental_body_3", "fire__Elemental_Body", [("elemental_fire", 0)], itp_type_full_body_armor, 0, 2000, weight(5)|head_armor(30)|body_armor(90)|leg_armor(30), imodbits_plate], 
 ["earthelemental_body_3", "Earth_Elemental_Body", [("earthelemental_body", 0)], itp_type_full_body_armor, 0, 2000, weight(5)|head_armor(30)|body_armor(110)|leg_armor(30), imodbits_plate], 
 
-["tree_trunk_invis_3", "Tree_Trunk", [("toumingshou",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(250)|difficulty(20)|spd_rtng(87)| weapon_length(186)|swing_damage(50, blunt)| thrust_damage(50 ,  blunt),imodbits_mace, [(ti_on_weapon_attack, [(store_trigger_param_1, ":shooter"),(agent_get_horse,":horse",":shooter"),(neg|gt,":horse",0),(copy_position,pos51,pos1),(call_script,"script_cf_agent_cleave",":shooter", 1, 0),])], [fac_elf]],
+["tree_trunk_invis_3", "Tree_Trunk", [("toumingshou",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unbalanced|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,101 , weight(250)|difficulty(20)|spd_rtng(87)| weapon_length(186)|swing_damage(50, blunt)| thrust_damage(50 ,  blunt),imodbits_mace, [], [fac_elf]],
 
 ["undeadface_mohrg", "Mohrg_head", [("Mohrg_head", 0)], itp_type_fullhelm|itp_unique, 0, 1, weight(5)|abundance(10)|difficulty(0)|head_armor(50)|body_armor(0)|leg_armor(0), imodbits_cloth], 
 ["undead_body_mohrg", "Mohrg_Body", [("Mohrg_body", 0)], itp_type_body_armor|itp_unique|itp_covers_legs, 0, 1, breastplate_tier_5, imodbits_cloth], 
@@ -12123,7 +9356,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["berserk_helm", "berserk_helm", [("berserk_helm", 0), ("berserk_helm_inventory", ixmesh_inventory)], itp_type_head_armor|itp_civilian|itp_attach_armature|itp_merchandise, 0, 4266, weight(4)|abundance(10)|difficulty(0)|head_armor(80)|body_armor(50)|leg_armor(50), imodbits_plate,  [], ne_faction],
 ["berserk_armor", "berserk_armor", [("berserk_armor", 0)], merc_body_armor, 0, 7876,full_plate_armor_tier_1, imodbits_armor, [], ne_faction],
 
- ["lich_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique|itp_no_pick_up_from_ground, 0,
+ ["lich_dragon_breath", "death_cloud Scroll", [("bullet_1",0),("huojian_fly_green",ixmesh_flying_ammo)], itp_type_bullets|itp_unique, 0,
   275, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(15),
   imodbits_missile, cast_magic_summon_Zombie_Lord+cast_magic_soul_Leech , firearm_factions ],
 
@@ -12135,57 +9368,55 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
 ["enchanter_staff_1", "enchanter Staff", [("staffofmagnus",0)], itp_unique|itp_type_pistol|itp_crush_through|itp_primary|itp_next_item_as_melee|itp_is_magic_staff ,itcf_reload_pistol|itcf_shoot_pistol|itcf_carry_spear,
  20000 , weight(3.25)|difficulty(0)|spd_rtng(55) | shoot_speed(140) | thrust_damage(75 ,pierce)|max_ammo(3)|accuracy(82),imodbits_magic_staff, magic_cast_trigger , [fac_commoners] ], 
 ["enchanter_staff",  "enchanter Staff", [("staffofmagnus",0)], itp_type_two_handed_wpn|itp_offset_lance| itp_primary|itp_penalty_with_shield, itc_staff|itcf_carry_spear, 20000 , weight(2)|difficulty(0)|spd_rtng(97)| weapon_length(150)|swing_damage(45 , blunt)| thrust_damage(26 ,  blunt),imodbits_polearm, [], [fac_commoners]],
-["dragon_shield", "Dragon Shield", [("fix_EOS_knight_shield",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  20000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60)|difficulty(6),imodbits_shield],
-["eggshield_2", "eggshield_2", [("sh_snake",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield, 50000, weight(5)|shield_hit_points(7000)|body_armor(40)|spd_rtng(78)|shield_width(30)|shield_height(60)|difficulty(3), imodbits_shield,tynan_dagger_trigger ],
+["dragon_shield", "Dragon Shield", [("fix_EOS_knight_shield",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield,  20000 , weight(2)|shield_hit_points(5000)|body_armor(125)|spd_rtng(100)|shield_width(40)|shield_height(60)|difficulty(6),imodbits_shield_metal],
+["eggshield_2", "eggshield_2", [("sh_snake",0)], itp_type_shield|itp_unique, itcf_carry_kite_shield, 50000, weight(5)|shield_hit_points(7000)|body_armor(40)|spd_rtng(78)|shield_width(30)|shield_height(60)|difficulty(3), imodbits_shield_metal,tynan_dagger_trigger ],
 
 ["magic_book_1", "Mirrorball", [("book_b",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  5000 , weight(2.0)|abundance(70)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_2", "Triumvirate", [("church_book_a",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_3", "Winter Flurry", [("church_book_d",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_4", "Firebird's Eye", [("church_book_e",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
  
  
 ["magic_book_5", "Tome of Elemental", [("church_book_b",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  5000 , weight(2.0)|abundance(70)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_6", "Sandro Notebook", [("book_a",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_7", "Demonary", [("church_book_f",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 ["magic_book_8", "Book of Bitterness", [("church_book_c",0)], 
- itp_type_shield|itp_merchandise|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_merchandise, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 
 
- ["magic_arrow_power", "_magic_arrow_Scroll", [("bullet_1",0),("holy_arrow_fl",ixmesh_flying_ammo),("magic_12_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
-  1000, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(150,cut)|max_ammo(30),
-  imodbits_none, missile_ice_trigger , [fac_commoners, fac_kingdom_5, fac_commoners] ],
 ["molag_bal_boots", "molag_bal_boots", [("knight_of_molag_bal_boots",0)], itp_unique|itp_type_foot_armor|itp_attach_armature ,0,  20000 , weight(1)|abundance(100)|head_armor(0)|body_armor(0)|leg_armor(50)|difficulty(0) ,imodbits_armor, [], [fac_kingdom_9,fac_demon]],
 
-["rhongomiant", "Rhongomiant", [("blackqq", 0)], itp_type_polearm|itp_unique|itp_primary|itp_bonus_against_shield|itp_penalty_with_shield|itp_couchable|itp_crush_through|itp_extra_penetration, itc_greatlance, 50000, weight(2.5)|weapon_length(400)|difficulty(12)|spd_rtng(95)|abundance(1)|swing_damage(30, pierce)|thrust_damage(200, pierce), imodbits_polearm, gungnir_trigger ],
-["aroundight", "Aroundight", [("Black_j",0)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_greatsword|itcf_carry_sword_back, 50000 , weight(2.75)|difficulty(15)|spd_rtng(130)| weapon_length(180)|swing_damage(60, pierce)| thrust_damage(100,pierce),imodbits_sword_high],
+["rhongomiant", "Rhongomiant", [("blackqq", 0)], itp_type_polearm|itp_unique|itp_primary|itp_bonus_against_shield|itp_penalty_with_shield|itp_couchable|itp_crush_through|itp_extra_penetration, itc_greatlance, 50000, weight(2.5)|weapon_length(400)|difficulty(12)|spd_rtng(95)|abundance(1)|swing_damage(30, pierce)|thrust_damage(200, pierce), imodbits_polearm ],
+["aroundight", "Aroundight", [("Black_j",0)], itp_unique|itp_type_two_handed_wpn|itp_two_handed|itp_primary|itp_crush_through|itp_can_knock_down|itp_can_penetrate_shield, itc_greatsword, 50000 , weight(2.75)|difficulty(15)|spd_rtng(130)| weapon_length(180)|swing_damage(60, pierce)| thrust_damage(100,pierce),imodbits_sword_high],
 
 ["power_musket_8barrel", "Musket", [("gatling",0)], itp_unique|itp_type_musket|itp_crush_through|itp_two_handed|itp_primary, itcf_shoot_musket|itcf_reload_musket|itc_parry_polearm|itcf_carry_crossbow_back, 10000, weight(10)|difficulty(0)|spd_rtng(150)|shoot_speed(140)|thrust_damage(140,pierce)|max_ammo(300)|accuracy(70), imodbits_gun, musket_trigger , [fac_dwarf]],
 
 ["magic_book_9", "Anpu Neb-Ta", [("book_a",0)], 
- itp_type_shield|itp_unique|itp_shield_no_parry, itcf_carry_sword_left_hip,  
+ itp_type_shield|itp_unique, itcf_carry_sword_left_hip,  
  50000 , weight(2.0)|abundance(10)|hit_points(10000)|body_armor(20)|spd_rtng(80)|shield_width(10)|shield_height(10),imodbits_none, [], [fac_dark_knights,fac_commoners, fac_undeads_2]], 
 
 ["dawnbreaker_armor", "dawnbreaker_armor", [("elf_twiligh_armor",0)], itp_unique|itp_type_body_armor|itp_covers_legs, 0, 20000, weight(28)|abundance(100)|head_armor(20)|body_armor(90)|leg_armor(40)|difficulty(24), imodbits_good_plate],
 
+
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 #-#-#-#Hunting Mod begin#-#-#-#
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#
- ["deer","Deer", [("deer",0)], itp_unique|itp_type_horse, 0, 1411,abundance(40)|hit_points(40)|body_armor(0)|difficulty(11)|horse_speed(50)|horse_maneuver(32)|horse_charge(20),imodbits_horse_basic],
+ ["deer","Deer", [("deer_2",0)], itp_unique|itp_type_horse, 0, 1411,abundance(40)|hit_points(40)|body_armor(0)|difficulty(11)|horse_speed(50)|horse_maneuver(32)|horse_charge(20),imodbits_horse_basic],
  ["boar","Boar", [("boar",0)], itp_unique|itp_disable_agent_sounds|itp_type_horse|itp_is_pike, 0, 1411,abundance(40)|hit_points(150)|body_armor(50)|difficulty(11)|horse_speed(20)|horse_maneuver(50)|horse_charge(25),imodbits_horse_basic],
  ["wolf_wild","wolf_mount_white", [("warg1",0)],itp_unique|itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 1411,abundance(40)|hit_points(150)|body_armor(30)|difficulty(11)|horse_speed(50)|horse_maneuver(50)|horse_charge(25),imodbits_horse_adv, [], [fac_orc]],
  
@@ -12198,7 +9429,7 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  
 ["gorgon_1_wild", "Gorgon", [("gorgonka", 0)], itp_type_horse|itp_merchandise|itp_disable_agent_sounds|itp_is_pike, 0, 8000, abundance(40)|difficulty(11)|hit_points(700)|body_armor(70)|horse_speed(35)|horse_maneuver(42)|horse_charge(40)|horse_scale(115), imodbits_horse_armor, [], [fac_scotland]], 
 ["gorgon_2_wild", "Mighty_Gorgon", [("upg_gorgonka", 0)], itp_type_horse|itp_merchandise|itp_disable_agent_sounds|itp_is_pike, 0, 10000, abundance(40)|difficulty(11)|hit_points(900)|body_armor(90)|horse_speed(42)|horse_maneuver(42)|horse_charge(45)|horse_scale(120), imodbits_horse_armor, [], [fac_scotland]], 
- ["griffin_wild", "griffin", [("griffin",0)], itp_merchandise|itp_type_horse|itp_disable_agent_sounds|itp_is_magic_staff|itp_is_pike, 0, 4000, abundance(40)|hit_points(600)|body_armor(60)|difficulty(11)|horse_speed(50)|horse_maneuver(33)|horse_charge(35)|horse_scale(120), imodbits_horse_armor, [], [fac_kingdom_1,fac_kingdom_7,fac_dwarf]],
+ ["griffin_wild", "griffin", [("griffin",0)], itp_type_horse|itp_disable_agent_sounds|itp_is_magic_staff|itp_is_pike, 0, 4000, abundance(40)|hit_points(600)|body_armor(60)|difficulty(11)|horse_speed(50)|horse_maneuver(33)|horse_charge(35)|horse_scale(120), imodbits_horse_armor, [], [fac_kingdom_1,fac_kingdom_7,fac_dwarf]],
 ["spider_wild","spider", [("spider",0)],itp_merchandise|itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 1411,abundance(40)|hit_points(400)|body_armor(50)|difficulty(11)|horse_speed(37)|horse_maneuver(70)|horse_charge(25),imodbits_horse_adv, [], [fac_orc,fac_beast]],
 
  ["unicorn_wild","Unicorn", [("unicorn",0)], itp_unique|itp_type_horse, 0, 4000,abundance(40)|hit_points(600)|body_armor(75)|difficulty(11)|horse_speed(50)|horse_maneuver(46)|horse_charge(100)|horse_scale(112), imodbits_horse_armor, [], [fac_forest_ranger,fac_elf]],
@@ -12211,215 +9442,752 @@ weight(1.75)|difficulty(7)|accuracy(99)|spd_rtng(85)|shoot_speed(91)|thrust_dama
  ["ogar","ogar", [("ogar",0)],itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 1411,abundance(40)|hit_points(150)|body_armor(30)|difficulty(4)|horse_speed(50)|horse_maneuver(50)|horse_charge(25),imodbits_horse_adv, [], [fac_orc]],
  ["orthrus","orthrus", [("orthrus",0)],itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 1411,abundance(40)|hit_points(200)|body_armor(30)|difficulty(5)|horse_speed(50)|horse_maneuver(50)|horse_charge(50),imodbits_horse_adv, [], [fac_orc]],
  ["cerber","cerber", [("cerber",0)],itp_type_horse|itp_disable_agent_sounds|itp_is_pike, 0, 1411,abundance(40)|hit_points(300)|body_armor(30)|difficulty(6)|horse_speed(50)|horse_maneuver(50)|horse_charge(75),imodbits_horse_adv, [], [fac_orc]],
+ 
 ["dragon_heart_plate_new", "Dragon Heart_plate", [("plate_falcon_armor_dragon_heart",0)], itp_type_body_armor|itp_covers_legs|itp_unique, 0, 50000, weight(30)|abundance(20)|head_armor(13)|body_armor(85)|leg_armor(45)|difficulty(24), imodbits_good_plate, [], [fac_kingdom_8,fac_kingdom_4]],
+["lancelothelmet", "Ebony Male Helm", [("lancelothelmet",0)], itp_type_fullhelm, 0, 
+ 5400 , weight(2.75)|abundance(100)|head_armor(90)|body_armor(0)|leg_armor(0)|difficulty(10) ,imodbits_good_plate,   [], [fac_kingdom_8,fac_undeads_2,fac_beast]],
+["chaos_axe2", "Chaos_Lord Axe", [("thrud_axe",0)], itp_type_two_handed_wpn|itp_wooden_parry|itp_two_handed|itp_primary|itp_bonus_against_shield|itp_can_knock_down|itp_crush_through|itp_extra_penetration, itc_nodachi, 959, weight(6.5)|difficulty(10)|spd_rtng(125)|weapon_length(160)|swing_damage(50,pierce)|thrust_damage(0,pierce), imodbits_axe|imodbit_masterwork],
+
+["leshen_body", "leshen_body", [("leshen",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(90)|body_armor(100)|leg_armor(90)|difficulty(12), imodbits_armor ],
+["leshen_weapon", "leshen_sword", [("toumingshen",0)], itp_type_pistol|itp_primary|itp_next_item_as_melee|itp_is_magic_staff|itp_unique|itp_no_pick_up_from_ground ,itcf_reload_pistol|itcf_shoot_pistol,
+ 25000 , weight(3.25)|difficulty(0)|spd_rtng(50) | shoot_speed(80) | thrust_damage(80 ,pierce)|max_ammo(1)|accuracy(82),imodbits_magic_staff,magic_cast_trigger , [fac_commoners] ],  
+["leshen_weapon_melee", "leshen_sword", [("toumingshen",0)], itp_can_knock_down|itp_crush_through|itp_type_one_handed_wpn|itp_primary|itp_wooden_parry|itp_wooden_attack|itp_unique|itp_no_pick_up_from_ground, itc_gauntlet,610 , weight(5.5)|difficulty(13)|spd_rtng(100)| weapon_length(250)|swing_damage(45 , pierce)| thrust_damage(0 ,  pierce),imodbits_mace,[
+  (ti_on_weapon_attack, 
+    [
+        (store_trigger_param_1, ":shooter"),
+        (agent_get_troop_id, ":troop", ":shooter"),
+        (eq, ":troop", "trp_ent_3"),
+        (assign,":power",5),
+        (store_random_in_range, ":r2", 1, ":power"),
+        (call_script, "script_cf_agent_excalibur_light", ":shooter", ":r2"),
+    ])] ],
+
+
+["papanurg_body", "Great Unclean ones body", [("PapaNurg",0)], itp_type_full_body_armor, 0, 20000, weight(26)|abundance(65)|head_armor(90)|body_armor(100)|leg_armor(90)|difficulty(12), imodbits_armor ],
+
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 #-#-#-#Hunting Mod end#-#-#-#
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+ ["magic_mana", "Essence of Magic", [("bullet_1",0),("mana_blast",ixmesh_flying_ammo),("church_scroll", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
+  10000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(100),
+  imodbits_none, missile_distance_trigger  ],
+
+ ["magic_burning_gaze", "Shems_Burning_Gaze", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("icon_magic_sun_ray", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(20),
+  imodbits_none, cast_magic_burning_gaze , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_blinding_light", "Blinding_Light", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_blinding_light", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_blinding_light , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_heal_near", "heal_Scroll", [("bullet_1",0),("laser_bolt_orange",ixmesh_flying_ammo),("magic_20_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1000, weight(2.0)|difficulty(6)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
+  imodbits_none, missile_distance_trigger , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_net_of_amyntok", "Net_of_Amyntok", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_net_of_amyntok", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(9)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_net_of_amyntok , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_light_of_battle", "Light_of_Battle", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_light_of_battle", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_light_of_battle , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_phas_protection", "magic_protection", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_phas_protection", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_phas_protection , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_bironas_timewarp", "Bironas_Timewarp", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_bironas_timewarp", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  5000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_bironas_timewarp , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_banishment", "Banishment", [("bullet_1",0),("holy_ball",ixmesh_flying_ammo),("magic_banishment", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
+  imodbits_none, cast_magic_banishment , [fac_demon_hunters, fac_hospitalier_knights] ],
+
+
+
+ ["magic_spark", "spark", [("bullet_1",0),("spark_ball",ixmesh_flying_ammo),("icon_magic_thunder", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(25,cut)|max_ammo(30),
+  imodbits_none, cast_magic_LightningBolt , [fac_commoners, fac_kingdom_5] ],
+ ["magic_wind_blast", "wind_blast", [("bullet_1",0),("air_ball",ixmesh_flying_ammo),("magic_wind_blast", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  3000, weight(2.0)|difficulty(6)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(8),
+  imodbits_none, cast_magic_wind_blast , [fac_demon_hunters, fac_hospitalier_knights]],
+ ["magic_lightning", "lightning_Scroll", [("bullet_1",0),("air_ball",ixmesh_flying_ammo),("icon_magic_LightningBolt", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(20),
+  imodbits_none, cast_magic_lightning , [fac_commoners, fac_kingdom_5] ],
+ ["magic_harmonic_convergence", "Harmonic_Convergence", [("bullet_1",0),("air_ball",ixmesh_flying_ammo),("magic_harmonic_convergence", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_harmonic_convergence , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_curse_of_the_midnight_wind", "Curse_of_the_Midnight_Wind", [("bullet_1",0),("air_ball",ixmesh_flying_ammo),("magic_curse_of_the_midnight_wind", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_curse_of_the_midnight_wind , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_lightning_burst", "Lightning Storm", [("bullet_1",0),("spark_ball",ixmesh_flying_ammo),("icon_magic_LightningBurst", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(5),
+  imodbits_none, cast_magic_lightning_burst , [fac_undeads_2, fac_commoners] ],
+ ["magic_comet_of_casandora", "meteor_shower_Scroll", [("bullet_1",0),("air_ball",ixmesh_flying_ammo),("magic_6_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(30)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(7),
+  imodbits_none, cast_magic_comet_of_casandora , [fac_commoners, fac_undeads_2, fac_commoners] ],
+ ["comet_of_casandora_dummy", "Stones", [("bullet_1",0),("flame_ball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_type_bolts|itp_is_magic_staff ,0, 
+ 1 , weight(2.75)|difficulty(6)|abundance(90)|weapon_length(25)| thrust_damage(200 ,  blunt)|max_ammo(18),
+ imodbits_none,cast_magic_fire_ball_3],
+
+ ["magic_summon_air_elemental", "magic_Summon_Air_Elemental", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("magic_Summon_Air_Elemental", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(15)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_summon_air_elemental , [fac_undeads_2] ],
+
+
+ ["magic_fire_ray", "Flame Beam", [("bullet_1",0),("guangjian3",ixmesh_flying_ammo),("magic_fire_ray", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, cast_magic_fire_ray , [fac_commoners, fac_undeads_2] ],
+ ["magic_fireball", "fireball", [("bullet_1",0),("fireball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
+  imodbits_none, cast_magic_fire_ball , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+ ["magic_fireball_2", "power_fireball_Scroll", [("bullet_1",0),("fireball",ixmesh_flying_ammo),("magic_11_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(7),
+  imodbits_none, cast_magic_fire_ball_2 , [fac_undeads_2, fac_commoners] ],
+ ["magic_cascading_fire_cloak", "Cascading_Fire_Cloak", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_cascading_fire_cloak", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_cascading_fire_cloak , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_pyroblast", "Pyroblast_Scroll", [("bullet_1",0),("fireball",ixmesh_flying_ammo),("icon_magic_Pyroblast", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  20000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(6),
+  imodbits_none, cast_magic_Pyroblast , [fac_commoners, fac_kingdom_5] ],
+ ["magic_piercing_bolts_of_burning", "Piercing_Bolts_of_Burning", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_apocalypse", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(24)|abundance(30)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(4),
+  imodbits_none, cast_magic_apocalypse , [ fac_undeads_2, fac_commoners] ],
+ ["magic_flame_storm", "Flame_Storm", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("icon_magic_incediary_cloud", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(30)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(3),
+  imodbits_none, cast_magic_incediary_cloud , [fac_undeads_2, fac_commoners] ],
+
+ ["magic_flaming_sword_of_rhuin", "flaming_sword_of_rhuin", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_flaming_sword_of_rhuin", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_flaming_sword_of_rhuin , [fac_demon_hunters, fac_hospitalier_knights, fac_kingdom_1] ],
+ ["magic_summon_fire_elemental", "magic_Summon_Fire_Elemental", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("magic_Summon_Fire_Elemental", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(15)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_summon_fire_elemental , [fac_undeads_2] ],
+
+
+ ["magic_searing_doom", "searing_doom", [("bullet_1",0),("evil_arrow",ixmesh_flying_ammo),("magic_9_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(20),
+  imodbits_none, missile_distance_trigger , [fac_commoners,fac_kingdom_5] ],
+ ["magic_burnished_gauntlet", "burnished_gauntlet Scroll", [("bullet_1",0),("iron_fist",ixmesh_flying_ammo),("magic_13_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(20),
+  imodbits_none, cast_magic_burnished_gauntlet, [fac_commoners,fac_kingdom_5] ],
+ ["magic_plague_of_rust", "plague_of_rust", [("bullet_1",0),("transmutation_project",ixmesh_flying_ammo),("magic_plague_of_rust", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_plague_of_rust , [fac_commoners,fac_kingdom_5] ],
+ ["magic_transmutation_of_lead", "transmutation_of_lead", [("bullet_1",0),("transmutation_project",ixmesh_flying_ammo),("magic_final_transmutation", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_transmutation_of_lead , [fac_commoners,fac_kingdom_5] ],
+ ["magic_final_transmutation", "final_transmutation", [("bullet_1",0),("transmutation_project",ixmesh_flying_ammo),("magic_final_transmutation", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(21)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_final_transmutation , [fac_commoners,fac_kingdom_5] ],
+
+ ["magic_summon_golem", "magic_summon_Golem", [("bullet_1",0),("laser_bolt_green",ixmesh_flying_ammo),("magic_summon_Golem", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(12)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_summon_golem , [fac_kingdom_5] ],
+
+
+
+ ["magic_earth_blood", "earth_blood", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_earth_blood", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
+  imodbits_none, cast_magic_earth_blood , [fac_commoners,fac_kingdom_4] ],
+ ["magic_animal_mastery", "Animal Mastery", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_animal_mastery", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(10)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_animal_mastery , [fac_commoners,fac_kingdom_4] ],
+ ["magic_entangling", "Entangling_Scroll", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("icon_magic_EntanglingRoots", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_Entangling , [fac_commoners,fac_kingdom_4] ],
+ ["magic_flesh_to_stone", "flesh_to_stone", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_flesh_to_stone", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_flesh_to_stone , [fac_commoners,fac_kingdom_4] ],
+ ["magic_regrowth", "regrowth", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_regrowth", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_regrowth , [fac_commoners,fac_kingdom_4] ],
+ ["magic_animate_tree", "Animate_Tree", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("icon_magic_summon_neutral", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(24)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(3),
+  imodbits_none, cast_magic_animate_tree , [fac_commoners,fac_kingdom_4] ],
+ ["magic_poison", "poison_Scroll", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_7_icon", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
+  2500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(20,cut)|max_ammo(20),
+  imodbits_none, cast_magic_poison+missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
+ ["magic_paralysis_cloud", "paralysis_cloud_Scroll", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("icon_magic_Petrification", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7500, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(6),
+  imodbits_none, cast_magic_Petrification+missile_distance_trigger , [fac_undeads_2] ],
+
+ ["magic_summon_earth_elemental", "magic_Summon_Earth_Elemental", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_Summon_Earth_Elemental", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7000, weight(2.0)|difficulty(18)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_summon_earth_elemental , [fac_undeads_2] ],
+
+
+ ["magic_amber_spear", "the_amber_spear", [("bullet_1",0),("amberspear",ixmesh_flying_ammo),("magic_amber_spear", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(150,cut)|max_ammo(6),
+  imodbits_none, cast_magic_amber_spear  , [fac_commoners,fac_kingdom_3] ],
+ ["magic_bray_scream", "bray_scream", [("bullet_1",0),("amber_bolt",ixmesh_flying_ammo),("magic_bray_scream", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_bray_scream  , [fac_commoners,fac_kingdom_3] ],
+ ["magic_wyssans_wildform", "wyssans_wildform", [("bullet_1",0),("amber_bolt",ixmesh_flying_ammo),("magic_wyssans_wildform", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_wyssans_wildform , [fac_commoners,fac_kingdom_3] ],
+ ["magic_panns_impenetrable_belt", "panns_impenetrable_belt", [("bullet_1",0),("amber_bolt",ixmesh_flying_ammo),("magic_panns_impenetrable_belt", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_panns_impenetrable_belt , [fac_commoners,fac_kingdom_3] ],
+ ["magic_curse_of_anraheir", "curse_of_anraheir", [("bullet_1",0),("amber_bolt",ixmesh_flying_ammo),("magic_curse_of_anraheir", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_curse_of_anraheir , [fac_commoners,fac_kingdom_3] ],
+ ["magic_savage_dominion", "savage_dominion", [("bullet_1",0),("amber_bolt",ixmesh_flying_ammo),("magic_savage_dominion", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(24)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(3),
+  imodbits_none, cast_magic_savage_dominion , [fac_commoners,fac_kingdom_4] ],
+
+
+
+
+
+ ["magic_shadow_bolt", "Shadow Bolt", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_shadow_bolt", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, cast_magic_shadow_bolt , [fac_commoners, fac_undeads_2] ],
+
+ ["magic_melkoths_mystifying_miasma", "melkoths_mystifying_miasma", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_melkoths_mystifying_miasma", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+  imodbits_none, cast_melkoths_mystifying_miasma , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+
+ ["magic_steed_of_shadows", "steed_of_shadows", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_steed_of_shadows", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  3000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+  imodbits_none, cast_magic_steed_of_shadows , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+
+ ["magic_penumbral_pendulum", "The Penumbral Pendulum ", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_penumbral_pendulum", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+  imodbits_none, cast_magic_penumbral_pendulum , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+
+ ["magic_pit_of_shades", "pit_of_shades", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_pit_of_shades", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(21)|abundance(40)|weapon_length(3)|thrust_damage(90,cut)|max_ammo(4),
+  imodbits_missile, cast_magic_black_hold_long , [fac_commoners] ],
+
+ ["magic_okkams_mindrazor", "okkams_mindrazor", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_okkams_mindrazor", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(24)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_okkams_mindrazor , [fac_commoners,fac_kingdom_3] ],
+  
+ ["magic_phantom_forces", "phantom_forces", [("bullet_1",0),("shadow_bolt",ixmesh_flying_ammo),("magic_phantom_forces", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(30)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(5),
+  imodbits_none, cast_magic_phantom_forces , [fac_commoners,fac_kingdom_3] ],
+
+
+ ["magic_spirit_leech", "spirit_leech", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("magic_spirit_leech", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(20,cut)|max_ammo(20),
+  imodbits_none, cast_magic_spirit_leech , [fac_commoners, fac_undeads_2] ],
+
+ ["magic_soulblight", "soulblight", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("magic_soulblight", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_soulblight , [fac_commoners,fac_undeads_2] ],
+
+ ["magic_doom_and_darkness", "doom_and_darkness", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("magic_doom_and_darkness", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_doom_and_darkness , [fac_commoners,fac_undeads_2] ],
+
+ ["magic_summon_undead", "summon_undead_Scroll", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("icon_magic_summon_undead", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(12)|abundance(15)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(6),
+  imodbits_none, cast_magic_basic_curse , [fac_undeads_2] ],
+ ["magic_summon_undead_near_ememy", "cast_magic_summon_undeadl", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("icon_magic_summon_undead", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(15)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_basic_curse+cast_magic_summon_undead , [fac_undeads_2] ],
+
+ ["magic_gaze_of_nagash", "gaze_of_nagash", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("magic_gaze_of_nagash", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(6),
+  imodbits_none, cast_magic_gaze_of_nagash , [fac_undeads_2, fac_kingdom_7] ],
+
+
+ ["magic_death_cloud", "death_cloud_Scroll", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("icon_magic_death_cloud", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  17500, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(4),
+  imodbits_none, cast_magic_death_cloud , [fac_undeads_2] ],
+
+ ["magic_zombie_lord", "Zombie_Lord", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("icon_magic_Zombie_Lord", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(18)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_basic_curse+cast_magic_summon_Zombie_Lord , [fac_undeads_2] ],
+ ["ryze_the_grave_call", "ryze_the_grave_call", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("ryze_the_grave_call", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(18)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_basic_curse+cast_magic_ryze_the_grave_call , [fac_undeads_2] ],
+
+ ["magic_soulhunter", "Soulhunter", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("icon_magic_Soulhunter", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(18)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_basic_curse+cast_magic_summon_Soulhunter , [fac_undeads_2] ],
+
+ ["magic_turn_vampire", "turn_vampire", [("bullet_1",0),("death_bolt",ixmesh_flying_ammo),("magic_turn_vampire", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_turn_vampire , [fac_undeads_2] ],
+
+
+
+
+
+ ["magic_chill_wind", "chill_wind", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_19_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2750, weight(2.0)|difficulty(9)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(6),
+  imodbits_missile, cast_magic_deep_freeze , [fac_kingdom_8] ],
+
+ ["magic_oblivion", "Oblivion", [("bullet_1",0),("arcane_flare",ixmesh_flying_ammo),("magic_oblivion", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  5000, weight(2.0)|difficulty(12)|abundance(40)|weapon_length(3)|thrust_damage(90,cut)|max_ammo(10),
+  imodbits_missile, cast_magic_black_hold , [fac_commoners] ],
+
+ ["magic_word_of_pain", "word_of_pain", [("bullet_1",0),("arcane_flare",ixmesh_flying_ammo),("magic_word_of_pain", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_word_of_pain , [fac_kingdom_8] ],
+ ["magic_doom_bolt", "doom_bolt", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_doom_bolt", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_doom_bolt , [fac_kingdom_8] ],
+
+ ["magic_power_of_darkness", "power_of_darkness", [("bullet_1",0),("arcane_flare",ixmesh_flying_ammo),("magic_power_of_darkness", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_power_of_darkness , [fac_kingdom_8] ],
+
+ ["magic_blade_wind", "blade_wind", [("bullet_1",0),("arcane_flare",ixmesh_flying_ammo),("magic_16_icon", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(21)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_summon_blade , [fac_commoners] ],
+
+
+ ["magic_soul_leech", "soul_Leech_Scroll", [("bullet_1",0),("arcane_flare",ixmesh_flying_ammo),("icon_magic_soul_Leech", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  17500, weight(2.0)|difficulty(25)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(8),
+  imodbits_none, cast_magic_soul_Leech , [fac_kingdom_8] ],
+
+
+
+
+ ["magic_soul_quench", "soul_quench", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_soul_quench", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(35,cut)|max_ammo(10),
+  imodbits_none, cast_magic_soul_quench , [fac_commoners, fac_kingdom_5, fac_commoners] ],
+  
+ ["magic_arcane_unforging", "arcane_unforging", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_arcane_unforging", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  20000, weight(2.0)|difficulty(18)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_arcane_unforging , [fac_kingdom_1] ],
+
+ ["magic_dispel_magic", "Dispel_Magic_Scroll", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("icon_magic_Dispel_Magic", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(40)|weapon_length(3)|thrust_damage(80,cut)|max_ammo(8),
+  imodbits_missile, cast_magic_Dispel_Magic , [fac_kingdom_1] ],
+
+ ["magic_apotheosis", "apotheosis", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_apotheosis", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(15),
+  imodbits_none, cast_magic_apotheosis , [fac_kingdom_1] ],
+
+ ["magic_hand_of_glory", "hand_of_glory", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_hand_of_glory", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_hand_of_glory , [fac_kingdom_1] ],
+
+ ["magic_curse_of_arrow_attraction", "Curse_of_Arrow_Attraction", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_Curse_of_Arrow_Attraction", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_curse_of_arrow_attraction , [fac_kingdom_1] ],
+
+ ["magic_walk_between_worlds", "walk_between_worlds", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_walk_between_worlds", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(10,cut)|max_ammo(30),
+  imodbits_none, cast_magic_steed_of_shadows , [fac_kingdom_1] ],
+
+ ["magic_mana_tempest", "mana_tempest", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_mana_tempest", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(30)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_mana_tempest , [fac_kingdom_1] ],
+
+ ["magic_mana_tempest_dummy", "mana_tempest", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_mana_tempest", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_mana_tempest_2 , [fac_kingdom_1] ],
+
+
+ ["magic_ice_ray", "ice_ray_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_IceBolt", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  1500, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(25,cut)|max_ammo(30),
+  imodbits_none, cast_magic_ice_ray , [fac_commoners, fac_kingdom_5] ],
+
+ ["magic_frostblade", "frostblade", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_frostblade", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_frostblade , [fac_kingdom_1] ],
+
+ ["magic_shield_of_cold", "shield_of_cold", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_shield_of_cold", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_shield_of_cold , [fac_kingdom_1] ],
+
+
+ ["magic_frost_cloud", "deep_freeze_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Frost_cloudr", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7500, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(4),
+  imodbits_missile, cast_magic_Frost_cloud , [fac_commoners] ],
+
+ ["magic_deadly_cold", "DEADLY_COLD_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_DEADLY_COLD", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(21)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(6),
+  imodbits_none, cast_magic_DEADLY_COLD , [fac_undeads_2, fac_kingdom_7] ],
+
+ ["magic_frozen_orb", "frozen_orb_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_frozen_orb", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(21)|abundance(10)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(5),
+  imodbits_none, cast_magic_frozen_orb , [fac_undeads_2] ],
+ ["magic_blizzard", "blizzard_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Blizzard", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(24)|abundance(30)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(7),
+  imodbits_none, cast_magic_blizzard , [ fac_undeads_2] ],
+
+ ["magic_frost_cloud_dummy", "deep_freeze_Scroll", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("icon_magic_Frost_cloudr", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2750, weight(2.0)|difficulty(9)|abundance(40)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_Frost_cloudr , [fac_undeads_2, fac_commoners] ],
+
+ ["magic_summon_water_elemental", "magic_Summon_Water_Elemental", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_Summon_Water_Elemental", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  7000, weight(2.0)|difficulty(18)|abundance(15)|weapon_length(4)|thrust_damage(10,cut)|max_ammo(4),
+  imodbits_none, cast_magic_summon_water_elemental , [fac_undeads_2] ],
+
+ ["magic_frozen_ground", "frozen_ground", [("bullet_1",0),("guangjian_fly2",ixmesh_flying_ammo),("magic_frozen_ground", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(15)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_frozen_ground , [fac_kingdom_1] ],
+
+ ["magic_summon_demon_k", "summon_demon_Scroll", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_summon_demon_k", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(18)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
+  imodbits_none, cast_magic_summon_demon_k , [fac_undeads_2, fac_commoners] ],
+ ["magic_summon_demon_t", "summon_demon_Scroll", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_summon_demon_t", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(18)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
+  imodbits_none, cast_magic_summon_demon_t , [fac_undeads_2, fac_commoners] ],
+  
+ ["magic_blue_fire_of_tzeentch", "magic_blue_fire_of_tzeentch", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_blue_fire_of_tzeentch", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, blue_fire_of_tzeentch_dummy , [fac_commoners, fac_undeads_2] ],
+  
+ ["magic_pink_fire_of_tzeentch", "magic_pink_fire_of_tzeentch", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_pink_fire_of_tzeentch", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_pink_fire_of_tzeentch ,  ],
+  
+ ["magic_glean_magic", "magic_glean_magic", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_glean_magic", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_glean_magic ,  ],
+  
+ ["magic_treason_of_tzeentch", "magic_treason_of_tzeentch", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_treason_of_tzeentch", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_treason_of_tzeentch ,  ],
+  
+ ["magic_infernal_gateway", "magic_infernal_gateway", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_infernal_gateway", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(30)|abundance(45)|weapon_length(3)|thrust_damage(70,cut)|max_ammo(2),
+  imodbits_none, cast_magic_infernal_gateway ,  ],
+  
+ ["magic_tzeentch_firestorm", "magic_tzeentch_firestorm", [("bullet_1",0),("laser_bolt_red",ixmesh_flying_ammo),("magic_tzeentch_firestorm", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(30)|abundance(90)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(3),
+  imodbits_none, cast_magic_tzeentch_firestorm , [fac_undeads_2, fac_commoners] ],
+  
+  
+  
+  
+ ["magic_summon_demon_s", "summon_demon_Scroll", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_summon_demon_s", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(18)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
+  imodbits_none, cast_magic_summon_demon_s , [fac_undeads_2, fac_commoners] ],
+  
+ ["magic_lash_of_slaanesh", "magic_lash_of_slaanesh", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_lash_of_slaanesh", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
+ ["magic_acquiescence", "magic_acquiescence", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_acquiescence", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff, 0,
+  2500, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(20,cut)|max_ammo(20),
+  imodbits_none, cast_magic_acquiescence , [fac_commoners, fac_undeads_2] ],
+ ["magic_pavane_of_slaanesh", "magic_pavane_of_slaanesh", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_pavane_of_slaanesh", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_pavane_of_slaanesh ,  ],
+ ["magic_hysterical_frenzy", "magic_hysterical_frenzy", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_hysterical_frenzy", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_hysterical_frenzy ,  ],
+  
+ ["magic_phantasmogoria", "magic_phantasmogoria", [("bullet_1",0),("doom_bolt",ixmesh_flying_ammo),("magic_phantasmogoria", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  10000, weight(2.0)|difficulty(21)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_phantasmogoria ,  ],
+
+
+  
+ ["magic_summon_demon_n", "summon_demon_Scroll", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_summon_demon_n", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  9000, weight(2.0)|difficulty(18)|abundance(10)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(3),
+  imodbits_none, cast_magic_summon_demon_n , [fac_undeads_2, fac_commoners] ],
+  
+ ["magic_stream_of_corruption", "magic_stream_of_corruption", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_stream_of_corruption", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(10),
+  imodbits_none, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
+  
+  
+ ["magic_miasma_of_pestilence", "magic_miasma_of_pestilence", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_miasma_of_pestilence", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  4000, weight(2.0)|difficulty(12)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_miasma_of_pestilence ,  ],
+ ["magic_blight_boil", "magic_blight_boil", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_blight_boil", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  8000, weight(2.0)|difficulty(15)|abundance(40)|weapon_length(3)|thrust_damage(100,cut)|max_ammo(15),
+  imodbits_missile, cast_magic_blight_boil ,  ],
+ ["magic_blades_of_putrefaction", "magic_blades_of_putrefaction", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_blades_of_putrefaction", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  6000, weight(2.0)|difficulty(18)|abundance(90)|weapon_length(3)|thrust_damage(50,cut)|max_ammo(20),
+  imodbits_none, cast_magic_blades_of_putrefaction ,  ],
+ ["magic_fleshy_abundance", "magic_fleshy_abundance", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_fleshy_abundance", ixmesh_inventory)], itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  15000, weight(2.0)|difficulty(21)|abundance(45)|weapon_length(3)|thrust_damage(5,cut)|max_ammo(2),
+  imodbits_none, cast_magic_fleshy_abundance ,  ],
+
+ ["magic_blue_fire_of_tzeentch_dummy", "magic_blue_fire_of_tzeentch", [("bullet_1",0),("high_flare",ixmesh_flying_ammo),("magic_blue_fire_of_tzeentch", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(0)|abundance(90)|weapon_length(3)|thrust_damage(60,cut)|max_ammo(10),
+  imodbits_none, blue_fire_of_tzeentch_dummy , [fac_commoners, fac_undeads_2] ],
+ ["magic_stream_of_corruption_dummy", "magic_stream_of_corruption", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_stream_of_corruption", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(60,cut)|max_ammo(10),
+  imodbits_none, stream_of_corruption_dummy , [fac_commoners, fac_undeads_2] ],
+ ["magic_lash_of_slaanesh_dummy", "magic_lash_of_slaanesh", [("bullet_1",0),("plague_bolt",ixmesh_flying_ammo),("magic_lash_of_slaanesh", ixmesh_inventory)], itp_merchandise|itp_type_bullets|itp_is_magic_staff|itp_unique, 0,
+  2000, weight(2.0)|difficulty(9)|abundance(90)|weapon_length(3)|thrust_damage(60,cut)|max_ammo(10),
+  imodbits_none, lash_of_slaanesh_dummy , [fac_commoners, fac_undeads_2] ],
+
+
 #-#-#-#voice begin#-#-#-#
-["voice_clear_skies","voice_Clear_Skies", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_cyclone","voice_Cyclone", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_unrelenting_force","voice_Unrelenting_Force", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_clear_skies","龙 吼 ·龙 破 净 空", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_cyclone","龙 吼 ·旋 风 打 击", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_unrelenting_force","龙 吼 ·不 卸 之 力", [("yellow_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_become_ethereal","voice_Become_Ethereal", [("heaven_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_slow_time","voice_Slow_Time", [("heaven_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_become_ethereal","龙 吼 ·虚 灵 幻 化", [("heaven_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_slow_time","龙 吼 ·延 缓 时 间", [("heaven_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_animal_allegiance","voice_Animal_Allegiance", [("green_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_storm_call","voice_Storm_Call", [("green_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_animal_allegiance","龙 吼 ·元 素 盟 友", [("green_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_storm_call","龙 吼 ·风 暴 召 唤", [("green_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_call_dragon","voice_Call_Dragon", [("blood_small",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 10000,weight(3)|abundance(90),0],
-["voice_call_of_valor","voice_Call_of_Valor", [("blood_small",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 10000,weight(3)|abundance(90),0],
+["voice_call_dragon","龙 吼 ·召 唤 巨 龙", [("blood_small",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 10000,weight(3)|abundance(90),0],
+["voice_call_of_valor","龙 吼 ·呼 唤 战 士", [("blood_small",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 10000,weight(3)|abundance(90),0],
 
-["voice_disarm","voice_Disarm", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_dismaying_shout","voice_Dismaying_Shout", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_bend_will","voice_Bend_Will", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_disarm","龙 吼 ·缴 械", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_dismaying_shout","龙 吼 ·震 慑 之 吼", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_bend_will","龙 吼 ·强 迫 意 志", [("black_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_fire_breath","voice_Fire_Breath", [("orange_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_whirlwind_sprint","voice_Whirlwind_Sprint", [("orange_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_fire_breath","龙 吼 ·火 焰 吐 息", [("orange_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_whirlwind_sprint","龙 吼 ·旋 风 精 力", [("orange_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_frost_breath","voice_Frost_Breath", [("blue_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_ice_form","voice_Ice_Form", [("blue_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_frost_breath","龙 吼 ·寒 霜 吐 息", [("blue_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_ice_form","龙 吼 ·寒 冰 冻 结", [("blue_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 
-["voice_marked_for_death","voice_Marked_for_Death", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_soul_tear","voice_Soul_Tear", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
-["voice_drain_vitality","voice_Drain_Vitality", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_marked_for_death","龙 吼 ·死 亡 印 记", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_soul_tear","龙 吼 ·灵 魂 撕 裂", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
+["voice_drain_vitality","龙 吼 ·吸 取 活 力", [("purple_big",0)], itp_unique|itp_type_goods|itp_is_magic_staff, 0, 15000,weight(3)|abundance(90),0],
 #-#-#-#voice end#-#-#-#
 
- ["magic_flamehand", "flamehand_Scroll", [("minie_ball",ixmesh_flying_ammo),("minie_ball",0)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
-  0, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
- ["magic_icehand", "ice_bit_Scroll", [("minie_ball",ixmesh_flying_ammo),("minie_ball",0)], itp_type_bullets|itp_is_magic_staff, 0,
-  1500, weight(2.25)|abundance(90)|weapon_length(3)|thrust_damage(30,cut)|max_ammo(30),
-  0, missile_distance_trigger , [fac_commoners, fac_undeads_2] ],
-
-["skill_wrath","wrath", [("orange_big",0),("skill_wrath", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_berserk","berserk", [("orange_big",0),("skill_berserk", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_frenzy","Frenzy", [("orange_big",0),("skill_frenzy", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_wrath","暴 走 ", [("orange_big",0),("skill_wrath", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_berserk","狂 暴 ", [("orange_big",0),("skill_berserk", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_frenzy","狂 乱 ", [("orange_big",0),("skill_frenzy", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
   
-["skill_awaken","awaken", [("green_big",0),("skill_awaken", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_charge","charge", [("green_big",0),("skill_charge", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_awaken","觉 醒 ", [("green_big",0),("skill_awaken", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_charge","突 击 ", [("green_big",0),("skill_charge", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
   
-["skill_holy_light","holy_light", [("heaven_big",0),("skill_holy_light", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_divine_ruling","divine_ruling", [("heaven_big",0),("skill_divine_ruling", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_revelation","revelation", [("heaven_big",0),("skill_revelation", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_holy_light","天 启 ", [("heaven_big",0),("skill_holy_light", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_divine_ruling","神 裁 ", [("heaven_big",0),("skill_divine_ruling", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_revelation","神 佑 ", [("heaven_big",0),("skill_revelation", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_inspire","inspire", [("heaven_big",0),("skill_inspire", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_warcry","warcry", [("yellow_big",0),("skill_warcry", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_taunt","taunt", [("yellow_big",0),("skill_taunt", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_inspire","鼓 舞 ", [("heaven_big",0),("skill_inspire", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_warcry","惊 吓 ", [("yellow_big",0),("skill_warcry", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_taunt","嘲 讽 ", [("yellow_big",0),("skill_taunt", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_insight","insight", [("yellow_big",0),("skill_insight", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_focus","focus", [("yellow_big",0),("skill_focus", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_ambush","ambush", [("yellow_big",0),("skill_ambush", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_insight","顿 悟 ", [("yellow_big",0),("skill_insight", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_focus","谨 慎 ", [("yellow_big",0),("skill_focus", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_ambush","伏 击 ", [("yellow_big",0),("skill_ambush", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_windforce","windforce", [("green_big",0),("skill_windforce", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_master_archer","master_archer", [("green_big",0),("skill_master_archer", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_arrow_of_slaying","arrow_of_slaying", [("green_big",0),("skill_arrow_of_slaying", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_windforce","风 暴 之 力 ", [("green_big",0),("skill_windforce", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_master_archer","游 侠 战 技 ", [("green_big",0),("skill_master_archer", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_arrow_of_slaying","杀 戮 箭 ", [("green_big",0),("skill_arrow_of_slaying", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_haste_reload","haste_reload", [("green_big",0),("skill_haste_reload", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_haste_reload","攻 击 加 速 ", [("green_big",0),("skill_haste_reload", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_battlecry","battlecry", [("yellow_big",0),("skill_battlecry", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_shadowstep","shadowstep", [("yellow_big",0),("skill_shadowstep", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_shadow_blade","shadow_blade", [("yellow_big",0),("skill_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_battlecry","战 嚎 ", [("yellow_big",0),("skill_battlecry", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_shadowstep","暗 影 步 ", [("yellow_big",0),("skill_shadowstep", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_shadow_blade","瞬 影 斩 ", [("yellow_big",0),("skill_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
 
-["skill_fly","fly", [("yellow_big",0),("skill_fly", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_ironshield","ironshield", [("yellow_big",0),("skill_ironshield", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_rush","rush", [("yellow_big",0),("skill_rush", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_powercharge","powercharge", [("yellow_big",0),("skill_powercharge", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-
-
-["skill_fright_aura","fright_aura", [("yellow_big",0),("skill_fright_aura", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-
-["skill_hero_dreams","hero_dreams", [("yellow_big",0),("skill_hero_dreams", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_charm","charm", [("yellow_big",0),("skill_charm", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bubble_dreams","bubble_dreams", [("yellow_big",0),("skill_bubble_dreams", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-
-["skill_battlerage","battlerage", [("yellow_big",0),("skill_battlerage", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_cleave","cleave", [("yellow_big",0),("skill_cleave", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_deadly_strike","deadly_strike", [("yellow_big",0),("skill_deadly_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_fear_attack","fear_attack", [("yellow_big",0),("skill_fear_attack", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_rend","rend", [("yellow_big",0),("skill_rend", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_wound_strike","wound_strike", [("yellow_big",0),("skill_wound_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_power_strike","power_strike", [("yellow_big",0),("skill_power_strike", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_cull_the_weak","cull_the_weak", [("yellow_big",0),("skill_cull_the_weak", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bloodlust","bloodlust", [("yellow_big",0),("skill_bloodlust", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_khorne_blessing","khorne_blessing", [("yellow_big",0),("skill_khorne_blessing", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mana_burn","mana_burn", [("yellow_big",0),("skill_mana_burn", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mark_of_khorne","mark_of_khorne", [("yellow_big",0),("skill_mark_of_khorne", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_nurgle_blessing","nurgle_blessing", [("skill_nurgle_blessing",0)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_curse_of_the_leper","curse_of_the_leper", [("skill_curse_of_the_leper",0)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_poisoned_attacks","poisoned_attacks", [("skill_poisoned_attacks",0)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_tzeentch_arcane","tzeentch_arcane", [("yellow_big",0),("skill_tzeentch_arcane", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mana_burst","mana_burst", [("yellow_big",0),("skill_mana_burst", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_diffusal_blade","diffusal_blade", [("yellow_big",0),("skill_diffusal_blade", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_master_of_Ice","master_of_Ice", [("yellow_big",0),("skill_master_of_Ice", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_call_storm","call_storm", [("yellow_big",0),("skill_call_storm", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_master_of_storms","master_of_storms", [("yellow_big",0),("skill_master_of_storms", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_master_of_fire","master_of_Fire", [("yellow_big",0),("skill_master_of_fire", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_spirit_link","spirit_link", [("yellow_big",0),("skill_spirit_link", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_confession","confession", [("yellow_big",0),("skill_confession", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_summon_undead","summon_undead", [("green_big",0),("skill_summon_undead", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_summon_neutral","summon_neutral", [("yellow_big",0),("skill_summon_undead", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_summon_demon","summon_demon", [("yellow_big",0),("skill_summon_undead", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_summon_hallow","summon_hallow", [("yellow_big",0),("skill_summon_undead", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_dive","dive", [("yellow_big",0),("skill_fly", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_flamestrike","flamestrike", [("yellow_big",0),("skill_flamestrike", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_flameswave","flameswave", [("yellow_big",0),("skill_flameswave", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_call_lightning","call_lightning", [("yellow_big",0),("skill_call_lightning", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_lightning_attack","lightning_attack", [("yellow_big",0),("skill_lightning_attack", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mummy_curse","mummy_curse", [("yellow_big",0),("skill_mummy_curse", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_shadowking","shadowking", [("yellow_big",0),("skill_shadowking", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mummy","mummy", [("yellow_big",0),("skill_mummy", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_block","block", [("skill_block",0)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_roll","roll", [("skill_roll",0)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_fly","飞 行 ", [("yellow_big",0),("skill_fly", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_ironshield","不 屈 ", [("yellow_big",0),("skill_ironshield", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_rush","猪 突 ", [("yellow_big",0),("skill_rush", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_powercharge","冲 刺 ", [("yellow_big",0),("skill_powercharge", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
 
 
-["skill_ground_stomp","ground_stomp", [("yellow_big",0),("skill_ground_stomp", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_seismic_slam","seismic_slam", [("yellow_big",0),("skill_seismic_slam", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_power_cleave","power_cleave", [("yellow_big",0),("skill_power_cleave", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_fright_aura","威 压 ", [("yellow_big",0),("skill_fright_aura", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["skill_hero_dreams","英 雄 祝 福 ", [("yellow_big",0),("skill_hero_dreams", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_charm","魅 惑 ", [("yellow_big",0),("skill_charm", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bubble_dreams","泡 沫 之 梦 ", [("yellow_big",0),("skill_bubble_dreams", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["skill_battlerage","狂 怒 之 血 ", [("yellow_big",0),("skill_bloodlust", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_cleave","顺 势 斩 ", [("yellow_big",0),("skill_cleave", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_deadly_strike","致 命 一 击 ", [("yellow_big",0),("skill_deadly_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_fear_attack","重 击 ", [("yellow_big",0),("skill_fear_attack", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_rend","痛 割 ", [("yellow_big",0),("skill_rend", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_wound_strike","致 残 打 击 ", [("yellow_big",0),("skill_wound_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_power_strike","强 力 一 击 ", [("yellow_big",0),("skill_power_strike", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_cull_the_weak","恃 强 凌 弱 ", [("yellow_big",0),("skill_cull_the_weak", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bloodlust","嗜 血", [("yellow_big",0),("skill_bloodlust", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_khorne_blessing","鲜 血 狂 热 ", [("yellow_big",0),("skill_khorne_blessing", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mana_burn","法 力 燃 烧 ", [("yellow_big",0),("skill_mana_burn", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mark_of_khorne","战 神 印 记 ", [("yellow_big",0),("skill_mark_of_khorne", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_nurgle_blessing","自 然 恩 赐 ", [("skill_nurgle_blessing",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_curse_of_the_leper","瘟 疫 毒 瘴 ", [("skill_curse_of_the_leper",0)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_poisoned_attacks","瘟 疫 驱 壳 ", [("skill_poisoned_attacks",0)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_tzeentch_arcane","诡 变 秘 法 ", [("yellow_big",0),("skill_tzeentch_arcane", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mana_burst","奥 能 爆 发 ", [("yellow_big",0),("skill_mana_burst", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_diffusal_blade","净 化 打 击 ", [("yellow_big",0),("skill_diffusal_blade", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_master_of_Ice","冰 霜 大 师 ", [("yellow_big",0),("skill_master_of_ice", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_call_storm","呼 唤 风 暴 ", [("yellow_big",0),("skill_call_storm", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_master_of_storms","闪 电 大 师 ", [("yellow_big",0),("skill_master_of_storms", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_master_of_fire","烈 焰 大 师 ", [("yellow_big",0),("skill_master_of_fire", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_spirit_link","灵 魂 链 接 ", [("yellow_big",0),("skill_spirit_link", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_confession","忏 悔 ", [("yellow_big",0),("skill_confession", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_summon_undead","召 唤 亡 灵 ", [("green_big",0),("skill_summon_undead", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_summon_neutral","召 唤 ", [("yellow_big",0),("skill_summon_neutral", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_summon_demon","恶 魔 呼 唤 ", [("yellow_big",0),("skill_summon_demon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_summon_hallow","圣 灵 降 临 ", [("yellow_big",0),("skill_summon_neutral", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_dive","俯 冲 ", [("yellow_big",0),("skill_fly", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_flamestrike","火 焰 突 袭 ", [("yellow_big",0),("skill_flamestrike", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_flameswave","火 浪 ", [("yellow_big",0),("skill_flameswave", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_call_lightning","呼 唤 闪 电 ", [("yellow_big",0),("skill_call_lightning", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_lightning_attack","闪 电 打 击 ", [("yellow_big",0),("skill_lightning_attack", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mummy_curse","邪 恶 诅 咒 ", [("yellow_big",0),("skill_mummy_curse", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_shadowking","暗 影 突 袭 ", [("yellow_big",0),("skill_shadowking", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mummy","诅 咒 打 击 ", [("yellow_big",0),("skill_mummy", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_block","格 挡 ", [("skill_block",0)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_roll","强 化 翻 滚 ", [("skill_roll",0)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
 
 
-["skill_counter_strike","counter_strike", [("yellow_big",0),("skill_counter_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_life_drain","life_drain", [("yellow_big",0),("skill_life_drain", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_evil","smite_evil", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bane_evil","bane_evil", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_undead","smite_undead", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bane_undead","bane_undead", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_orc","smite_orc", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bane_orc","bane_orc", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_head_hunted","head_hunted", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_human","smite_human", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_outsider","smite_outsider", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_bane_outsider","bane_outsider", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_skeletal","skeletal", [("yellow_big",0),("skill_skeletal", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_entangle","entangle", [("yellow_big",0),("skill_entangle", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_rage_strike","rage_strike", [("yellow_big",0),("skill_rage_strike", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_rage_charge","rage_charge", [("yellow_big",0),("skill_rage_charge", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_sinper_shot","sinper_shot", [("yellow_big",0),("skill_sinper_shot", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_steady_aim","steady_aim", [("yellow_big",0),("skill_steady_aim", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_grasp","grasp", [("yellow_big",0),("skill_grasp", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_divine_strength","divine_strength", [("yellow_big",0),("skill_divine_strength", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_weakness","weakness", [("yellow_big",0),("skill_weakness", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mass_slow","mass_slow", [("yellow_big",0),("skill_mass_slow", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_slow","slow", [("yellow_big",0),("skill_slow", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mass_haste","mass_haste", [("yellow_big",0),("skill_mass_haste", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_haste","haste", [("yellow_big",0),("skill_haste", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_regeneration","regeneration", [("yellow_big",0),("skill_regeneration", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_stoneskin","stoneskin", [("yellow_big",0),("skill_stoneskin", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_dragons_fear","dragons_fear", [("yellow_big",0),("skill_dragons_fear", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_spell_dispel","spell_dispel", [("yellow_big",0),("skill_spell_dispel", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_dragron_flame_burst","dragron_flame_burst", [("yellow_big",0),("skill_dragron_flame_burst", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_flame_burst","flame_burst", [("yellow_big",0),("skill_flame_burst", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_forst_ring","forst_ring", [("yellow_big",0),("skill_forst_ring", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_power_blade","power_blade", [("yellow_big",0),("skill_power_blade", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_earth_shock","earth_shock", [("yellow_big",0),("skill_earth_shock", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_heal","heal", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_mass_heal","mass_heal", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_reaper","reaper", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_smite_life","smite_life", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_it_is_high_noon","it_is_high_noon", [("yellow_big",0),("skill_it_is_high_noon", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_sidearm_1","sidearm_1", [("yellow_big",0),("skill_sidearm_1", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_sidearm_2","sidearm_2", [("yellow_big",0),("skill_sidearm_2", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_luanwu","luanwu", [("yellow_big",0),("skill_luanwu", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_wushuang","wushuang", [("yellow_big",0),("skill_wushuang", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_undead_horse","undead_horse", [("yellow_big",0),("skill_undead_horse", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_retribution","retribution", [("yellow_big",0),("skill_retribution", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_magic_mirror","magic_mirror", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_fire_shield","fire_shield", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_meditation","meditation", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_counter","counter", [("yellow_big",0),("skill_counter", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_dragon_voice","dragon_voice", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_avatar","avatar", [("yellow_big",0),("skill_avatar", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_multishot","multishot", [("yellow_big",0),("skill_multishot", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_dragon_blade_slash","dragon_blade_slash", [("yellow_big",0),("skill_dragon_blade", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_swift_strike","swift_strike", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_deflect","deflect", [("yellow_big",0),("skill_deflect", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
-["skill_shadow_blade","Omnislash", [("yellow_big",0),("skill_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_head_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_shadow_blade","shadow_blade", [("yellow_big",0),("bash_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_rush","rush", [("yellow_big",0),("bash_rush", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_cleave","cleave", [("yellow_big",0),("bash_cleave", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_power_strike","power_strike", [("yellow_big",0),("bash_power_strike", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_roll","roll", [("green_big",0),("bash_roll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_seismic_slam","seismic_slam", [("yellow_big",0),("bash_seismic_slam", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_earth_shock","earth_shock", [("yellow_big",0),("bash_earth_shock", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_flame_burst","flame_burst", [("yellow_big",0),("bash_flame_burst", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_forst_ring","forst_ring", [("yellow_big",0),("bash_forst_ring", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_grasp","grasp", [("yellow_big",0),("bash_grasp", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_summon_undead","summon_undead", [("bash_summon_undead",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_ground_stomp","大 地 践 踏 ", [("yellow_big",0),("skill_ground_stomp", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_seismic_slam","裂 地 斩 ", [("yellow_big",0),("skill_seismic_slam", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_power_cleave","强 力 顺 势 斩 ", [("yellow_big",0),("skill_power_cleave", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
 
 
-["bash_smite_evil","smite_evil", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_smite_undead","smite_undead", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_smite_orc","smite_orc", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_head_hunted","head_hunted", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_smite_outsider","smite_outsider", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_counter_strike","反 击 螺 旋 ", [("yellow_big",0),("skill_counter_strike", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_life_drain","吸 取 生 命 ", [("yellow_big",0),("skill_life_drain", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_evil","破 邪 斩 ", [("yellow_big",0),("skill_smite_undead", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bane_evil","十 字 军 ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_undead","圣 光 斩 ", [("yellow_big",0),("skill_smite_undead", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bane_undead","亡 灵 猎 手 ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_orc","烈 焰 斩 ", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bane_orc","憎 恨 兽 人  ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_head_hunted","猎 头 者", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_human","刽 子 手 ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_outsider","破 异 斩 ", [("yellow_big",0),("skill_smite_undead", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_bane_outsider","排 外 者 ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_skeletal","防 御 箭 矢 ", [("yellow_big",0),("skill_skeletal", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_entangle","缠 绕 ", [("yellow_big",0),("skill_entangle", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_rage_strike","突 袭 ", [("yellow_big",0),("skill_rage_strike", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_rage_charge","狂 怒 突 击 ", [("yellow_big",0),("skill_rage_charge", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_sinper_shot","狙 击 ", [("yellow_big",0),("skill_sinper_shot", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_steady_aim","稳 固 瞄 准 ", [("yellow_big",0),("skill_steady_aim", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_grasp","恶 魔 之 握 ", [("yellow_big",0),("skill_grasp", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_divine_strength","非 凡 神 力 ", [("yellow_big",0),("skill_divine_strength", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_weakness","虚 弱 诅 咒", [("yellow_big",0),("skill_weakness", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mass_slow","群 体 迟 缓 ", [("yellow_big",0),("skill_mass_slow", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_slow","迟 缓 ", [("yellow_big",0),("skill_slow", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mass_haste","群 体 加 速 ", [("yellow_big",0),("skill_mass_haste", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_haste","加 速 ", [("yellow_big",0),("skill_haste", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_regeneration","活 力 再 生", [("yellow_big",0),("skill_regeneration", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_stoneskin","坚 韧 不 屈 ", [("yellow_big",0),("skill_stoneskin", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_dragons_fear","恐 惧 ", [("yellow_big",0),("skill_dragons_fear", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_spell_dispel","驱 魔 大 法 ", [("yellow_big",0),("skill_spell_dispel", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_dragron_flame_burst","狂 怒 龙 息 ", [("yellow_big",0),("skill_dragron_flame_burst", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_flame_burst","烈 焰 喷 发 ", [("yellow_big",0),("skill_flame_burst", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_forst_ring","寒 冰 爆 发", [("yellow_big",0),("skill_forst_ring", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_power_blade","剑 气 斩 ", [("yellow_big",0),("skill_power_blade", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_earth_shock","雷 霆 一 击 ", [("yellow_big",0),("skill_earth_shock", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_heal","治 疗 ", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_mass_heal","群 体 治 疗", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_reaper","收 割 灵 魂 ", [("yellow_big",0),("skill_smite_orc", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_smite_life","生 灵 屠 夫 ", [("yellow_big",0),("skill_bane_orc", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_it_is_high_noon","灵 魂 弹 幕", [("yellow_big",0),("skill_it_is_high_noon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_sidearm_1","袖 里 藏 刀 ", [("yellow_big",0),("skill_sidearm_1", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_sidearm_2","暗 箭 伤 人", [("yellow_big",0),("skill_sidearm_2", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_luanwu","剑 刃 乱 舞 ", [("yellow_big",0),("skill_luanwu", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_wushuang","无 双 斗 志 ", [("yellow_big",0),("skill_wushuang", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_undead_horse","不 屈 战 马", [("yellow_big",0),("skill_undead_horse", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_retribution","报 应 ", [("yellow_big",0),("skill_retribution", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_magic_mirror","魔 法 反 射 ", [("yellow_big",0),("skill_skeletal", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_fire_shield","烈 焰 之 盾 ", [("yellow_big",0),("skill_skeletal", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_meditation","冥 想 ", [("yellow_big",0),("skill_meditation", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_counter","清 算 ", [("yellow_big",0),("skill_counter", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_dragon_voice","龙 吼 ", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_avatar","天 神 下 凡 ", [("yellow_big",0),("skill_avatar", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_multishot","多 重 射 击 ", [("yellow_big",0),("skill_multishot", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_dragon_blade_slash","龙 神 之 刃 ", [("yellow_big",0),("skill_dragon_blade", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_swift_strike","影 袭 ", [("yellow_big",0),("skill_swift_strike", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_deflect","闪 反 ", [("yellow_big",0),("skill_deflect", ixmesh_inventory)], itp_unique|itp_type_foot_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_omnislash","无 敌 斩 ", [("yellow_big",0),("skill_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["skill_autoshot","追 踪 射 击 ", [("yellow_big",0),("skill_autoshot", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_oneshot","魔 法 射 击 ", [("yellow_big",0),("skill_sinper_shot", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["bash_oneshot","魔 法 射 击 ", [("yellow_big",0),("bash_oneshot", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_shadow_blade","瞬 影 斩 ", [("yellow_big",0),("bash_shadow_blade", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_rush","突 击 （被 动 ）", [("yellow_big",0),("bash_rush", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_cleave","横 扫 （被 动 ）", [("yellow_big",0),("bash_cleave", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_power_strike","重 击 （被 动 ）", [("yellow_big",0),("bash_power_strike", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_roll","翻 滚 （被 动 ）", [("green_big",0),("bash_roll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_seismic_slam","裂 地 斩 ", [("yellow_big",0),("bash_seismic_slam", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_earth_shock","雷 霆 一 击 ", [("yellow_big",0),("bash_earth_shock", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_flame_burst","烈 焰 喷 发 ", [("yellow_big",0),("bash_flame_burst", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_forst_ring","寒 冰 爆 发 ", [("yellow_big",0),("bash_forst_ring", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_grasp","恶 魔 之 握 ", [("yellow_big",0),("bash_grasp", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_summon_undead","召 唤 ", [("bash_summon_undead",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["bash_heal","治 疗 ", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_mass_heal","群 体 治 疗 ", [("yellow_big",0),("skill_heal", ixmesh_inventory)], itp_unique|itp_type_body_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["bash_swift_strike","突 进 （被 动 ） ", [("yellow_big",0),("bash_swift_strike", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_sidearm_1","袖 里 藏 刀 ", [("yellow_big",0),("bash_sidearm_1", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_shield_bash","盾 击 (默 认 )", [("yellow_big",0),("bash_shield_bash", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_kick","击 退 ", [("yellow_big",0),("bash_kick", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["bash_Yrden","bash_Yrden", [("yellow_big",0),("bash_Yrden", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_Quen","bash_Quen", [("yellow_big",0),("bash_Quen", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_Igni","bash_Igni", [("yellow_big",0),("bash_Igni", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_Axii","bash_Axii", [("yellow_big",0),("bash_Axii", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
 
 
 
-["bash_swift_strike","swift_strike", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_sidearm_1","sidearm_1", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_shield_bash","shield_bash", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
-["bash_kick","kick", [("yellow_big",0),("magic_12_icon", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["bash_left_hand_cast","左 手 施 法", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+
+["skill_bash_text","特 技 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_cast_text","法 术 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_skill_text","特 技 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_extra_skill_text","特 技 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_passiv_skill_text","特 技 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["skill_selec_skill_text","特 技 说 明", [("yellow_big",0),("church_scroll", ixmesh_inventory)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+
+["perk_one_hand_1","单 手 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_2","负 盾 前 行 ", [("perk_one_hand_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_3","魔 力 护 身 ", [("perk_one_hand_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_4","盾 牌 猛 击 ", [("perk_one_hand_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_5","处 决 ", [("perk_one_hand_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_6","敌 法 者 ", [("perk_one_hand_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_one_hand_7","致 命 武 器 ", [("perk_one_hand_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_two_hand_1","双 手 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_2","强 袭 ", [("perk_two_hand_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_3","狂 战 士 ", [("perk_two_hand_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_4","斩 箭 术 ", [("perk_two_hand_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_5","斩 首 ", [("perk_two_hand_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_6","缴 械 ", [("perk_two_hand_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_two_hand_7","无 畏 无 惧 ", [("perk_two_hand_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_polearm_1","长 杆 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_2","方 阵 枪 兵 ", [("perk_polearm_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_3","无 畏 枪 骑 ", [("perk_polearm_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_4","意 志 壁 垒 ", [("perk_polearm_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_5","枪 术 大 师 ", [("perk_polearm_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_6","穿 心 一 击 ", [("perk_polearm_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_polearm_7","无 双 英 豪 ", [("perk_polearm_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_bow_1","弓 箭 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_2","瞄 准 要 害 ", [("perk_bow_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_3","游 牧 骑 手 ", [("perk_bow_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_4","倾 盆 箭 雨 ", [("perk_bow_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_5","游 侠 大 师 ", [("perk_bow_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_6","绝 命 射 击 ", [("perk_bow_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_bow_7","战 斗 续 行 ", [("perk_bow_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_crossbow_1","弩 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_2","特 技 装 填 ", [("perk_crossbow_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_3","巨 人 杀 手 ", [("perk_crossbow_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_4","诸 葛 弩 ", [("perk_crossbow_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_5","Head shoot ", [("perk_crossbow_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_6","暗 杀 大 师 ", [("perk_crossbow_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_crossbow_7","弩 炮 ", [("perk_crossbow_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_thrown_1","投 掷 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_2","巨 人 杀 手 ", [("perk_thrown_2",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_3","破 盾 投 掷 ", [("perk_thrown_3",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_4","一 击 倒 地 ", [("perk_thrown_4",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_5","处 决 ", [("perk_thrown_5",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_6","掷 弹 兵 ", [("perk_thrown_6",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_thrown_7","完 美 猎 手 ", [("perk_thrown_7",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_musket_1","火 器 掌 握 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_2","翻 滚 装 填 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_3","扫 射 模 式 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_4","无 烟 火 药 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_5","魔 弹 射 手 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_6","英 雄 本 色 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_musket_7","时 代 已 变 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
+["perk_magic_1","思 维 敏 捷 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_2","法 术 强 效 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_3","法 术 穿 透 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_4","强 力 召 唤 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_5","精 妙 法 术 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_6","超 载 施 法 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+["perk_magic_7","魔 力 导 体 ", [("perk_basic",0)], itp_unique|itp_type_hand_armor|itp_is_magic_staff, 0, 0,0,0],
+
 
 ["items_end", "Items End", [("shield_round_a",0)], 0, 0, 1, 0, 0],
 ]

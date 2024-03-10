@@ -449,7 +449,7 @@ skins = [
      ("orc_face",0xffbbb6ae,["hair_blonde"],[0xff171313, 0xff007080c]),
     ], #face textures
     [(voice_die,"snd_troll_die"),(voice_hit,"snd_troll_hit"),(voice_grunt,"snd_troll_grunt"),(voice_grunt_long,"snd_troll_grunt"),(voice_yell,"snd_troll_yell"),(voice_victory,"snd_troll_victory")], #voice sounds
-      "skel_human", 1.3, # "skel_human", 1.8,
+      "skel_human", 1.4, # "skel_human", 1.8,
     psys_game_blood,psys_game_blood_2,
   ),
   
@@ -471,24 +471,54 @@ skins = [
     []
   ),
   
+  
   (
     "beastman", 0,
-    "beastman_bodys", "beast_calf_l", "beast_handL",
-    "beastmen", undead_face_keys,
+    "beastman_bodys", "beast_calf_l", "beast_handL", 
+    "beastman_head_half", 
+[(240, 0, -0.400000, 0.300000, "Chin Size"),
+(230, 0, -0.400000, 0.800000, "Chin Shape"),
+(250, 0, -0.250000, 0.550000, "Chin Forward"),
+(130, 0, -0.500000, 1.000000, "Jaw Width"),
+(120, 0, -0.500000, 0.600000, "Lower Lip"),
+(110, 0, -0.200000, 0.600000, "Upper Lip"),
+(100, 0, 0.200000, -0.200000, "Mouth-Nose Distance"),
+(90, 0, 0.550000, -0.550000, "Mouth Width"),
+(30, 0, -0.300000, 0.300000, "Nostril Size"),
+(60, 0, 0.250000, -0.250000, "Nose Height"),
+(40, 0, -0.200000, 0.300000, "Nose Width"),
+(70, 0, -0.300000, 0.400000, "Nose Size"),
+(50, 0, 0.200000, -0.300000, "Nose Shape"),
+(80, 0, -0.300000, 0.650000, "Nose Bridge"),
+(160, 0, -0.200000, 0.250000, "Eye Width"),
+(190, 0, -0.250000, 0.150000, "Eye to Eye Dist"),
+(170, 0, -0.850000, 0.850000, "Eye Shape"),
+(200, 0, -0.300000, 0.700000, "Eye Depth"),
+(180, 0, -1.500000, 1.500000, "Eyelids"),
+(20, 0, 0.600000, -0.250000, "Cheeks"),
+(260, 0, -0.600000, 0.500000, "Cheek Bones"),
+(220, 0, 0.800000, -0.800000, "Eyebrow Height"),
+(210, 0, -0.750000, 0.750000, "Eyebrow Shape"),
+(10, 0, -0.600000, 0.500000, "Temple Width"),
+(270, 0, -0.300000, 1.000000, "Face Depth"),
+(150, 0, -0.250000, 0.450000, "Face Ratio"),
+(140, 0, -0.400000, 0.500000, "Face Width"),
+(280, 0, 1.000000, 1.000000, "Post-Edit"),
+],
     [], #man_hair_meshes ,"man_hair_y5","man_hair_y8",
     [], #beard meshes ,"beard_q"
     ["hair_black"], #hair textures
     ["hair_black"], #beard_materials
     [
-     ("beastheads",0xffcbe0e0,["hair_black"],[0xffffffff, 0xffb04717, 0xff502a19]),
+     ("beastman_head",0xffffffff,["hair_black"],[0xffffffff]),
      ], #man_face_textures,
-    #[(voice_die,"snd_skeleton_death"),(voice_hit,"snd_skeleton_hit"),(voice_yell,"snd_skeleton_yell"),(voice_grunt,"snd_undead_grunt"),(voice_stun,"snd_skeleton_hit"),(voice_victory,"snd_skeleton_death")], #voice sounds
     [(voice_die, "snd_beastmen_die"), (voice_hit, "snd_beastmen_hit"), (voice_warcry, "snd_beastmen_warcry"),(voice_grunt, "snd_beastmen_grunt"), (voice_grunt_long, "snd_beastmen_grunt"), (voice_yell, "snd_beastmen_grunt"), (voice_stun, "snd_beastmen_hit"), (voice_victory, "snd_beastmen_warcry")],
     
-    "skel_human", 1.2,
+    "skel_big", 1.08,
     psys_no_blood,psys_no_blood,
     []
   ),
+      
       
   (
     "dwarf", 0,
@@ -534,7 +564,7 @@ skins = [
     ], #face textures
     #[(voice_die,"snd_troll_die"),(voice_hit,"snd_troll_hit"),(voice_grunt,"snd_troll_grunt")], #voice sounds
     [(voice_die,"snd_troll_die"),(voice_hit,"snd_troll_hit"),(voice_grunt,"snd_troll_grunt"),(voice_grunt_long,"snd_troll_grunt"),(voice_yell,"snd_troll_yell"),(voice_victory,"snd_troll_victory")], #voice sounds
-      "skel_troll", 0.9, # "skel_human", 1.8,
+      "skel_troll", 1.0, # "skel_human", 1.8,
     psys_game_blood,psys_game_blood_2,
     []
   ),
@@ -605,7 +635,7 @@ skins = [
 #     ("manface_old_2",0xffd5d5c5,["hair_white"],[0xffffcded, 0xffbbcded, 0xff99eebb]),
      ], #man_face_textures,
     [(voice_die,"snd_man_die"),(voice_hit,"snd_man_hit"),(voice_grunt,"snd_man_grunt"),(voice_grunt_long,"snd_man_grunt_long"),(voice_yell,"snd_man_yell"),(voice_stun,"snd_man_stun"),(voice_victory,"snd_man_victory")], #voice sounds
-    "skel_human", 1.6,
+    "skel_human", 1.8,
     psys_no_blood,psys_no_blood,
     [[1.7, comp_greater_than, (1.0,face_width), (1.0,temple_width)], #constraints: ex: 1.7 > (face_width + temple_width)
      [0.3, comp_less_than, (1.0,face_width), (1.0,temple_width)],
@@ -629,7 +659,7 @@ skins = [
     [("demon_skin",0xffcbe0e0,["hair_blonde"],[0xffffffff, 0xffb04717, 0xff502a19]),
      ], #man_face_textures,
     [(voice_die,"snd_skeleton_death"),(voice_hit,"snd_skeleton_hit"),(voice_grunt,"snd_man_grunt"),(voice_grunt_long,"snd_man_grunt_long"),(voice_yell,"snd_skeleton_yell"),(voice_stun,"snd_skeleton_hit"),(voice_victory,"snd_skeleton_death")], #voice sounds    
-    "skel_human", 1.2,
+    "skel_human", 1.4,
     psys_game_blood,psys_game_blood_2,
     [[1.7, comp_greater_than, (1.0,face_width), (1.0,temple_width)], #constraints: ex: 1.7 > (face_width + temple_width)
      [0.3, comp_less_than, (1.0,face_width), (1.0,temple_width)],
@@ -656,13 +686,14 @@ skins = [
    ["hair_black"],
    ["hair_black"],
    [("orchead", 0xffaf9f7e, ["hair_black"], []),
-    ("orchead2", 0xffaf9f7e, ["hair_black"], []),
+    #("orchead2", 0xffaf9f7e, ["hair_black"], []),
    ],
     [(voice_die,"snd_troll_die"),(voice_hit,"snd_troll_hit"),(voice_grunt,"snd_troll_grunt"),(voice_grunt_long,"snd_troll_grunt"),(voice_yell,"snd_troll_yell"),(voice_victory,"snd_troll_victory")], #voice sounds
-   "skel_big", 1.000000,
+   "skel_big", 1.060000,
    psys_game_blood, psys_game_blood_2, 
    []
   ),
+      
       
 #new magic begin
 ##  (

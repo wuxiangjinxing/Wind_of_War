@@ -1,9 +1,11 @@
+# -*- coding: UTF-8 -*-
+
 ## CC
 from module_skills import *
 ## CC
 
 
-# -*- coding: cp1254 -*-
+
 strings = [
   ("no_string", "NO STRING!"),
   ("empty_string", " "),
@@ -29,7 +31,7 @@ strings = [
   ("s7_raiders", "{s7} Raiders"),
   ("s7_scouts", "{s7} Scouts"),
 
-
+  ("party_strength", "party strength:{reg25}"),
   ("bandits_eliminated_by_another", "The troublesome bandits have been eliminated by another party."),
   ("msg_battle_won","Battle won! Press tab key to leave..."),
   ("tutorial_map1","You are now viewing the overland map. Left-click on the map to move your party to that location, enter the selected town, or pursue the selected party. Time will pause on the overland map if your party is not moving, waiting or resting. To wait anywhere simply press and hold down the space bar."),
@@ -602,10 +604,67 @@ strings = [
   ("surname_38", "{s50} the Quick"),
   ("surname_39", "{s50} the Minstrel"),
   ("surname_40", "{s50} the Bold"),
-  ("surname_41", "{s50} Hot-Head"),
-  
+  ("surname_41", "{s50} of Zendar"),
+  ("surname_42", "{s50} of Rivacheg"),
+  ("surname_43", "{s50} of Wercheg"),
+  ("surname_44", "{s50} of Ehlerdag"),
+  ("surname_45", "{s50} of Yaragar"),
+  ("surname_46", "{s50} of Burglen"),
+  ("surname_47", "{s50} of Shapeshte"),
+  ("surname_48", "{s50} of Hanun"),
+  ("surname_49", "{s50} of Saren"),
+  ("surname_50", "{s50} of Tosdhar"),
+  ("surname_51", "{s50} the Long"),
+  ("surname_52", "{s50} the Gaunt"),
+  ("surname_53", "{s50} Silkybeard"),
+  ("surname_54", "{s50} the Sparrow"),
+  ("surname_55", "{s50} the Pauper"),
+  ("surname_56", "{s50} the Scarred"),
+  ("surname_57", "{s50} the Fair"),
+  ("surname_58", "{s50} the Grim"),
+  ("surname_59", "{s50} the Red"),
+  ("surname_60", "{s50} the Black"),
+  ("surname_61", "{s50} the Tall"),
+  ("surname_62", "{s50} Star-Eyed"),
+  ("surname_63", "{s50} the Fearless"),
+  ("surname_64", "{s50} the Valorous"),
+  ("surname_65", "{s50} the Cunning"),
+  ("surname_66", "{s50} the Coward"),
+  ("surname_67", "{s50} Bright"),
+  ("surname_68", "{s50} the Quick"),
+  ("surname_69", "{s50} the Minstrel"),
+  ("surname_70", "{s50} Hot-Head"),
+  ("surname_71", "{s50} of Zendar"),
+  ("surname_72", "{s50} of Rivacheg"),
+  ("surname_73", "{s50} of Wercheg"),
+  ("surname_74", "{s50} of Ehlerdag"),
+  ("surname_75", "{s50} of Yaragar"),
   ("surnames_end", "surnames_end"),
   
+  
+  
+  ("merchant_surname_1", "merchant {s50}"),
+  ("merchant_surname_2", "merchant {s50}"),
+  ("merchant_surname_3", "merchant {s50}"),
+  ("merchant_surname_4", "merchant {s50}"),
+  ("merchant_surname_5", "merchant {s50}"),
+  ("merchant_surname_6", "merchant {s50}"),
+  ("merchant_surname_7", "merchant {s50}"),
+  ("merchant_surname_8", "merchant {s50}"),
+  ("merchant_surname_9", "merchant {s50}"),
+  ("merchant_surname_10", "merchant {s50}"),
+  ("merchant_surname_11", "merchant {s50}"),
+  ("merchant_surname_12", "merchant {s50}"),
+  ("merchant_surname_13", "merchant {s50}"),
+  ("merchant_surname_14", "merchant {s50}"),
+  ("merchant_surname_15", "merchant {s50}"),
+  ("merchant_surname_16", "merchant {s50}"),
+  ("merchant_surname_17", "merchant {s50}"),
+  ("merchant_surname_18", "merchant {s50}"),
+  ("merchant_surname_19", "merchant {s50}"),
+  ("merchant_surname_20", "merchant {s50}"),
+  ("merchant_surname_end", "merchant_surname_end"),
+
 
   ("number_of_troops_killed_reg1", "Number of troops killed: {reg1}"),
   ("number_of_troops_wounded_reg1", "Number of troops wounded: {reg1}"),
@@ -2769,28 +2828,32 @@ We apologize sincerely if you contributed your suggestions and feedback but were
 
 #multiplayer scene names
   ("multi_scene_1", "Ruins"),
-  ("multi_scene_2", "Village"),
-  ("multi_scene_3", "Hailes Castle"), #Castle 1
   ("multi_scene_4", "Ruined Fort"),
-  ("multi_scene_5", "Scene 5"), #not ready yet
-  ("multi_scene_6", "Scene 6"), #not ready yet
   ("multi_scene_7", "Field by the River"),
-  ("multi_scene_8", "Rudkhan Castle"), #Castle 2
   ("multi_scene_9", "Snowy Village"),
-  ("multi_scene_10", "Turin Castle"), #Castle 3
   ("multi_scene_11", "Nord Town"),
   ("multi_scene_16", "Port Assault"),
-  ("multi_scene_17", "Brunwud Castle"), #Castle 4
   ("multi_scene_18", "Battle on Ice"),
-  ("multi_scene_19", "Mahdaar Castle"), #Castle 5
-  ("multi_scene_20", "Jameyyed Castle"), #Castle 6
   ("multi_scene_21", "The Arena"),
   ("multi_scene_22", "Forest Hideout"),
+  ("multi_scene_23", "Forest Hideout"),
+  ("multi_scene_24", "Forest Hideout"),
+  
   ("multi_scene_12", "Random Plains (Medium)"),
   ("multi_scene_13", "Random Plains (Large)"),
   ("multi_scene_14", "Random Steppe (Medium)"),
   ("multi_scene_15", "Random Steppe (Large)"),
   ("multi_scene_end", "multi_scene_end"),
+
+  ("multi_scene_2", "Village"),
+  ("multi_scene_3", "Hailes Castle"), #Castle 1
+  ("multi_scene_5", "Scene 5"), #not ready yet
+  ("multi_scene_6", "Scene 6"), #not ready yet
+  ("multi_scene_8", "Rudkhan Castle"), #Castle 2
+  ("multi_scene_10", "Turin Castle"), #Castle 3
+  ("multi_scene_17", "Brunwud Castle"), #Castle 4
+  ("multi_scene_19", "Mahdaar Castle"), #Castle 5
+  ("multi_scene_20", "Jameyyed Castle"), #Castle 6
 
 #multiplayer game type names
   ("multi_game_type_1", "Deathmatch"),

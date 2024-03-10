@@ -1,10 +1,13 @@
 .\header files\header_animations.py
+.\header files\header_animations_addon.py
 .\header files\header_common.py
+.\header files\header_common_addon.py
 .\header files\header_dialogs.py
 .\header files\header_factions.py
 .\header files\header_game_menus.py
 .\header files\header_ground_types.py
 .\header files\header_items.py
+.\header files\header_items_addon.py
 .\header files\header_item_modifiers.py
 .\header files\header_map_icons.py
 .\header files\header_meshes.py
@@ -13,21 +16,26 @@
 .\header files\header_music.py
 .\header files\header_operations.py
 .\header files\header_particle_systems.py
+.\header files\header_particle_systems_addon.py
 .\header files\header_parties.py
 .\header files\header_postfx.py
 .\header files\header_presentations.py
+.\header files\header_presentations_addon.py
 .\header files\header_quests.py
 .\header files\header_scenes.py
 .\header files\header_scene_props.py
+.\header files\header_scene_props_addon.py
 .\header files\header_skills.py
 .\header files\header_skins.py
 .\header files\header_sounds.py
+.\header files\header_sounds_addon.py
 .\header files\header_strings.py
 .\header files\header_tableau_materials.py
 .\header files\header_terrain_types.py
 .\header files\header_triggers.py
+.\header files\header_triggers_addon.py
 .\header files\header_troops.py
-已复制        29 个文件。
+       37 file(s) copied.
 .\ID files\ID_animations.py
 .\ID files\ID_factions.py
 .\ID files\ID_info_pages.py
@@ -53,7 +61,7 @@
 .\ID files\ID_strings.py
 .\ID files\ID_tableau_materials.py
 .\ID files\ID_troops.py
-已复制        25 个文件。
+       25 file(s) copied.
 .\process files\process_animations.py
 .\process files\process_common.py
 .\process files\process_dialogs.py
@@ -73,6 +81,7 @@
 .\process files\process_music.py
 .\process files\process_music_old.py
 .\process files\process_operations.py
+.\process files\process_operations_patch.py
 .\process files\process_particle_sys.py
 .\process files\process_parties.py
 .\process files\process_party_tmps.py
@@ -85,12 +94,13 @@
 .\process files\process_simple_triggers.py
 .\process files\process_skills.py
 .\process files\process_skins.py
+.\process files\process_skins_patch.py
 .\process files\process_sounds.py
 .\process files\process_strings.py
 .\process files\process_tableau_materials.py
 .\process files\process_tags_unused.py
 .\process files\process_troops.py
-已复制        36 个文件。
+       38 file(s) copied.
 .\ID_animations.py
 .\ID_factions.py
 .\ID_info_pages.py
@@ -116,4 +126,4 @@
 .\ID_strings.py
 .\ID_tableau_materials.py
 .\ID_troops.py
-已复制        25 个文件。
+       25 file(s) copied.

@@ -103,7 +103,10 @@ qst_deal_with_steppe_bandit = 101
 qst_deal_with_sea_raider = 102
 qst_deal_with_mountain_bandit = 103
 qst_deal_with_desert_bandit = 104
-qst_quests_end = 105
+qst_freelancer_enlisted = 105
+qst_freelancer_vacation = 106
+qst_freelancer_captured = 107
+qst_quests_end = 108
 qsttag_deliver_message = 504403158265495552
 qsttag_deliver_message_to_enemy_lord = 504403158265495553
 qsttag_raise_troops = 504403158265495554
@@ -209,6 +212,9 @@ qsttag_deal_with_steppe_bandit = 504403158265495653
 qsttag_deal_with_sea_raider = 504403158265495654
 qsttag_deal_with_mountain_bandit = 504403158265495655
 qsttag_deal_with_desert_bandit = 504403158265495656
-qsttag_quests_end = 504403158265495657
+qsttag_freelancer_enlisted = 504403158265495657
+qsttag_freelancer_vacation = 504403158265495658
+qsttag_freelancer_captured = 504403158265495659
+qsttag_quests_end = 504403158265495660
 
 

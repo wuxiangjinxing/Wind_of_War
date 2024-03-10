@@ -1,6 +1,6 @@
 set path=C:\Python26;%PATH%
 @echo off
-py -2 process_acp.py
+python process_acp.py
 @del *.pyc
 echo.
 echo ______________________________
